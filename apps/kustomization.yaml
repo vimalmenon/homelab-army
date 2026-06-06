@@ -14,3 +14,5 @@ resources:
   - metallb.yaml
   - dynamo-svc.yaml
   - messages-svc.yaml
+  - external-secrets.yaml
+  - aws-secrets.yaml
