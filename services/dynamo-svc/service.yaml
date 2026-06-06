@@ -6,8 +6,7 @@ metadata:
   labels:
     app: dynamo-svc
 spec:
-  type: LoadBalancer
-  loadBalancerIP: 192.168.128.211
+  type: ClusterIP
   ports:
   - name: http
     port: 8000
