@@ -12,3 +12,4 @@ resources:
   - grafana-stack.yaml
   - nfs-provisioner.yaml
   - metallb.yaml
+  - dynamo-svc.yaml

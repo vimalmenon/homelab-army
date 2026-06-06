@@ -73,6 +73,15 @@ items:
   spec:
     finalizers:
     - kubernetes
+- apiVersion: v1
+  kind: Namespace
+  metadata:
+    labels:
+      kubernetes.io/metadata.name: microservices
+    name: microservices
+  spec:
+    finalizers:
+    - kubernetes
 kind: List
 metadata:
   resourceVersion: ''
