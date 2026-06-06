@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web
-  generation: 1
   name: pihole
   namespace: default
 spec:

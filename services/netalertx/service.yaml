@@ -6,17 +6,9 @@ metadata:
   name: netalertx
   namespace: netalertx
 spec:
-  clusterIP: 10.43.143.141
-  clusterIPs:
-  - 10.43.143.141
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
   ports:
   - name: web
     port: 20211
     protocol: TCP
     targetPort: 20211
-  sessionAffinity: None
   type: ClusterIP

@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
-  generation: 3
   name: n8n
   namespace: n8n
 spec:

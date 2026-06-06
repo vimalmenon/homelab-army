@@ -10,15 +10,7 @@ metadata:
   name: pihole-dns
   namespace: default
 spec:
-  allocateLoadBalancerNodePorts: true
   clusterIP: 10.43.217.4
-  clusterIPs:
-  - 10.43.217.4
-  externalTrafficPolicy: Cluster
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
   loadBalancerIP: 192.168.128.210
   ports:
   - name: dns-tcp

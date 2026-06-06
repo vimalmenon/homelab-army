@@ -4,18 +4,10 @@ metadata:
   name: redis
   namespace: authelia
 spec:
-  clusterIP: 10.43.203.55
-  clusterIPs:
-  - 10.43.203.55
-  internalTrafficPolicy: Cluster
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
   ports:
   - port: 6379
     protocol: TCP
     targetPort: 6379
   selector:
     app: redis
-  sessionAffinity: None
   type: ClusterIP

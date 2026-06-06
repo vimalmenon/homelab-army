@@ -35,7 +35,10 @@ spec:
         - name: N8N_BASIC_AUTH_USER
           value: vimal
         - name: N8N_BASIC_AUTH_PASSWORD
-          value: REDACTED_GRAFANA_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: n8n-secret
+              key: auth-password
         image: n8nio/n8n:latest
         imagePullPolicy: Always
         name: n8n

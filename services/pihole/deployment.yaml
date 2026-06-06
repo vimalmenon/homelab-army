@@ -25,7 +25,10 @@ spec:
         - name: TZ
           value: Asia/Kuala_Lumpur
         - name: WEBPASSWORD
-          value: homelab
+          valueFrom:
+            secretKeyRef:
+              name: pihole-secret
+              key: webpassword
         - name: PIHOLE_DNS_
           value: 1.1.1.1;8.8.8.8
         - name: DNSSEC
