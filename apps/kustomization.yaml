@@ -13,3 +13,4 @@ resources:
   - nfs-provisioner.yaml
   - metallb.yaml
   - dynamo-svc.yaml
+  - messages-svc.yaml
