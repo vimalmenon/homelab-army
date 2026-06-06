@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - root.yaml
+  - slides.yaml
+  - uptime-kuma.yaml
+  - netalertx.yaml
+  - n8n.yaml
+  - pihole.yaml
+  - authelia.yaml
+  - grafana-stack.yaml
+  - nfs-provisioner.yaml
+  - metallb.yaml

@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    metallb.io/ip-allocated-from-pool: homelab-pool
+    metallb.universe.tf/allow-shared-ip: pihole
+    svcc.cattle.io/ignore: 'true'
+  finalizers:
+  - service.kubernetes.io/load-balancer-cleanup
+  name: pihole-dns
+  namespace: default
+spec:
+  allocateLoadBalancerNodePorts: true
+  clusterIP: 10.43.217.4
+  clusterIPs:
+  - 10.43.217.4
+  externalTrafficPolicy: Cluster
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  loadBalancerIP: 192.168.128.210
+  ports:
+  - name: dns-tcp
+    nodePort: 30963
+    port: 53
+    protocol: TCP
+    targetPort: 53
+  - name: dns-udp
+    nodePort: 30963
+    port: 53
+    protocol: UDP
+    targetPort: 53
+  selector:
+    app: pihole
+  sessionAffinity: None
+  type: LoadBalancer

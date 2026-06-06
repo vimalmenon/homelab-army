@@ -1,0 +1,114 @@
+---
+# Extracted from grafana-alerting-provisioning ConfigMap in monitoring namespace
+# This is the Grafana-managed alerting configuration (not PrometheusRule CRDs)
+
+# contactpoints.yaml
+apiVersion: 1
+contactPoints:
+  - name: "Email to Vimal"
+    receivers:
+      - uid: email-to-vimal
+        type: email
+        settings:
+          addresses: "hello@completeautomate.com"
+          singleEmail: false
+        disableResolveMessage: false
+---
+# policies.yaml
+apiVersion: 1
+policies:
+  - orgId: 1
+    receiver: "Email to Vimal"
+    group_by:
+      - grafana_folder
+      - alertname
+    group_wait: 30s
+    group_interval: 5m
+    repeat_interval: 4h
+---
+# rules.yaml
+apiVersion: 1
+groups:
+  - folder: Cluster Alerts
+    interval: 30s
+    name: node-health
+    orgId: 1
+    rules:
+      - annotations:
+          description: Node {{ $labels.node }} has been NotReady for over 2 minutes. Power
+            cycle the Pi or check its power supply and network connection.
+          summary: Node {{ $labels.node }} is NotReady
+        condition: A
+        data:
+          - datasourceUid: prometheus
+            model:
+              expr: count by (node) (kube_node_status_condition{condition="Ready",status="true"}
+                == 0)
+              interval: 30s
+              refId: A
+            refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        execErrState: Alerting
+        for: 2m
+        labels:
+          severity: critical
+          team: homelab
+        noDataState: OK
+        title: Node Down
+        uid: node-down
+  - folder: Cluster Alerts
+    interval: 30s
+    name: pod-health
+    orgId: 1
+    rules:
+      - annotations:
+          description: Pod {{ $labels.pod }} in namespace {{ $labels.namespace }} has been
+            in Pending state for over 2 minutes.
+          summary: Pod {{ $labels.pod }} ({{ $labels.namespace }}) stuck in Pending state
+        condition: A
+        data:
+          - datasourceUid: prometheus
+            model:
+              expr: kube_pod_status_phase{phase="Pending"} == 1
+              interval: 30s
+              refId: A
+            refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        execErrState: Alerting
+        for: 2m
+        labels:
+          pod: '{{ $labels.pod }}'
+          namespace: '{{ $labels.namespace }}'
+          severity: warning
+          team: homelab
+        noDataState: OK
+        title: Pod Pending for over 2 minutes
+        uid: pod-pending
+      - annotations:
+          description: 'Container {{ $labels.container }} in pod {{ $labels.pod }} (namespace:
+            {{ $labels.namespace }}) has restarted more than 3 times in 10 minutes.'
+          summary: Pod {{ $labels.pod }} ({{ $labels.container }}) is crash looping
+        condition: A
+        data:
+          - datasourceUid: prometheus
+            model:
+              expr: count(increase(kube_pod_container_status_restarts_total[5m]) > 3) >
+                0
+              interval: 30s
+              refId: A
+            refId: A
+            relativeTimeRange:
+              from: 600
+              to: 0
+        execErrState: Alerting
+        for: 1m
+        labels:
+          severity: warning
+          team: homelab
+        noDataState: OK
+        title: Pod Restarting Frequently
+        uid: pod-crash-looping

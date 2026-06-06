@@ -1,0 +1,17 @@
+# Secrets and sensitive config
+apply-secrets.sh
+*.secret
+.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# K8s
+*.secret.yaml

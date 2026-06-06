@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    svcc.cattle.io/ignore: 'true'
+  name: pihole-web
+  namespace: default
+spec:
+  clusterIP: 10.43.110.219
+  clusterIPs:
+  - 10.43.110.219
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: pihole
+  sessionAffinity: None
+  type: ClusterIP

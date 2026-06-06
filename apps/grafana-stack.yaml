@@ -1,0 +1,96 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 70.*
+    helm:
+      values: |
+        # Prometheus
+        prometheus:
+          prometheusSpec:
+            replicas: 1
+            retention: 7d
+            resources:
+              requests:
+                memory: 512Mi
+                cpu: 200m
+              limits:
+                memory: 1Gi
+                cpu: 500m
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+              - prometheus.completeautomate.com
+            paths:
+              - /
+            tls:
+              - hosts:
+                  - prometheus.completeautomate.com
+                secretName: prometheus-tls
+
+        # Grafana
+        grafana:
+          replicas: 1
+          adminPassword: admin
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+              - grafana.completeautomate.com
+            paths:
+              - /
+            tls:
+              - hosts:
+                  - grafana.completeautomate.com
+                secretName: grafana-tls
+          persistence:
+            enabled: true
+            size: 5Gi
+          datasources:
+            datasources.yaml:
+              apiVersion: 1
+              datasources:
+                - name: Prometheus
+                  type: prometheus
+                  url: http://prometheus-operated:9090
+                  access: proxy
+                  isDefault: true
+
+        # Alertmanager
+        alertmanager:
+          enabled: true
+          ingress:
+            enabled: true
+            ingressClassName: traefik
+            hosts:
+              - alertmanager.completeautomate.com
+            paths:
+              - /
+            tls:
+              - hosts:
+                  - alertmanager.completeautomate.com
+                secretName: alertmanager-tls
+
+        # Node exporter
+        nodeExporter:
+          enabled: true
+
+        # Kube state metrics
+        kubeStateMetrics:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

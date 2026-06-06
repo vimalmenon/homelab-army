@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    pv.kubernetes.io/bind-completed: 'yes'
+    pv.kubernetes.io/bound-by-controller: 'yes'
+    volume.beta.kubernetes.io/storage-provisioner: nfs-provisioner
+    volume.kubernetes.io/storage-provisioner: nfs-provisioner
+  finalizers:
+  - kubernetes.io/pvc-protection
+  name: netalertx-data
+  namespace: netalertx
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: nfs-client
+  volumeMode: Filesystem
+  volumeName: pvc-39b34acd-3181-41ec-b281-712a9189bfb1

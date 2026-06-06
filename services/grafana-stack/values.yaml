@@ -1,0 +1,339 @@
+# ============================================================================
+# kube-prometheus-stack Helm values
+# Chart:  kube-prometheus-stack-86.1.0
+# Source: prometheus-community/kube-prometheus-stack
+#
+# Extracted from live cluster (monitoring namespace) on 2026-06-06.
+# ArgoCD will deploy this via Helm, not Kustomize.
+# ============================================================================
+
+# -- Full name override for resources
+fullnameOverride: ""
+
+# -- Global image registry
+global:
+  imageRegistry: ""
+
+# ============================================================================
+# Prometheus Operator
+# ============================================================================
+prometheusOperator:
+  enabled: true
+  image:
+    repository: quay.io/prometheus-operator/prometheus-operator
+    tag: v0.91.0
+  prometheusConfigReloader:
+    image:
+      repository: quay.io/prometheus-operator/prometheus-config-reloader
+      tag: v0.91.0
+  resources: {}
+  # -- Deny secret types the operator should not watch
+  secretFieldSelector: "type!=kubernetes.io/dockercfg,type!=kubernetes.io/service-account-token,type!=helm.sh/release.v1"
+  # -- TLS configuration
+  tls:
+    enabled: true
+  # -- Kubelet service configuration
+  kubeletService:
+    enabled: true
+    namespace: kube-system
+  # -- Use endpointslice or endpoints for kubelet
+  kubeletEndpoints: true
+  kubeletEndpointSlice: false
+
+# ============================================================================
+# Prometheus
+# ============================================================================
+prometheus:
+  enabled: true
+  # -- Prometheus is managed by the operator; this defines the Prometheus CR
+  prometheusSpec:
+    image:
+      repository: quay.io/prometheus/prometheus
+      tag: v3.12.0-distroless
+    # -- Data retention
+    retention: 7d
+    # -- No persistent volume (using emptyDir)
+    storageSpec: {}
+    # -- Resource requests
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    # -- Scrape interval
+    scrapeInterval: 30s
+    evaluationInterval: 30s
+    # -- Enable admin API (disabled for security)
+    enableAdminAPI: false
+    # -- WAL compression
+    walCompression: true
+    # -- External URL
+    externalUrl: "http://prometheus-kube-prometheus-prometheus.monitoring:9090"
+    # -- ServiceMonitor selector
+    serviceMonitorSelector:
+      matchLabels:
+        release: prometheus
+    # -- PodMonitor selector
+    podMonitorSelector:
+      matchLabels:
+        release: prometheus
+    # -- Rule selector
+    ruleSelector:
+      matchLabels:
+        release: prometheus
+    # -- Probe selector
+    probeSelector:
+      matchLabels:
+        release: prometheus
+    # -- Security context
+    securityContext:
+      fsGroup: 2000
+      runAsGroup: 2000
+      runAsNonRoot: true
+      runAsUser: 1000
+      seccompProfile:
+        type: RuntimeDefault
+    # -- Replicas
+    replicas: 1
+
+# ============================================================================
+# Grafana
+# ============================================================================
+grafana:
+  enabled: true
+  # -- Grafana subchart version (grafana-12.4.1)
+  image:
+    repository: docker.io/grafana/grafana
+    tag: 13.0.1-security-01
+  # -- Admin credentials (DO NOT use actual password - use ArgoCD Vault/SealedSecret)
+  admin:
+    user: admin
+    password: "${GRAFANA_ADMIN_PASSWORD}"  # Placeholder - set via ArgoCD/External Secrets
+  # -- Grafana config from configmap prometheus-grafana
+  grafana.ini:
+    server:
+      domain: grafana.completeautomate.com
+      root_url: https://grafana.completeautomate.com
+    analytics:
+      check_for_updates: true
+    log:
+      mode: console
+    paths:
+      data: /var/lib/grafana/
+      logs: /var/log/grafana
+      plugins: /var/lib/grafana/plugins
+      provisioning: /etc/grafana/provisioning
+    unified_storage:
+      index_path: /var/lib/grafana-search/bleve
+  # -- SMTP configuration (from live env vars)
+  smtp:
+    enabled: true
+    host: smtp.zoho.com:465
+    user: hello@completeautomate.com
+    password: "${GRAFANA_SMTP_PASSWORD}"  # Placeholder - set via ArgoCD/External Secrets
+    fromAddress: hello@completeautomate.com
+    fromName: Grafana Alerts
+    skipVerify: true
+  # -- Resource requests
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  # -- Service configuration
+  service:
+    type: ClusterIP
+    port: 80
+  # -- Ingress (if needed, enable here; currently ClusterIP-only)
+  ingress:
+    enabled: false
+  # -- Sidecar for dashboard loading
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
+      labelValue: "1"
+      searchNamespace: ALL
+    datasources:
+      enabled: true
+      label: grafana_datasource
+      labelValue: "1"
+      searchNamespace: ALL
+  # -- Additional datasources (grafana provisioning format)
+  # The kube-prometheus-stack chart auto-creates these via sidecar
+  additionalDataSources: []
+  # -- Alerting provisioning (loaded from configmap grafana-alerting-provisioning)
+  alerting:
+    contactpoints:
+      - name: "Email to Vimal"
+        receivers:
+          - uid: email-to-vimal
+            type: email
+            settings:
+              addresses: "hello@completeautomate.com"
+              singleEmail: false
+            disableResolveMessage: false
+    policies:
+      - orgId: 1
+        receiver: "Email to Vimal"
+        group_by:
+          - grafana_folder
+          - alertname
+        group_wait: 30s
+        group_interval: 5m
+        repeat_interval: 4h
+    # -- Grafana-managed alert rules (not PrometheusRule CRDs)
+    rules:
+      groups:
+        - folder: Cluster Alerts
+          interval: 30s
+          name: node-health
+          orgId: 1
+          rules:
+            - annotations:
+                description: Node {{ $labels.node }} has been NotReady for over 2 minutes.
+                  Power cycle the Pi or check its power supply and network connection.
+                summary: Node {{ $labels.node }} is NotReady
+              condition: A
+              data:
+                - datasourceUid: prometheus
+                  model:
+                    expr: count by (node) (kube_node_status_condition{condition="Ready",status="true"}
+                      == 0)
+                    interval: 30s
+                    refId: A
+                  refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+              execErrState: Alerting
+              for: 2m
+              labels:
+                severity: critical
+                team: homelab
+              noDataState: OK
+              title: Node Down
+              uid: node-down
+        - folder: Cluster Alerts
+          interval: 30s
+          name: pod-health
+          orgId: 1
+          rules:
+            - annotations:
+                description: Pod {{ $labels.pod }} in namespace {{ $labels.namespace }}
+                  has been in Pending state for over 2 minutes.
+                summary: Pod {{ $labels.pod }} ({{ $labels.namespace }}) stuck in Pending
+                  state
+              condition: A
+              data:
+                - datasourceUid: prometheus
+                  model:
+                    expr: kube_pod_status_phase{phase="Pending"} == 1
+                    interval: 30s
+                    refId: A
+                  refId: A
+                  relativeTimeRange:
+                    from: 300
+                    to: 0
+              execErrState: Alerting
+              for: 2m
+              labels:
+                pod: '{{ $labels.pod }}'
+                namespace: '{{ $labels.namespace }}'
+                severity: warning
+                team: homelab
+              noDataState: OK
+              title: Pod Pending for over 2 minutes
+              uid: pod-pending
+            - annotations:
+                description: 'Container {{ $labels.container }} in pod {{ $labels.pod }}
+                  (namespace: {{ $labels.namespace }}) has restarted more than 3 times
+                  in 10 minutes.'
+                summary: Pod {{ $labels.pod }} ({{ $labels.container }}) is crash looping
+              condition: A
+              data:
+                - datasourceUid: prometheus
+                  model:
+                    expr: count(increase(kube_pod_container_status_restarts_total[5m])
+                      > 3) > 0
+                    interval: 30s
+                    refId: A
+                  refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+              execErrState: Alerting
+              for: 1m
+              labels:
+                severity: warning
+                team: homelab
+              noDataState: OK
+              title: Pod Restarting Frequently
+              uid: pod-crash-looping
+
+# ============================================================================
+# kube-state-metrics
+# ============================================================================
+kubeStateMetrics:
+  enabled: true
+  image:
+    repository: registry.k8s.io/kube-state-metrics/kube-state-metrics
+    tag: v2.19.0
+
+# ============================================================================
+# prometheus-node-exporter
+# ============================================================================
+nodeExporter:
+  enabled: true
+  image:
+    repository: quay.io/prometheus/node-exporter
+    tag: v1.11.1
+
+# ============================================================================
+# Alertmanager
+# ============================================================================
+alertmanager:
+  enabled: false  # Not deployed; Grafana handles alerting
+
+# ============================================================================
+# Default rules (from prometheus-community/kube-prometheus-stack)
+# The chart includes ~35 PrometheusRule CRDs by default (kubernetes mixin rules).
+# These are auto-generated and managed by the chart. If custom rules are
+# needed beyond Grafana-managed alerting, add them via additionalPrometheusRules.
+# ============================================================================
+defaultRules:
+  enabled: true
+  create: true
+  rules:
+    alertmanager: true
+    configReloaders: true
+    etcd: true
+    general: true
+    k8sContainerCpuUsageSecondsTotal: true
+    k8sContainerMemoryMajorPageFaults: true
+    k8sContainerMemoryManagement: true
+    k8sContainerMemoryPageFaults: true
+    k8sContainerMemoryWorkingSetBytes: true
+    k8sContainerRequest: true
+    k8sContainerResource: true
+    k8sContainerThrottling: true
+    k8sPodStatusFailed: true
+    k8sPodStatusPhase: true
+    kubeApiserverAvailability: true
+    kubeApiserverBurnrate: true
+    kubeApiserverHistogram: true
+    kubeApiserverSlos: true
+    kubeControllerManager: true
+    kubelet: true
+    kubeProxy: true
+    kubeScheduler: true
+    kubeStateMetrics: true
+    kubernetesApps: true
+    kubernetesResources: true
+    kubernetesStorage: true
+    kubernetesSystem: true
+    kubeVersion: true
+    network: true
+    node: true
+    nodeExporterAlerting: true
+    nodeExporterRecording: true
+    prometheus: true
+    prometheusOperator: true

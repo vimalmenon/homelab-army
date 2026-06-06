@@ -1,0 +1,19 @@
+tunnel: homelab-k8s
+credentials-file: /home/hermes/.cloudflared/011a9625-236e-42dc-b716-e5de75390eaa.json
+
+ingress:
+  - hostname: argocd.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: auth.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: grafana.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: n8n.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: netalertx.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: slides.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: status.completeautomate.com
+    service: http://192.168.128.200
+  - service: http_status:404
