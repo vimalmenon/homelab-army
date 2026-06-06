@@ -1,0 +1,13 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: nfs-provisioner
+  namespace: nfs-provisioner
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: nfs-provisioner
+subjects:
+- kind: ServiceAccount
+  name: nfs-provisioner
+  namespace: nfs-provisioner

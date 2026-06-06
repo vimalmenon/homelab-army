@@ -3,5 +3,9 @@ kind: Kustomization
 
 resources:
   - deployment.yaml
-  - rbac.yaml
+  - serviceaccount.yaml
+  - role.yaml
+  - rolebinding.yaml
+  - clusterrole.yaml
+  - clusterrolebinding.yaml
   - sc.yaml
