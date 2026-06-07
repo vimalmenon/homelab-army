@@ -42,7 +42,7 @@ spec:
           enabled: true
           admin:
             user: admin
-            existingSecret: prometheus-grafana
+            password: "REDACTED_GRAFANA_PASSWORD"
           grafana.ini:
             server:
               domain: grafana.completeautomate.com
