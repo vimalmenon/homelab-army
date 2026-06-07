@@ -23,22 +23,8 @@ spec:
         - containerPort: 8000
           protocol: TCP
         env:
-        - name: AWS_REGION
-          value: us-east-1
-        - name: DYNAMO_TABLE
-          value: vimal
-        - name: APP_PREFIX
-          value: message
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: aws-dynamo-creds
-              key: AWS_ACCESS_KEY_ID
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: aws-dynamo-creds
-              key: AWS_SECRET_ACCESS_KEY
+        - name: DYNAMO_SVC_URL
+          value: http://dynamo-svc.microservices.svc.cluster.local:8000
         livenessProbe:
           httpGet:
             path: /health
