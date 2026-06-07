@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: promtail
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://grafana.github.io/helm-charts
+    chart: promtail
+    targetRevision: 6.*
+    helm:
+      values: |
+        config:
+          clients:
+            - url: http://loki.loki.svc.cluster.local:3100/loki/api/v1/push
+          snippets:
+            pipelineStages:
+              - regex:
+                  expression: "^(?P<timestamp>\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2})(?:\\S+) (?P<level>\\w+) (?P<logger>[\\w.]+) (?P<message>.*)$"
+              - json:
+                  expressions:
+                    level: level
+                    service: service
+                    logger: logger
+                    message: message
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: loki
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

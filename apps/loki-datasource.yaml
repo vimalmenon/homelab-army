@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: loki-datasource
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/vimalmenon/homelab-army.git
+    targetRevision: main
+    path: services/loki
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

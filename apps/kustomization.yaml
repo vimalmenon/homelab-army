@@ -16,3 +16,6 @@ resources:
   - messages-svc.yaml
   - external-secrets.yaml
   - aws-secrets.yaml
+  - loki.yaml
+  - promtail.yaml
+  - loki-datasource.yaml
