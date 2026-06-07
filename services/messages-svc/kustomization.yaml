@@ -6,4 +6,4 @@ resources:
   - service.yaml
   - servicemonitor.yaml
   - middleware.yaml
-  - ingressroute.yaml
+  - ingress.yaml
