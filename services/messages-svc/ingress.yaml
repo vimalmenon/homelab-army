@@ -19,6 +19,17 @@ spec:
                   number: 8000
             path: /
             pathType: Prefix
+    - host: messages.completeautomate.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: messages-svc
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix
   tls:
     - hosts:
         - messages.homelab.local
+        - messages.completeautomate.com
