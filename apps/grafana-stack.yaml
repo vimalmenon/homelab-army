@@ -8,83 +8,130 @@ spec:
   source:
     repoURL: https://prometheus-community.github.io/helm-charts
     chart: kube-prometheus-stack
-    targetRevision: 70.*
+    targetRevision: 86.1.0
     helm:
+      releaseName: prometheus
       values: |
-        # Prometheus
+        # Matches current live deployment in monitoring namespace
+
+        prometheusOperator:
+          enabled: true
+
         prometheus:
+          enabled: true
           prometheusSpec:
             replicas: 1
             retention: 7d
             resources:
               requests:
+                cpu: 250m
                 memory: 512Mi
-                cpu: 200m
-              limits:
-                memory: 1Gi
-                cpu: 500m
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-              - prometheus.completeautomate.com
-            paths:
-              - /
-            tls:
-              - hosts:
-                  - prometheus.completeautomate.com
-                secretName: prometheus-tls
+            scrapeInterval: 30s
+            evaluationInterval: 30s
+            serviceMonitorSelector:
+              matchLabels:
+                release: prometheus
+            podMonitorSelector:
+              matchLabels:
+                release: prometheus
+            ruleSelector:
+              matchLabels:
+                release: prometheus
 
-        # Grafana
         grafana:
-          replicas: 1
-          adminPassword: admin
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-              - grafana.completeautomate.com
-            paths:
-              - /
-            tls:
-              - hosts:
-                  - grafana.completeautomate.com
-                secretName: grafana-tls
-          persistence:
-            enabled: true
-            size: 5Gi
-          datasources:
-            datasources.yaml:
-              apiVersion: 1
-              datasources:
-                - name: Prometheus
-                  type: prometheus
-                  url: http://prometheus-operated:9090
-                  access: proxy
-                  isDefault: true
-
-        # Alertmanager
-        alertmanager:
           enabled: true
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-              - alertmanager.completeautomate.com
+          admin:
+            user: admin
+            # Password kept in existing k8s secret "prometheus-grafana"
+          grafana.ini:
+            server:
+              domain: grafana.completeautomate.com
+              root_url: https://grafana.completeautomate.com
+            analytics:
+              check_for_updates: true
+            log:
+              mode: console
             paths:
-              - /
-            tls:
-              - hosts:
-                  - alertmanager.completeautomate.com
-                secretName: alertmanager-tls
+              data: /var/lib/grafana/
+              logs: /var/log/grafana
+              plugins: /var/lib/grafana/plugins
+              provisioning: /etc/grafana/provisioning
+          smtp:
+            enabled: true
+            host: smtp.zoho.com:465
+            user: hello@completeautomate.com
+            fromAddress: hello@completeautomate.com
+            fromName: Grafana Alerts
+            skipVerify: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          service:
+            type: ClusterIP
+            port: 80
+          ingress:
+            enabled: false
+          sidecar:
+            dashboards:
+              enabled: true
+              label: grafana_dashboard
+              labelValue: "1"
+              searchNamespace: ALL
+            datasources:
+              enabled: true
+              label: grafana_datasource
+              labelValue: "1"
+              searchNamespace: ALL
+          additionalDataSources: []
 
-        # Node exporter
+        kubeStateMetrics:
+          enabled: true
+
         nodeExporter:
           enabled: true
 
-        # Kube state metrics
-        kubeStateMetrics:
+        alertmanager:
+          enabled: false
+
+        defaultRules:
           enabled: true
+          create: true
+          rules:
+            alertmanager: false
+            configReloaders: true
+            etcd: true
+            general: true
+            k8sContainerCpuUsageSecondsTotal: true
+            k8sContainerMemoryMajorPageFaults: true
+            k8sContainerMemoryManagement: true
+            k8sContainerMemoryPageFaults: true
+            k8sContainerMemoryWorkingSetBytes: true
+            k8sContainerRequest: true
+            k8sContainerResource: true
+            k8sContainerThrottling: true
+            k8sPodStatusFailed: true
+            k8sPodStatusPhase: true
+            kubeApiserverAvailability: true
+            kubeApiserverBurnrate: true
+            kubeApiserverHistogram: true
+            kubeApiserverSlos: true
+            kubeControllerManager: true
+            kubelet: true
+            kubeProxy: true
+            kubeScheduler: true
+            kubeStateMetrics: true
+            kubernetesApps: true
+            kubernetesResources: true
+            kubernetesStorage: true
+            kubernetesSystem: true
+            kubeVersion: true
+            network: true
+            node: true
+            nodeExporterAlerting: true
+            nodeExporterRecording: true
+            prometheus: true
+            prometheusOperator: true
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
@@ -94,3 +141,5 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - ServerSideApply=true
