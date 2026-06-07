@@ -5,3 +5,5 @@ resources:
   - deployment.yaml
   - service.yaml
   - servicemonitor.yaml
+  - middleware.yaml
+  - ingressroute.yaml
