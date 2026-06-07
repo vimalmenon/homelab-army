@@ -42,7 +42,7 @@ spec:
           enabled: true
           admin:
             user: admin
-            # Password kept in existing k8s secret "prometheus-grafana"
+            existingSecret: prometheus-grafana
           grafana.ini:
             server:
               domain: grafana.completeautomate.com
