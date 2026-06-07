@@ -14,6 +14,8 @@ spec:
     metadata:
       labels:
         app: dynamo-svc
+      annotations:
+        rollme: "1"
     spec:
       containers:
       - name: dynamo-svc
