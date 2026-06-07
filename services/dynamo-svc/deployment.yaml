@@ -24,7 +24,7 @@ spec:
           protocol: TCP
         env:
         - name: AWS_REGION
-          value: ap-southeast-1
+          value: us-east-1
         - name: DYNAMO_TABLE
           value: vimal
         - name: AWS_ACCESS_KEY_ID
