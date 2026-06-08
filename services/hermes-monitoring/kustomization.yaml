@@ -7,3 +7,4 @@ resources:
   - service.yaml
   - endpoints.yaml
   - servicemonitor.yaml
+  - dashboard.yaml
