@@ -84,16 +84,16 @@ data:
     ---
     - Quick Access:
         - Complete Automate:
-            href: https://completeautomate.com
-            description: Main website
-            abbr: CA
+            - href: https://completeautomate.com
+              description: Main website
+              abbr: CA
         - YouTube Channel:
-            href: "https://youtube.com/@real_vimal_menon"
-            description: real_vimal_menon
-            abbr: YT
+            - href: https://youtube.com/@real_vimal_menon
+              description: real_vimal_menon
+              abbr: YT
         - Gmail:
-            href: https://mail.google.com
-            abbr: GM
+            - href: https://mail.google.com
+              abbr: GM
         - Linear:
-            href: https://linear.app
-            abbr: LI
+            - href: https://linear.app
+              abbr: LI

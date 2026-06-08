@@ -4,15 +4,15 @@
 
 - Quick Access:
     - Complete Automate:
-        href: https://completeautomate.com
-        description: Main website
+        - href: https://completeautomate.com
+          description: Main website
 
     - YouTube Channel:
-        href: "https://youtube.com/@real_vimal_menon"
-        description: real_vimal_menon
+        - href: https://youtube.com/@real_vimal_menon
+          description: real_vimal_menon
 
     - Gmail:
-        href: https://mail.google.com
+        - href: https://mail.google.com
 
     - Linear:
-        href: https://linear.app
+        - href: https://linear.app
