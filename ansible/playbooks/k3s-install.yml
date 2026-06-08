@@ -1,0 +1,115 @@
+---
+# ──────────────────────────────────────────────
+# Install k3s — Master Node
+# ──────────────────────────────────────────────
+# Installs k3s server on control-plane nodes.
+# Run this AFTER os-hardening.yml.
+#
+# Usage (full cluster bootstrap from scratch):
+#   ansible-playbook playbooks/k3s-install.yml
+#
+# After master is ready, run node-join.yml on workers:
+#   ansible-playbook playbooks/node-join.yml
+
+- name: Install k3s — Server (Control Plane)
+  hosts: k3s_master
+  become: yes
+  gather_facts: yes
+  tags: [k3s, server, install]
+  vars:
+    k3s_config_yaml: |
+      token: "{{ k3s_token }}"
+      tls-san:
+        - "{{ ansible_default_ipv4.address }}"
+        - "{{ k3s_master_hostname | default(ansible_hostname) }}"
+      node-ip: "{{ ansible_default_ipv4.address }}"
+      node-external-ip: "{{ ansible_default_ipv4.address }}"
+      cluster-cidr: "{{ cluster_cidr }}"
+      service-cidr: "{{ service_cidr }}"
+      cluster-dns: "{{ cluster_dns }}"
+
+  tasks:
+    - name: Create k3s config directory
+      ansible.builtin.file:
+        path: "{{ k3s_config_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy k3s config.yaml
+      ansible.builtin.copy:
+        dest: "{{ k3s_config_dir }}/config.yaml"
+        content: "{{ k3s_config_yaml }}"
+        mode: "0600"
+      notify: restart k3s
+
+    - name: Download k3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: "0755"
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+        INSTALL_K3S_SKIP_START: "true"
+
+    - name: Run k3s installer
+      ansible.builtin.shell: |
+        INSTALL_K3S_VERSION={{ k3s_version }} \
+        INSTALL_K3S_EXEC=server \
+        sh /tmp/k3s-install.sh
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/k3s
+      register: k3s_install_result
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+
+    - name: Wait for k3s service to be ready
+      ansible.builtin.systemd:
+        name: k3s
+        state: started
+        enabled: yes
+      register: k3s_service
+
+    - name: Wait for node to become Ready
+      ansible.builtin.shell: |
+        set -o pipefail
+        /usr/local/bin/k3s kubectl wait --for=condition=Ready node/{{ ansible_hostname }} --timeout=120s
+      args:
+        executable: /bin/bash
+      changed_when: false
+      register: node_ready
+      failed_when: node_ready.rc != 0
+      when: k3s_install_result.changed or k3s_service.changed
+
+    - name: Retrieve k3s token for worker join
+      ansible.builtin.slurp:
+        src: /var/lib/rancher/k3s/server/token
+      register: k3s_token_slurp
+      when: k3s_server_mode
+
+    - name: Display join token (for workers)
+      ansible.builtin.debug:
+        msg: "K3S_TOKEN={{ (k3s_token_slurp['content'] | b64decode | trim) }}"
+      when: k3s_server_mode
+
+    - name: Fetch kubeconfig
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: "{{ playbook_dir }}/../files/k3s-kubeconfig"
+        flat: yes
+      when: k3s_server_mode
+
+    - name: Set correct server IP in kubeconfig (for local use)
+      ansible.builtin.replace:
+        path: "{{ playbook_dir }}/../files/k3s-kubeconfig"
+        regexp: "127.0.0.1"
+        replace: "{{ ansible_default_ipv4.address }}"
+      delegate_to: localhost
+      when: k3s_server_mode
+
+  handlers:
+    - name: restart k3s
+      ansible.builtin.systemd:
+        name: k3s
+        state: restarted
+        daemon_reload: yes

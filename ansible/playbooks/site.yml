@@ -1,0 +1,25 @@
+---
+# ──────────────────────────────────────────────
+# homelab-army — Full Cluster Bootstrap
+# ──────────────────────────────────────────────
+# Orchestrates ALL playbooks in order:
+#   1. OS hardening (kernel, packages, firewall)
+#   2. k3s master install
+#   3. Worker node join
+#   4. Post-install (MetalLB, storage, etc.)
+#
+# Usage:
+#   ansible-playbook playbooks/site.yml -e k3s_token=<TOKEN>
+#
+# ⚠ This will re-apply OS settings on an existing cluster
+#   without disrupting k3s. The k3s installer is idempotent
+#   (skips if binary already exists).
+
+- name: "Phase 1 — OS Hardening"
+  ansible.builtin.import_playbook: os-hardening.yml
+
+- name: "Phase 2 — k3s Server (Control Plane)"
+  ansible.builtin.import_playbook: k3s-install.yml
+
+- name: "Phase 3 — Join Workers"
+  ansible.builtin.import_playbook: node-join.yml

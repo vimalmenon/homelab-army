@@ -1,0 +1,6 @@
+# ──────────────────────────────────────────────
+# homelab-army — k3s Master Node Variables
+# ──────────────────────────────────────────────
+
+k3s_role: server
+k3s_server_mode: true

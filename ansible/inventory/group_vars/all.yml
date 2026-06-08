@@ -1,0 +1,57 @@
+# ──────────────────────────────────────────────
+# homelab-army — Common Variables
+# ──────────────────────────────────────────────
+
+# --- k3s ---
+k3s_version: v1.35.5+k3s1
+k3s_install_dir: /usr/local/bin
+k3s_data_dir: /var/lib/rancher/k3s
+k3s_config_dir: /etc/rancher/k3s
+k3s_token: "{{ lookup('env', 'K3S_TOKEN') | default('changeme-k3s-cluster-token', true) }}"
+
+# --- Master / API ---
+k3s_api_port: 6443
+k3s_extra_server_args: >-
+  --disable traefik
+  --disable servicelb
+  --disable local-storage
+  --flannel-backend wireguard-native
+  --kubelet-arg max-pods=100
+  --kube-controller-manager-arg bind-address=0.0.0.0
+
+# --- Network ---
+cluster_cidr: 10.42.0.0/16
+service_cidr: 10.43.0.0/16
+cluster_dns: 10.43.0.10
+
+# --- MetalLB ---
+metallb_version: v0.14.9
+metallb_ip_range: 192.168.128.200-192.168.128.220
+
+# --- System ---
+timezone: Asia/Hong_Kong
+ntp_servers:
+  - pool.ntp.org
+  - asia.pool.ntp.org
+
+# --- Swap & Kernel ---
+disable_swap: true
+kernel_modules:
+  - overlay
+  - br_netfilter
+sysctl_settings:
+  net.ipv4.ip_forward: 1
+  net.ipv6.conf.all.forwarding: 1
+  net.bridge.bridge-nf-call-iptables: 1
+  net.bridge.bridge-nf-call-ip6tables: 1
+
+# --- Packages to install on every node ---
+extra_packages:
+  - curl
+  - wget
+  - vim
+  - htop
+  - iotop
+  - net-tools
+  - nfs-common
+  - ufw

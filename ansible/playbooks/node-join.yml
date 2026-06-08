@@ -1,0 +1,83 @@
+---
+# ──────────────────────────────────────────────
+# Join k3s Worker Nodes to the Cluster
+# ──────────────────────────────────────────────
+# Run AFTER k3s-install.yml (master must be ready).
+#
+# Usage:
+#   ansible-playbook playbooks/node-join.yml -e k3s_token=<TOKEN>
+#
+# Or set K3S_TOKEN env var:
+#   K3S_TOKEN=$(ssh homelab@192.168.128.54 sudo cat /var/lib/rancher/k3s/server/token)
+#   ansible-playbook playbooks/node-join.yml -e "k3s_token=$K3S_TOKEN"
+
+- name: Join Workers — k3s Agents
+  hosts: k3s_workers
+  become: yes
+  gather_facts: yes
+  tags: [k3s, workers, join]
+  vars:
+    k3s_config_yaml: |
+      server: "{{ k3s_server_url }}"
+      token: "{{ k3s_token }}"
+      node-ip: "{{ ansible_default_ipv4.address }}"
+      node-external-ip: "{{ ansible_default_ipv4.address }}"
+
+  tasks:
+    - name: Create k3s config directory
+      ansible.builtin.file:
+        path: "{{ k3s_config_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy k3s config.yaml
+      ansible.builtin.copy:
+        dest: "{{ k3s_config_dir }}/config.yaml"
+        content: "{{ k3s_config_yaml }}"
+        mode: "0600"
+      notify: restart k3s-agent
+
+    - name: Download k3s install script
+      ansible.builtin.get_url:
+        url: https://get.k3s.io
+        dest: /tmp/k3s-install.sh
+        mode: "0755"
+
+    - name: Run k3s agent installer
+      ansible.builtin.shell: |
+        INSTALL_K3S_VERSION={{ k3s_version }} \
+        K3S_URL={{ k3s_server_url }} \
+        K3S_TOKEN={{ k3s_token }} \
+        sh /tmp/k3s-install.sh
+      args:
+        executable: /bin/bash
+        creates: /usr/local/bin/k3s
+      environment:
+        INSTALL_K3S_VERSION: "{{ k3s_version }}"
+        K3S_URL: "{{ k3s_server_url }}"
+        K3S_TOKEN: "{{ k3s_token }}"
+
+    - name: Enable and start k3s-agent service
+      ansible.builtin.systemd:
+        name: k3s-agent
+        state: started
+        enabled: yes
+
+    - name: Wait for node to join (verify on master)
+      ansible.builtin.shell: |
+        set -o pipefail
+        ssh -o StrictHostKeyChecking=no homelab@{{ k3s_server_url.split('://')[1].split(':')[0] }} \
+          "k3s kubectl wait --for=condition=Ready node/{{ ansible_hostname }} --timeout=120s"
+      args:
+        executable: /bin/bash
+      changed_when: false
+      delegate_to: localhost
+      register: join_verify
+      failed_when: join_verify.rc != 0
+
+  handlers:
+    - name: restart k3s-agent
+      ansible.builtin.systemd:
+        name: k3s-agent
+        state: restarted
+        daemon_reload: yes

@@ -1,0 +1,143 @@
+---
+# ──────────────────────────────────────────────
+# OS Hardening for k3s Cluster Nodes
+# ──────────────────────────────────────────────
+# - Configures kernel modules & sysctl
+# - Disables swap
+# - Sets timezone & NTP
+# - Installs prerequisite packages
+# - Configures firewall (UFW) — port whitelist for k3s
+
+- name: OS Hardening — k3s Cluster Node
+  hosts: k3s_cluster
+  become: yes
+  gather_facts: yes
+  tags: [os, hardening, kernel, packages]
+
+  tasks:
+    - name: Load kernel modules
+      community.general.modprobe:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ kernel_modules }}"
+      tags: [kernel]
+
+    - name: Ensure kernel modules persist (load on boot)
+      ansible.builtin.copy:
+        dest: "/etc/modules-load.d/k3s.conf"
+        content: |
+          {% for mod in kernel_modules %}{{ mod }}
+          {% endfor %}
+        mode: "0644"
+      tags: [kernel]
+
+    - name: Configure sysctl settings
+      ansible.posix.sysctl:
+        name: "{{ item.key }}"
+        value: "{{ item.value }}"
+        state: present
+        reload: yes
+        sysctl_set: yes
+      loop: "{{ sysctl_settings | dict2items }}"
+      tags: [kernel, sysctl]
+
+    - name: Disable swap
+      ansible.builtin.shell: |
+        swapoff -a
+        sed -i '/ swap / s/^/#/' /etc/fstab || true
+      args:
+        executable: /bin/bash
+      when: disable_swap
+      changed_when: false
+      tags: [swap]
+
+    - name: Set timezone
+      ansible.builtin.timezone:
+        name: "{{ timezone }}"
+      tags: [system, time]
+
+    - name: Install NTP package
+      ansible.builtin.apt:
+        name: ntp
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+      tags: [system, ntp]
+
+    - name: Install prerequisite packages
+      ansible.builtin.apt:
+        name: "{{ extra_packages }}"
+        state: present
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+      tags: [packages]
+
+    - name: Install Python requirements for Ansible modules
+      ansible.builtin.pip:
+        name:
+          - kubernetes
+          - jmespath
+        state: present
+      tags: [packages, pip]
+
+    # ── Firewall (UFW) ─────────────────────
+    # k3s ports: https://docs.k3s.io/installation/requirements#networking
+
+    - name: Allow SSH (port 22)
+      community.general.ufw:
+        rule: allow
+        port: "22"
+        proto: tcp
+      tags: [firewall, ufw]
+
+    - name: Allow k3s server API (port 6443) — control-plane only
+      community.general.ufw:
+        rule: allow
+        port: "6443"
+        proto: tcp
+      when: k3s_server_mode | default(false)
+      tags: [firewall, ufw]
+
+    - name: Allow k3s etcd (ports 2379-2380) — control-plane only
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - 2379
+        - 2380
+      when: k3s_server_mode | default(false)
+      tags: [firewall, ufw]
+
+    - name: Allow Flannel / VXLAN (port 8472) — all nodes (UDP)
+      community.general.ufw:
+        rule: allow
+        port: "8472"
+        proto: udp
+      tags: [firewall, ufw]
+
+    - name: Allow Flannel WireGuard (port 51820) — all nodes (UDP)
+      community.general.ufw:
+        rule: allow
+        port: "51820"
+        proto: udp
+      tags: [firewall, ufw]
+
+    - name: Allow Cluster Traffic (ports 10250, 10256) — kubelet/k3s metrics
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop:
+        - 10250
+        - 10256
+      tags: [firewall, ufw]
+
+    - name: Enable UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+      tags: [firewall, ufw]
