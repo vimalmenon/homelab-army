@@ -18,3 +18,7 @@ spec:
       remoteRef:
         key: micro-army/grafana-admin
         property: admin-password
+    - secretKey: admin-user
+      remoteRef:
+        key: micro-army/grafana-admin
+        property: admin-user
