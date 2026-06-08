@@ -58,3 +58,8 @@
     - AWS Console:
         href: https://console.aws.amazon.com
         description: AWS management
+
+- Communications:
+    - Zoho Mail:
+        href: https://mail.zoho.com/zm/#mail/folder/inbox
+        description: Email inbox
