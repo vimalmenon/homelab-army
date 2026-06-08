@@ -22,4 +22,5 @@ resources:
   - s3-svc.yaml
   - email-svc.yaml
   - dashboards.yaml
+  - kube-router.yaml
   - network-policies.yaml
