@@ -25,6 +25,7 @@ spec:
             - -c
             - |
               set -e
+              apt-get update -qq && apt-get install -y -qq curl >/dev/null 2>&1
               pip install requests --break-system-packages --quiet 2>/dev/null
               KUBE_VERSION=$(curl -sL --connect-timeout 5 https://dl.k8s.io/release/stable.txt)
               curl -sL --connect-timeout 10 \
