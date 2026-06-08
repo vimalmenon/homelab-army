@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: email-svc
+  namespace: microservices
+  labels:
+    app: email-svc
+spec:
+  type: ClusterIP
+  ports:
+  - port: 8000
+    targetPort: 8000
+    protocol: TCP
+    name: http
+  selector:
+    app: email-svc

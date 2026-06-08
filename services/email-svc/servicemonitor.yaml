@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: email-svc
+  namespace: microservices
+  labels:
+    app: email-svc
+spec:
+  selector:
+    matchLabels:
+      app: email-svc
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
