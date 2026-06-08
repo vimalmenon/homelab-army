@@ -37,6 +37,14 @@ spec:
             ruleSelector:
               matchLabels:
                 release: prometheus
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: nfs-client
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
 
         grafana:
           enabled: true
