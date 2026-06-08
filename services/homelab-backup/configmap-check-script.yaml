@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homelab-backup-check-script
+  namespace: backups
+  labels:
+    app: homelab-backup
+data:
+  check.py: |
+    #!/usr/bin/env python3
+    """Check if the latest Hermes S3 backup is fresh. Exit 0 = healthy."""
+    import boto3
+    from datetime import datetime, timezone, timedelta
+
+    S3_BUCKET = "completeautomate-media"
+    S3_PREFIX = "backups/hermes"
+    MAX_AGE_HOURS = 28
+
+    s3 = boto3.client("s3")
+    paginator = s3.get_paginator("list_objects_v2")
+    pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=f"{S3_PREFIX}/")
+
+    latest_key = None
+    latest_lm = None
+    for page in pages:
+        for obj in page.get("Contents", []):
+            lm = obj["LastModified"].replace(tzinfo=timezone.utc)
+            if latest_lm is None or lm > latest_lm:
+                latest_lm = lm
+                latest_key = obj["Key"]
+
+    now = datetime.now(timezone.utc)
+    if latest_key is None:
+        print(f"[FAIL] No Hermes backup found in S3 ({S3_BUCKET}/{S3_PREFIX}/)")
+        exit(1)
+
+    age_hours = (now - latest_lm).total_seconds() / 3600
+    if age_hours < MAX_AGE_HOURS:
+        print(f"[OK] Latest: {latest_key} ({age_hours:.1f}h old)")
+        exit(0)
+
+    print(f"[FAIL] Stale: {latest_key} is {age_hours:.1f}h old (max {MAX_AGE_HOURS}h)")
+    exit(1)
