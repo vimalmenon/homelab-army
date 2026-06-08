@@ -23,7 +23,7 @@ spec:
       containers:
       - env:
         - name: TZ
-          value: Asia/Kuala_Lumpur
+          value: Asia/Hong_Kong
         - name: WEBPASSWORD
           valueFrom:
             secretKeyRef:

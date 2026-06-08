@@ -27,7 +27,7 @@ spec:
         - name: PORT
           value: '20211'
         - name: TZ
-          value: Asia/Kolkata
+          value: Asia/Hong_Kong
         - name: APP_CONF_OVERRIDE
           value: '{"GRAPHQL_PORT":"20214"}'
         image: ghcr.io/netalertx/netalertx:latest

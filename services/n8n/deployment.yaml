@@ -39,6 +39,8 @@ spec:
             secretKeyRef:
               name: n8n-secret
               key: auth-password
+        - name: TZ
+          value: Asia/Hong_Kong
         image: n8nio/n8n:latest
         imagePullPolicy: Always
         name: n8n
