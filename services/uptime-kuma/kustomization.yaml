@@ -4,6 +4,5 @@ resources:
 - deployment.yaml
 - ingress.yaml
 - ingress-external.yaml
-- middleware.yaml
 - pvc.yaml
 - service.yaml
