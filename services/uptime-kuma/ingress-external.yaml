@@ -3,13 +3,13 @@ kind: Ingress
 metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
-  name: uptime-kuma
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd,uptime-kuma-status-page-rewrite@kubernetescrd
+  name: uptime-kuma-external
   namespace: uptime-kuma
 spec:
   ingressClassName: traefik
   rules:
-  - host: status.homelab.local
+  - host: status.completeautomate.com
     http:
       paths:
       - backend:
@@ -21,4 +21,4 @@ spec:
         pathType: Prefix
   tls:
   - hosts:
-    - status.homelab.local
+    - status.completeautomate.com
