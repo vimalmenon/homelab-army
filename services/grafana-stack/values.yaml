@@ -402,6 +402,84 @@ grafana:
               title: 🔇 No logs received — namespace silent
               uid: log-flow-stopped
 
+        - folder: Cluster Alerts
+          interval: 30s
+          name: backup-health
+          orgId: 1
+          rules:
+            - annotations:
+                description: >-
+                  Backup job '{{ $labels.job_name }}' in namespace 'backups' has
+                  failed. The homelab-backup CronJob runs daily at 3:00 AM and
+                  backs up PVC data and k8s resource manifests to S3.
+
+
+                  🔍 Common causes:
+                  1. S3 credentials expired — check the aws-dynamo-creds ESO secret
+                  2. NFS mount issue — the PVCs may not be reachable from the backup pod
+                  3. Storage full — the PVC exceeded its capacity during tar
+
+
+                  📋 Debug:
+                    kubectl logs -n backups -l job-name={{ $labels.job_name }} --tail=50
+                    kubectl describe job -n backups {{ $labels.job_name }}
+                summary: >-
+                  ❌ Backup job '{{ $labels.job_name }}' FAILED —
+                  PVC/S3 data may not be protected. Check logs and re-run.
+              condition: A
+              data:
+                - datasourceUid: prometheus
+                  model:
+                    expr: kube_job_status_failed{namespace="backups", job_name=~".*homelab-backup.*"} > 0
+                    interval: 30s
+                    refId: A
+                  refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+              execErrState: Alerting
+              for: 0s
+              labels:
+                severity: critical
+                team: homelab
+              noDataState: OK
+              title: ❌ Backup Job Failed
+              uid: backup-failed
+            - annotations:
+                description: >-
+                  The homelab-backup CronJob has not completed successfully in
+                  the last 26 hours (scheduled every 24 hours at 3:00 AM).
+                  This could mean the CronJob is misconfigured, the pod is
+                  stuck pending, or the cluster scheduler is not triggering it.
+
+
+                  📋 Debug:
+                    kubectl get cronjob -n backups homelab-backup
+                    kubectl get jobs -n backups
+                    kubectl describe cronjob -n backups homelab-backup
+                summary: >-
+                  ⏰ Backup cronjob has NOT run in 26+ hours —
+                  may be stuck or misconfigured.
+              condition: A
+              data:
+                - datasourceUid: prometheus
+                  model:
+                    expr: time() - kube_cronjob_status_last_schedule_time{namespace="backups", cronjob="homelab-backup"} > 93600
+                    interval: 60s
+                    refId: A
+                  refId: A
+                  relativeTimeRange:
+                    from: 600
+                    to: 0
+              execErrState: Alerting
+              for: 5m
+              labels:
+                severity: warning
+                team: homelab
+              noDataState: Alerting
+              title: ⏰ Backup Missed — No recent backup
+              uid: backup-missed
+
 # ============================================================================
 # kube-state-metrics
 # ============================================================================
