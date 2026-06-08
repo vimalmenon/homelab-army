@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: tunnel-sync
+  namespace: tunnel-sync
+  labels:
+    app: tunnel-sync
+spec:
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          serviceAccountName: tunnel-sync
+          restartPolicy: Never
+          containers:
+          - name: tunnel-sync
+            image: python:3.13-slim
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              pip install requests --break-system-packages --quiet 2>/dev/null
+              KUBE_VERSION=$(curl -sL --connect-timeout 5 https://dl.k8s.io/release/stable.txt)
+              curl -sL --connect-timeout 10 \
+                "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl" \
+                -o /usr/local/bin/kubectl
+              chmod +x /usr/local/bin/kubectl
+              python3 /scripts/tunnel_sync.py
+            env:
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-token
+                  key: CLOUDFLARE_API_TOKEN
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 300m
+                memory: 256Mi
+          volumes:
+          - name: scripts
+            configMap:
+              name: tunnel-sync-scripts
+              defaultMode: 0755

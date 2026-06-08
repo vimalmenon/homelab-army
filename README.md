@@ -29,6 +29,7 @@ homelab-army is a GitOps-powered Kubernetes cluster running on three Raspberry P
 | 📈 **Grafana Stack** | `apps/grafana-stack.yaml` | Prometheus + Grafana monitoring   |
 | 💾 **NFS Provisioner** | `apps/nfs-provisioner.yaml` | Dynamic NFS storage provisioning |
 | 🌍 **MetalLB**     | `apps/metallb.yaml`    | Bare-metal load balancer             |
+| 🚇 **Tunnel Sync** | `services/tunnel-sync/` | Auto-syncs k3s ingresses → Cloudflare tunnel |
 
 ## 📁 Repo Structure
 
@@ -53,15 +54,21 @@ homelab-army/
 │   ├── nfs-provisioner.yaml
 │   └── metallb.yaml
 └── services/                 # Per-service Kustomize/Helm configs
-    ├── slides/
-    ├── uptime-kuma/
-    ├── netalertx/
-    ├── n8n/
-    ├── pihole/
+    ├── aws-secrets/
     ├── authelia/
+    ├── dynamo-svc/
+    ├── email-svc/
     ├── grafana-stack/
-    ├── nfs-provisioner/
-    └── metallb/
+    ├── homelab-backup/
+    ├── homepage/
+    ├── messages-svc/
+    ├── n8n/
+    ├── netalertx/
+    ├── pihole/
+    ├── s3-svc/
+    ├── slides/
+    ├── tunnel-sync/           # Auto-syncs k3s ingresses → Cloudflare tunnel
+    └── uptime-kuma/
 ```
 
 ## ⚡ Quick Start
