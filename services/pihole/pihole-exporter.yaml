@@ -14,27 +14,25 @@ spec:
         app: pihole-exporter
     spec:
       containers:
-      - name: pihole-exporter
-        image: ekofr/pihole-exporter:latest
-        imagePullPolicy: Always
+      - name: exporter
+        image: python:3-alpine
+        command: ["python", "/exporter/exporter.py"]
         ports:
         - containerPort: 9617
           protocol: TCP
           name: metrics
-        env:
-        - name: PIHOLE_HOST
-          value: http://pihole-web.default.svc.cluster.local
-        - name: PIHOLE_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: pihole-secret
-              key: webpassword
-        - name: INTERVAL
-          value: "30"
+        volumeMounts:
+        - name: script
+          mountPath: /exporter
         resources:
           requests:
             cpu: 50m
             memory: 32Mi
           limits:
-            cpu: 200m
+            cpu: 100m
             memory: 64Mi
+      volumes:
+      - name: script
+        configMap:
+          name: pihole-exporter-script
+          defaultMode: 0755

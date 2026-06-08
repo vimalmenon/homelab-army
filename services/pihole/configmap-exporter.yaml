@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pihole-exporter-script
+  namespace: default
+data:
+  exporter.py: |
+    #!/usr/bin/env python3
+    import json, os, time, urllib.request
+    from http.server import HTTPServer, BaseHTTPRequestHandler
+
+    PIHOLE_URL = "http://localhost:80"
+    INTERVAL = 30
+    cache = {}
+
+    def fetch(endpoint):
+        url = f"{PIHOLE_URL}/api/{endpoint}"
+        req = urllib.request.Request(url, headers={"Accept": "application/json"})
+        with urllib.request.urlopen(req, timeout=5) as r:
+            return json.loads(r.read())
+
+    def scrape():
+        try:
+            stats = fetch("stats/summary")
+            q = stats.get("queries", {})
+            clients = fetch("stats/clients")
+            blocklist = fetch("dns/blocklist")
+            gravity = fetch("dns/gravity")
+
+            cache.clear()
+            cache["total"] = q.get("total", 0)
+            cache["blocked"] = q.get("blocked", 0)
+            cache["cached"] = q.get("cached", 0)
+            cache["forwarded"] = q.get("forwarded", 0)
+            cache["blocked_pct"] = q.get("percent_blocked", 0)
+            cache["clients"] = clients.get("clients", {}).get("total", 0)
+            cache["domains_blocked"] = blocklist.get("blocklist", {}).get("domains_blocked", 0)
+            cache["success"] = True
+        except Exception as e:
+            cache["success"] = False
+            cache["error"] = str(e)
+
+    class Handler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            if self.path == "/metrics":
+                self.send_response(200)
+                self.send_header("Content-Type", "text/plain; charset=utf-8")
+                self.end_headers()
+                self.wfile.write("\n".join([
+                    "# HELP pihole_dns_queries_total Total DNS queries",
+                    "# TYPE pihole_dns_queries_total gauge",
+                    f'pihole_dns_queries_total {cache.get("total",0)}',
+                    "",
+                    "# HELP pihole_dns_queries_blocked Blocked queries",
+                    "# TYPE pihole_dns_queries_blocked gauge",
+                    f'pihole_dns_queries_blocked {cache.get("blocked",0)}',
+                    "",
+                    "# HELP pihole_dns_queries_cached Cached queries",
+                    "# TYPE pihole_dns_queries_cached gauge",
+                    f'pihole_dns_queries_cached {cache.get("cached",0)}',
+                    "",
+                    "# HELP pihole_dns_queries_forwarded Forwarded queries",
+                    "# TYPE pihole_dns_queries_forwarded gauge",
+                    f'pihole_dns_queries_forwarded {cache.get("forwarded",0)}',
+                    "",
+                    "# HELP pihole_dns_queries_blocked_percent Blocked %",
+                    "# TYPE pihole_dns_queries_blocked_percent gauge",
+                    f'pihole_dns_queries_blocked_percent {cache.get("blocked_pct",0)}',
+                    "",
+                    "# HELP pihole_clients_active Active clients",
+                    "# TYPE pihole_clients_active gauge",
+                    f'pihole_clients_active {cache.get("clients",0)}',
+                    "",
+                    "# HELP pihole_domains_blocked Domains in blocklist",
+                    "# TYPE pihole_domains_blocked gauge",
+                    f'pihole_domains_blocked {cache.get("domains_blocked",0)}',
+                    "",
+                    "# HELP pihole_up Exporter healthy",
+                    "# TYPE pihole_up gauge",
+                    f'pihole_up {1 if cache.get("success") else 0}',
+                    "",
+                ]).encode())
+            else:
+                self.send_response(404)
+                self.end_headers()
+        def log_message(self, *a): pass
+
+    scrape()
+    import threading
+    threading.Thread(target=lambda: [time.sleep(INTERVAL) or scrape() for _ in iter(int,1)], daemon=True).start()
+    HTTPServer(("0.0.0.0", 9617), Handler).serve_forever()
