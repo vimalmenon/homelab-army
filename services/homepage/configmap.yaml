@@ -64,6 +64,23 @@ data:
         - Zoho Mail:
             href: https://mail.zoho.com/zm/#mail/folder/inbox
             description: Email inbox
+    - Nodes:
+        - homelab01:
+            href: https://grafana.completeautomate.com/d/k3s-cluster-resources
+            description: Control-plane · 192.168.128.54
+            ping: 192.168.128.54
+        - homelab02:
+            href: https://grafana.completeautomate.com/d/k3s-cluster-resources
+            description: Worker · 192.168.128.60
+            ping: 192.168.128.60
+        - homelab03:
+            href: https://grafana.completeautomate.com/d/k3s-cluster-resources
+            description: Worker, NFS · 192.168.128.59
+            ping: 192.168.128.59
+        - Hermes Pi:
+            href: https://grafana.completeautomate.com/d/ee5218d2-51d3-471b-80a0-70bc95f6ae64/hermes-pi
+            description: Host machine · 192.168.128.52
+            ping: 192.168.128.52
   widgets.yaml: |
     ---
     - greeting:
@@ -76,9 +93,6 @@ data:
         disk: /
         cputemp: true
         uptime: true
-    - search:
-        provider: google
-        target: _blank
     - datetime:
         text_size: xl
         format:
