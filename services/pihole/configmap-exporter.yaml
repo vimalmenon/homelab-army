@@ -6,26 +6,49 @@ metadata:
 data:
   exporter.py: |
     #!/usr/bin/env python3
-    import json, os, time, urllib.request
+    import json, os, time, urllib.request, http.cookiejar
     from http.server import HTTPServer, BaseHTTPRequestHandler
 
-    PIHOLE_URL = "http://localhost:80"
-    INTERVAL = 30
-    cache = {}
+    PIHOLE_URL = os.getenv("PIHOLE_URL", "http://pihole-web.default.svc.cluster.local")
+    PIHOLE_PASS = os.getenv("PIHOLE_PASSWORD", "homelab")
+    INTERVAL = int(os.getenv("INTERVAL", "30"))
 
-    def fetch(endpoint):
+    cache = {}
+    cookie_jar = http.cookiejar.CookieJar()
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookie_jar))
+    csrf_token = None
+
+    def api_call(endpoint, method="GET", data=None):
         url = f"{PIHOLE_URL}/api/{endpoint}"
-        req = urllib.request.Request(url, headers={"Accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=5) as r:
+        headers = {"Accept": "application/json", "Content-Type": "application/json"}
+        if csrf_token:
+            headers["X-CSRF-Token"] = csrf_token
+        body = json.dumps(data).encode() if data else None
+        req = urllib.request.Request(url, data=body, headers=headers, method=method)
+        with opener.open(req, timeout=5) as r:
             return json.loads(r.read())
+
+    def login():
+        global csrf_token
+        try:
+            resp = api_call("auth", method="POST", data={"password": PIHOLE_PASS})
+            session = resp.get("session", {})
+            csrf_token = session.get("csrf")
+            return session.get("valid", False)
+        except Exception as e:
+            cache["error"] = f"Login failed: {e}"
+            return False
 
     def scrape():
         try:
-            stats = fetch("stats/summary")
+            if not login():
+                cache["success"] = False
+                return
+            stats = api_call("stats/summary")
             q = stats.get("queries", {})
-            clients = fetch("stats/clients")
-            blocklist = fetch("dns/blocklist")
-            gravity = fetch("dns/gravity")
+            clients = api_call("stats/clients")
+            blocklist = api_call("dns/blocklist")
+            gravity = api_call("dns/gravity")
 
             cache.clear()
             cache["total"] = q.get("total", 0)
@@ -46,40 +69,41 @@ data:
                 self.send_response(200)
                 self.send_header("Content-Type", "text/plain; charset=utf-8")
                 self.end_headers()
-                self.wfile.write("\n".join([
-                    "# HELP pihole_dns_queries_total Total DNS queries",
-                    "# TYPE pihole_dns_queries_total gauge",
+                lines = [
+                    '# HELP pihole_dns_queries_total Total DNS queries',
+                    '# TYPE pihole_dns_queries_total gauge',
                     f'pihole_dns_queries_total {cache.get("total",0)}',
-                    "",
-                    "# HELP pihole_dns_queries_blocked Blocked queries",
-                    "# TYPE pihole_dns_queries_blocked gauge",
+                    '',
+                    '# HELP pihole_dns_queries_blocked Blocked queries',
+                    '# TYPE pihole_dns_queries_blocked gauge',
                     f'pihole_dns_queries_blocked {cache.get("blocked",0)}',
-                    "",
-                    "# HELP pihole_dns_queries_cached Cached queries",
-                    "# TYPE pihole_dns_queries_cached gauge",
+                    '',
+                    '# HELP pihole_dns_queries_cached Cached queries',
+                    '# TYPE pihole_dns_queries_cached gauge',
                     f'pihole_dns_queries_cached {cache.get("cached",0)}',
-                    "",
-                    "# HELP pihole_dns_queries_forwarded Forwarded queries",
-                    "# TYPE pihole_dns_queries_forwarded gauge",
+                    '',
+                    '# HELP pihole_dns_queries_forwarded Forwarded queries',
+                    '# TYPE pihole_dns_queries_forwarded gauge',
                     f'pihole_dns_queries_forwarded {cache.get("forwarded",0)}',
-                    "",
-                    "# HELP pihole_dns_queries_blocked_percent Blocked %",
-                    "# TYPE pihole_dns_queries_blocked_percent gauge",
+                    '',
+                    '# HELP pihole_dns_queries_blocked_percent Blocked %',
+                    '# TYPE pihole_dns_queries_blocked_percent gauge',
                     f'pihole_dns_queries_blocked_percent {cache.get("blocked_pct",0)}',
-                    "",
-                    "# HELP pihole_clients_active Active clients",
-                    "# TYPE pihole_clients_active gauge",
+                    '',
+                    '# HELP pihole_clients_active Active clients',
+                    '# TYPE pihole_clients_active gauge',
                     f'pihole_clients_active {cache.get("clients",0)}',
-                    "",
-                    "# HELP pihole_domains_blocked Domains in blocklist",
-                    "# TYPE pihole_domains_blocked gauge",
+                    '',
+                    '# HELP pihole_domains_blocked Domains in blocklist',
+                    '# TYPE pihole_domains_blocked gauge',
                     f'pihole_domains_blocked {cache.get("domains_blocked",0)}',
-                    "",
-                    "# HELP pihole_up Exporter healthy",
-                    "# TYPE pihole_up gauge",
+                    '',
+                    '# HELP pihole_up Exporter healthy',
+                    '# TYPE pihole_up gauge',
                     f'pihole_up {1 if cache.get("success") else 0}',
-                    "",
-                ]).encode())
+                    '',
+                ]
+                self.wfile.write("\n".join(lines).encode())
             else:
                 self.send_response(404)
                 self.end_headers()
@@ -87,5 +111,9 @@ data:
 
     scrape()
     import threading
-    threading.Thread(target=lambda: [time.sleep(INTERVAL) or scrape() for _ in iter(int,1)], daemon=True).start()
+    def loop():
+        while True:
+            time.sleep(INTERVAL)
+            scrape()
+    threading.Thread(target=loop, daemon=True).start()
     HTTPServer(("0.0.0.0", 9617), Handler).serve_forever()

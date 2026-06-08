@@ -21,6 +21,12 @@ spec:
         - containerPort: 9617
           protocol: TCP
           name: metrics
+        env:
+        - name: PIHOLE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pihole-secret
+              key: webpassword
         volumeMounts:
         - name: script
           mountPath: /exporter
