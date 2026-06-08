@@ -12,6 +12,7 @@ contactPoints:
         settings:
           addresses: "hello@completeautomate.com"
           singleEmail: false
+        subject: '[{{ .Status }}] {{ index .AlertLabels "alertname" }}{{ if index .AlertLabels "pod" }} | {{ index .AlertLabels "pod" }} (ns: {{ index .AlertLabels "namespace" }}){{ end }}{{ if index .AlertLabels "node" }} | node: {{ index .AlertLabels "node" }}{{ end }}'
         disableResolveMessage: false
 ---
 # policies.yaml
@@ -112,3 +113,135 @@ groups:
         noDataState: OK
         title: Pod Restarting Frequently
         uid: pod-crash-looping
+  - folder: Cluster Alerts
+    interval: 30s
+    name: log-health
+    orgId: 1
+    rules:
+      - annotations:
+          description: >-
+            Pod '{{ $labels.pod }}' in namespace '{{ $labels.namespace }}' is
+            producing an unusually high rate of ERROR-level log entries.
+            This indicates something is going wrong in the application.
+
+
+            🔍 Common causes:
+            1. Application crash — the service is encountering an unhandled
+               exception (check the ERROR log messages for tracebacks)
+            2. External dependency down — the service can't reach its database,
+               API, or other backend (check for connection timeout / refused errors)
+            3. Bad request data — a client is sending invalid input that causes
+               validation errors
+
+
+            📋 Debug:
+              kubectl logs -n {{ $labels.namespace }} {{ $labels.pod }} | grep ERROR | tail -20
+              kubectl exec -n {{ $labels.namespace }} {{ $labels.pod }} -- curl -s localhost:PORT/health
+          summary: >-
+            🔥 ERROR logs surging in {{ $labels.pod }} (ns: {{ $labels.namespace }}) —
+            more than 0.5 ERROR-level log lines/sec in the last 5 min.
+        condition: A
+        data:
+          - datasourceUid: loki
+            model:
+              expr: sum by(namespace, pod) (rate({namespace=~"microservices|default|monitoring"} |= "ERROR" [5m])) > 0.5
+              interval: 30s
+              refId: A
+            refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        execErrState: Alerting
+        for: 2m
+        labels:
+          pod: '{{ $labels.pod }}'
+          namespace: '{{ $labels.namespace }}'
+          severity: warning
+          team: homelab
+        noDataState: OK
+        title: 🔥 High ERROR rate in logs
+        uid: log-error-spike
+      - annotations:
+          description: >-
+            Pod '{{ $labels.pod }}' is returning HTTP error responses (4xx or
+            5xx status codes) at a rate above 1 per second over 5 minutes.
+            This could mean users are hitting errors or the service is
+            malfunctioning.
+
+
+            🔍 Common causes:
+            1. Client errors (4xx) — invalid requests from the frontend or
+               external clients
+            2. Server errors (5xx) — application crashes, unhandled exceptions,
+               or dependency failures
+            3. Auth failures — expired or invalid credentials/tokens being sent
+
+
+            📋 Debug:
+              kubectl logs -n microservices {{ $labels.pod }} | grep -E '"(4[0-9][0-9]|5[0-9][0-9])"' | tail -20
+          summary: >-
+            🌐 HTTP 4xx/5xx error rate > 1/sec in {{ $labels.pod }} —
+            API responses indicate client or server errors.
+        condition: A
+        data:
+          - datasourceUid: loki
+            model:
+              expr: sum by(pod) (rate({namespace="microservices"} |~ "4[0-9][0-9]|5[0-9][0-9]" [5m])) > 1
+              interval: 30s
+              refId: A
+            refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        execErrState: Alerting
+        for: 2m
+        labels:
+          pod: '{{ $labels.pod }}'
+          namespace: microservices
+          severity: warning
+          team: homelab
+        noDataState: OK
+        title: 🌐 High HTTP error rate in API logs
+        uid: log-http-errors
+      - annotations:
+          description: >-
+            Loki has received no log lines from the microservices namespace
+            for over 5 minutes. This could mean the services have
+            stopped, crashed without restarting, or Promtail on that node has
+            failed.
+
+
+            🔍 Common causes:
+            1. Pod crashed — the pod was OOMKilled or hit a fatal error and
+               cannot restart (check Pending/CrashLoopBackOff states)
+            2. Node offline — the node running the pod is NotReady
+            3. Promtail failure — the log collector DaemonSet isn't running on
+               the node
+
+
+            📋 Debug:
+              kubectl get pods --all-namespaces --field-selector=status.phase!=Running
+              kubectl get pods -n loki -o wide
+              kubectl logs -n loki -l app.kubernetes.io/name=promtail --tail=5
+          summary: >-
+            🔇 Zero log lines received from microservices namespace in 5+ minutes —
+            services may be down or Promtail is failing.
+        condition: A
+        data:
+          - datasourceUid: loki
+            model:
+              expr: sum by(namespace) (rate({namespace="microservices"}[5m])) > 0
+              interval: 30s
+              refId: A
+            refId: A
+            relativeTimeRange:
+              from: 300
+              to: 0
+        execErrState: Alerting
+        for: 3m
+        labels:
+          severity: critical
+          team: homelab
+        noDataState: Alerting
+        title: 🔇 No logs received — namespace silent
+        uid: log-flow-stopped
