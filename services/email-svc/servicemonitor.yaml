@@ -4,7 +4,7 @@ metadata:
   name: email-svc
   namespace: microservices
   labels:
-    app: email-svc
+    release: prometheus
 spec:
   selector:
     matchLabels:
@@ -13,3 +13,6 @@ spec:
   - port: http
     path: /metrics
     interval: 15s
+  namespaceSelector:
+    matchNames:
+    - microservices
