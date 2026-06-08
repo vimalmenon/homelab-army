@@ -476,7 +476,7 @@ grafana:
               labels:
                 severity: warning
                 team: homelab
-              noDataState: Alerting
+              noDataState: OK
               title: ⏰ Backup Missed — No recent backup
               uid: backup-missed
 
