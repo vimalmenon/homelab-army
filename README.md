@@ -124,7 +124,7 @@ This cluster runs on the philosophy of **CICD — Continuous Integration, Contin
 
 | Status | Task | Notes |
 |--------|------|-------|
-| 🔲 | **Ansible k3s cluster setup** | Create Ansible playbooks to provision a multi-node k3s cluster from scratch (OS hardening, k3s install, join workers) — `ansible/k3s-cluster/` |
+| ✅ | **Ansible k3s cluster setup** | Create Ansible playbooks to provision a multi-node k3s cluster from scratch (OS hardening, k3s install, join workers) — `ansible/k3s-cluster/` |
 
 ---
 
