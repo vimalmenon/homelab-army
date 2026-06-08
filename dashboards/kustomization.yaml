@@ -16,3 +16,6 @@ configMapGenerator:
   - name: dashboard-email-svc
     files:
       - email-svc.json
+  - name: dashboard-pihole-dns
+    files:
+      - pihole.json
