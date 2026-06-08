@@ -2,7 +2,7 @@ apiVersion: v1
 data:
   configuration.yml: "###############################################################\n\
     #                   Authelia configuration                    #\n###############################################################\n\
-    theme: dark\n\nidentity_validation:\n  reset_password:\n    jwt_secret: ${JWT_SECRET}\n\
+    theme: dark\n\nidentity_validation:\n  reset_password:\n    jwt_secret: REPLACED_BY_ENV_VAR_jwt_secret\n\
     \nserver:\n  address: tcp://0.0.0.0:9091/\n  buffers:\n    read: 4096\n    write:\
     \ 4096\n  endpoints:\n    enable_pprof: false\n    enable_expvars: false\n  disable_healthcheck:\
     \ false\n  headers:\n    csp_template: \n\nlog:\n  level: info\n\ntelemetry:\n\
@@ -20,7 +20,7 @@ data:
     \      policy: one_factor\n    - domain: netalertx.homelab.local\n      policy:\
     \ one_factor\n    - domain: netalertx.completeautomate.com\n      policy: one_factor\n\
     \    - domain: \"*.homelab.local\"\n      policy: bypass\n    - domain: \"*.completeautomate.com\"\
-    \n      policy: bypass\n\nsession:\n  name: authelia_session\n  secret: ${SESSION_SECRET}\n\
+    \n      policy: bypass\n\nsession:\n  name: authelia_session\n  secret: REPLACED_BY_ENV_VAR_session_secret\n\
     \  expiration: 8h\n  inactivity: 45m\n  remember_me: 30d\n  cookies:\n    - name:\
     \ authelia_session\n      domain: completeautomate.com\n      authelia_url: https://auth.completeautomate.com\n\
     \      default_redirection_url: https://n8n.completeautomate.com\n    - name:\
@@ -28,7 +28,7 @@ data:
     \      default_redirection_url: https://n8n.homelab.local\n  redis:\n    host:\
     \ redis\n    port: 6379\n    database_index: 0\n    maximum_active_connections:\
     \ 10\n    minimum_idle_connections: 3\n\nregulation:\n  max_retries: 3\n  find_time:\
-    \ 2m\n  ban_time: 5m\n\nstorage:\n  encryption_key: ${ENCRYPTION_KEY}\n\
+    \ 2m\n  ban_time: 5m\n\nstorage:\n  encryption_key: REPLACED_BY_ENV_VAR_encryption_key\n\
     \  local:\n    path: /config/db.sqlite3\n\nnotifier:\n  filesystem:\n    filename:\
     \ /config/notifications.json\n"
   users.yml: "users:\n  admin:\n    disabled: false\n    displayname: \"Vimal Menon\"\

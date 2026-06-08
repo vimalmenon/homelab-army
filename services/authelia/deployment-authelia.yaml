@@ -38,17 +38,17 @@ spec:
           timeoutSeconds: 1
         name: authelia
         env:
-        - name: JWT_SECRET
+        - name: AUTHELIA_IDENTITY_VALIDATION_RESET_PASSWORD_JWT_SECRET
           valueFrom:
             secretKeyRef:
               name: authelia-secrets
               key: JWT_SECRET
-        - name: SESSION_SECRET
+        - name: AUTHELIA_SESSION_SECRET
           valueFrom:
             secretKeyRef:
               name: authelia-secrets
               key: SESSION_SECRET
-        - name: ENCRYPTION_KEY
+        - name: AUTHELIA_STORAGE_ENCRYPTION_KEY
           valueFrom:
             secretKeyRef:
               name: authelia-secrets
