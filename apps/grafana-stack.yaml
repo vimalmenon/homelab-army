@@ -92,6 +92,11 @@ spec:
               labelValue: "1"
               searchNamespace: ALL
           additionalDataSources: []
+          persistence:
+            enabled: true
+            storageClassName: nfs-client
+            size: 5Gi
+            # Grafana's SQLite DB, plugins, and user settings survive pod restarts
 
         kubeStateMetrics:
           enabled: true
