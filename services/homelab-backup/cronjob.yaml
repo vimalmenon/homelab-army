@@ -1,0 +1,73 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: homelab-backup
+  namespace: backups
+  labels:
+    app: homelab-backup
+spec:
+  schedule: "0 3 * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          serviceAccountName: homelab-backup
+          restartPolicy: Never
+          containers:
+          - name: backup
+            image: alpine:3.19
+            command:
+            - /bin/sh
+            - -c
+            - |
+              apk add --no-cache python3 py3-pip curl nfs-utils >/dev/null 2>&1
+              KUBE_VERSION=$(curl -sL --connect-timeout 5 https://dl.k8s.io/release/stable.txt)
+              curl -sL --connect-timeout 10 \
+                "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl" \
+                -o /usr/local/bin/kubectl
+              chmod +x /usr/local/bin/kubectl
+              pip3 install boto3 --break-system-packages --quiet 2>/dev/null
+              python3 /scripts/backup.py
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: aws-dynamo-creds
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: aws-dynamo-creds
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: AWS_REGION
+              value: us-east-1
+            - name: BUCKET
+              value: completeautomate-media
+            - name: RETENTION_DAYS
+              value: "30"
+            volumeMounts:
+            - name: nfs-root
+              mountPath: /nfs
+              readOnly: true
+            - name: scripts
+              mountPath: /scripts
+            resources:
+              requests:
+                cpu: 200m
+                memory: 256Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
+          volumes:
+          - name: nfs-root
+            nfs:
+              server: 192.168.128.59
+              path: /mnt/nextcloud-storage
+          - name: scripts
+            configMap:
+              name: homelab-backup-scripts
+              defaultMode: 0755
