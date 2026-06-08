@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace-default.yaml
+  - namespace-authelia.yaml
+  - namespace-monitoring.yaml
+  - namespace-microservices.yaml
+  - namespace-n8n.yaml
+  - namespace-slides.yaml
+  - namespace-uptime-kuma.yaml
+  - namespace-loki.yaml

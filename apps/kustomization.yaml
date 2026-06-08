@@ -19,5 +19,7 @@ resources:
   - loki.yaml
   - promtail.yaml
   - loki-datasource.yaml
+  - s3-svc.yaml
   - email-svc.yaml
   - dashboards.yaml
+  - network-policies.yaml
