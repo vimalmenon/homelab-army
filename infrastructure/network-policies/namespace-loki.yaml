@@ -38,7 +38,7 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io.metadata.name: kube-system
+              kubernetes.io/metadata.name: kube-system
   policyTypes:
     - Ingress
 ---
@@ -53,6 +53,6 @@ spec:
     - from:
         - namespaceSelector:
             matchLabels:
-              kubernetes.io.metadata.name: monitoring
+              kubernetes.io/metadata.name: monitoring
   policyTypes:
     - Ingress
