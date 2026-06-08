@@ -50,7 +50,8 @@ spec:
           enabled: true
           admin:
             user: admin
-            password: "REDACTED_GRAFANA_PASSWORD"
+            existingSecret: grafana-admin
+            passwordKey: admin-password
           grafana.ini:
             server:
               domain: grafana.completeautomate.com

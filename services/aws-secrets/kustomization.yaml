@@ -5,3 +5,4 @@ resources:
   - namespace.yaml
   - secret-store.yaml
   - external-secrets.yaml
+  - grafana-admin.yaml
