@@ -16,7 +16,7 @@ spec:
       containers:
       - name: exporter
         image: python:3-alpine
-        command: ["python", "/exporter/exporter.py"]
+        command: ["python3", "/exporter/exporter.py"]
         ports:
         - containerPort: 9617
           protocol: TCP
