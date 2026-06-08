@@ -1,0 +1,11 @@
+---
+# Homepage Kubernetes
+# https://gethomepage.dev/configs/kubernetes/
+
+mode: cluster
+cluster:
+  show: true
+  cpu: true
+  memory: true
+  showLabel: true
+  nodes: true

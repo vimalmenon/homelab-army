@@ -1,0 +1,7 @@
+---
+# Homepage Configuration
+# https://gethomepage.dev/configs/settings/
+
+providers:
+  openweathermap: openweathermap
+  weatherapi: weatherapi

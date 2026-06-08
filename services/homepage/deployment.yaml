@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: homepage
+  namespace: homepage
+  labels:
+    app: homepage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      serviceAccountName: homepage
+      containers:
+      - name: homepage
+        image: ghcr.io/gethomepage/homepage:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: HOMEPAGE_ALLOWED_HOSTS
+          value: "homepage.completeautomate.com,homepage.homelab.local"
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
+        volumeMounts:
+        - name: config
+          mountPath: /app/config
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
+      volumes:
+      - name: config
+        configMap:
+          name: homepage-config

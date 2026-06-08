@@ -1,0 +1,82 @@
+---
+# Homepage Services
+# https://gethomepage.dev/configs/services/
+
+- Monitoring:
+    - Grafana:
+        href: https://grafana.completeautomate.com
+        description: Cluster metrics & dashboards
+        icon: grafana.png
+        ping: grafana.completeautomate.com
+
+    - Prometheus:
+        href: https://prometheus.completeautomate.com
+        description: Metrics collection
+        icon: prometheus.png
+        ping: prometheus.completeautomate.com
+
+    - Loki:
+        href: https://grafana.completeautomate.com/explore
+        description: Log aggregation
+        icon: loki.png
+        ping: loki.loki.svc.cluster.local:3100
+
+    - Uptime Kuma:
+        href: https://uptime.completeautomate.com
+        description: Uptime monitoring
+        icon: uptime-kuma.png
+        ping: uptime.completeautomate.com
+
+- Infrastructure:
+    - ArgoCD:
+        href: https://argocd.completeautomate.com
+        description: GitOps deployment
+        icon: argocd.png
+        ping: argocd.completeautomate.com
+
+    - Traefik:
+        href: https://traefik.completeautomate.com
+        description: Ingress controller
+        icon: traefik.png
+        ping: traefik.completeautomate.com
+
+    - NetAlertX:
+        href: https://netalertx.completeautomate.com
+        description: Network monitoring
+        icon: netalertx.png
+        ping: netalertx.completeautomate.com
+
+- Services:
+    - n8n:
+        href: https://n8n.completeautomate.com
+        description: Workflow automation
+        icon: n8n.png
+        ping: n8n.completeautomate.com
+
+    - Pi-hole:
+        href: https://pihole.completeautomate.com/admin
+        description: DNS & ad blocking
+        icon: pihole.png
+        ping: pihole.completeautomate.com
+
+    - Slides:
+        href: https://slides.completeautomate.com
+        description: AI slides generator
+        icon: slides.png
+        ping: slides.completeautomate.com
+
+- Development:
+    - GitHub:
+        href: https://github.com/vimalmenon
+        description: Source code
+        icon: github.png
+
+    - Cloudflare:
+        href: https://dash.cloudflare.com
+        description: DNS & CDN
+        icon: cloudflare.png
+
+    - AWS Console:
+        href: https://console.aws.amazon.com
+        description: AWS management
+        icon: aws.png
