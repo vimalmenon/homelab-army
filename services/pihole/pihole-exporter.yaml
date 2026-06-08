@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pihole-exporter
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pihole-exporter
+  template:
+    metadata:
+      labels:
+        app: pihole-exporter
+    spec:
+      containers:
+      - name: pihole-exporter
+        image: ekofr/pihole-exporter:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9617
+          protocol: TCP
+          name: metrics
+        env:
+        - name: PIHOLE_HOST
+          value: http://pihole-web.default.svc.cluster.local
+        - name: PIHOLE_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: pihole-secret
+              key: webpassword
+        - name: INTERVAL
+          value: "30"
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 64Mi
