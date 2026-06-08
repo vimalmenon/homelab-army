@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: hermes-pi-node-exporter
+  namespace: monitoring
+  labels:
+    app: hermes-pi
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: hermes-pi
+  endpoints:
+  - port: metrics
+    interval: 30s
+    path: /metrics
+  namespaceSelector:
+    matchNames:
+    - monitoring
