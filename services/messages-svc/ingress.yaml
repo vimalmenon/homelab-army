@@ -5,7 +5,7 @@ metadata:
   namespace: microservices
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: microservices-messages-basic-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,microservices-messages-basic-auth@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
