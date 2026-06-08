@@ -25,7 +25,7 @@ spec:
           protocol: TCP
         env:
         - name: HOMEPAGE_ALLOWED_HOSTS
-          value: "homepage.completeautomate.com,homepage.homelab.local"
+          value: "*"
         - name: PUID
           value: "1000"
         - name: PGID
@@ -36,13 +36,13 @@ spec:
           readOnly: true
         livenessProbe:
           httpGet:
-            path: /health
+            path: /
             port: 3000
           initialDelaySeconds: 10
           periodSeconds: 15
         readinessProbe:
           httpGet:
-            path: /api/health
+            path: /
             port: 3000
           initialDelaySeconds: 5
           periodSeconds: 10
