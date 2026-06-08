@@ -4,6 +4,7 @@ resources:
 - configmap.yaml
 - deployment-authelia.yaml
 - deployment-redis.yaml
+- externalsecret.yaml
 - ingress.yaml
 - pvc-redis-data.yaml
 - service-auth-svc.yaml

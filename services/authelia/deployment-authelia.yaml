@@ -37,6 +37,22 @@ spec:
           successThreshold: 1
           timeoutSeconds: 1
         name: authelia
+        env:
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authelia-secrets
+              key: JWT_SECRET
+        - name: SESSION_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: authelia-secrets
+              key: SESSION_SECRET
+        - name: ENCRYPTION_KEY
+          valueFrom:
+            secretKeyRef:
+              name: authelia-secrets
+              key: ENCRYPTION_KEY
         ports:
         - containerPort: 9091
           protocol: TCP
