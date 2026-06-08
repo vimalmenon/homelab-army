@@ -28,7 +28,7 @@ spec:
         - |
           # Copy config files from ConfigMap to writable emptyDir
           for f in /app-config/*; do
-            [ -f "$f" ] && cp -r "$f" /app/config/
+            [ -f "$f" ] && cp -rL "$f" /app/config/
           done
           mkdir -p /app/config/logs
         volumeMounts:
