@@ -7,3 +7,4 @@ resources:
 - deployment.yaml
 - ingress.yaml
 - ingress-external.yaml
+- externalsecret.yaml

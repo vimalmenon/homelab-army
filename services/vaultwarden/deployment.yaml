@@ -22,7 +22,10 @@ spec:
           protocol: TCP
         env:
         - name: ADMIN_TOKEN
-          value: "ADMIN_TOKEN_REDACTED"
+          valueFrom:
+            secretKeyRef:
+              name: vaultwarden-secrets
+              key: ADMIN_TOKEN
         - name: SIGNUPS_ALLOWED
           value: "false"
         - name: INVITATIONS_ALLOWED
