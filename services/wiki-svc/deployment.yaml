@@ -15,7 +15,7 @@ spec:
       labels:
         app: wiki-svc
       annotations:
-        rollme: "1"
+        rollme: "2"
     spec:
       containers:
       - name: wiki-svc
