@@ -24,3 +24,4 @@ resources:
   - homelab-backup.yaml
   - vaultwarden.yaml
   - wiki-svc.yaml
+  - youtube-svc.yaml

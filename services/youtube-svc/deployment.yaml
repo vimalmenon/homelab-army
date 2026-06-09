@@ -1,0 +1,65 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: youtube-svc
+  namespace: microservices
+  labels:
+    app: youtube-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: youtube-svc
+  template:
+    metadata:
+      labels:
+        app: youtube-svc
+      annotations:
+        rollme: "1"
+    spec:
+      containers:
+      - name: youtube-svc
+        image: ghcr.io/vimalmenon/micro-army/youtube-svc:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DYNAMO_SVC_URL
+          value: http://dynamo-svc.microservices.svc.cluster.local:8000
+        - name: S3_SVC_URL
+          value: http://s3-svc.microservices.svc.cluster.local:8000
+        - name: GOOGLE_CLIENT_ID
+          valueFrom:
+            secretKeyRef:
+              name: youtube-oauth
+              key: client_id
+        - name: GOOGLE_CLIENT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: youtube-oauth
+              key: client_secret
+        - name: GOOGLE_REFRESH_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: youtube-oauth
+              key: refresh_token
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
