@@ -6,6 +6,7 @@ resources:
 - deployment-redis.yaml
 - externalsecret.yaml
 - ingress.yaml
+- poddisruptionbudget.yaml
 - pvc-redis-data.yaml
 - service-auth-svc.yaml
 - service-redis.yaml
