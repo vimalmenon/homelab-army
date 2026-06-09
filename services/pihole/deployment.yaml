@@ -45,7 +45,13 @@ spec:
           protocol: TCP
         - containerPort: 53
           protocol: UDP
-        resources: {}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
         securityContext:
           capabilities:
             add:
