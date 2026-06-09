@@ -2,7 +2,6 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - root.yaml
   - slides.yaml
   - uptime-kuma.yaml
   - netalertx.yaml
@@ -16,12 +15,11 @@ resources:
   - messages-svc.yaml
   - external-secrets.yaml
   - aws-secrets.yaml
-  - loki.yaml
-  - promtail.yaml
-  - loki-datasource.yaml
   - s3-svc.yaml
   - email-svc.yaml
   - dashboards.yaml
   - kube-router.yaml
   - network-policies.yaml
   - homepage.yaml
+  - homelab-backup.yaml
+  - vaultwarden.yaml
