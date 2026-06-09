@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wiki
+  namespace: microservices
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: wiki.homelab.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: wiki-svc
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix
+    - host: wiki.completeautomate.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: wiki-svc
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - wiki.homelab.local
+        - wiki.completeautomate.com

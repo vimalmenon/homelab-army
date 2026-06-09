@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wiki-svc
+  namespace: microservices
+  labels:
+    app: wiki-svc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wiki-svc
+  template:
+    metadata:
+      labels:
+        app: wiki-svc
+      annotations:
+        rollme: "1"
+    spec:
+      containers:
+      - name: wiki-svc
+        image: ghcr.io/vimalmenon/micro-army/wiki-svc:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DYNAMO_SVC_URL
+          value: http://dynamo-svc.microservices.svc.cluster.local:8000
+        - name: S3_SVC_URL
+          value: http://s3-svc.microservices.svc.cluster.local:8000
+        - name: MAX_FILE_SIZE
+          value: "10485760"
+        - name: ALLOWED_EXTENSIONS
+          value: "png,jpg,jpeg,gif,pdf,txt,md,svg,csv,json"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
