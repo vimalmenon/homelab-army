@@ -8,5 +8,5 @@ metadata:
 parameters:
   archiveOnDelete: 'false'
 provisioner: nfs-provisioner
-reclaimPolicy: Delete
+reclaimPolicy: Retain
 volumeBindingMode: Immediate
