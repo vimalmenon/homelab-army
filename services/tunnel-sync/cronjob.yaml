@@ -39,6 +39,10 @@ spec:
                 secretKeyRef:
                   name: cloudflare-token
                   key: CLOUDFLARE_API_TOKEN
+            - name: CF_ACCOUNT_ID
+              value: 3fffdd2b812bcd8b1ee70fb599de63b7
+            - name: CF_TUNNEL_ID
+              value: 011a9625-236e-42dc-b716-e5de75390eaa
             volumeMounts:
             - name: scripts
               mountPath: /scripts
