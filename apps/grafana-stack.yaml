@@ -19,18 +19,6 @@ spec:
 
         prometheus:
           enabled: true
-          ingress:
-            enabled: true
-            ingressClassName: traefik
-            hosts:
-              - prometheus.homelab.local
-              - prometheus.completeautomate.com
-            paths:
-              - /
-            tls:
-              - hosts:
-                  - prometheus.homelab.local
-                  - prometheus.completeautomate.com
           prometheusSpec:
             replicas: 1
             retention: 7d
