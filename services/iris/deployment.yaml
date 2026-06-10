@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: iris
-        image: ghcr.io/vimalmenon/micro-army/iris:latest
+        image: ghcr.io/vimalmenon/micro-army/email-svc:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

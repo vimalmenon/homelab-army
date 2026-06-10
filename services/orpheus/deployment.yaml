@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: orpheus
-        image: ghcr.io/vimalmenon/micro-army/orpheus:latest
+        image: ghcr.io/vimalmenon/micro-army/youtube-svc:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

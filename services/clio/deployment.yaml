@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: clio
-        image: ghcr.io/vimalmenon/micro-army/clio:latest
+        image: ghcr.io/vimalmenon/micro-army/dynamo-svc:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
