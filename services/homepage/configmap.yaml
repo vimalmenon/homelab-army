@@ -38,7 +38,36 @@ data:
             href: https://netalertx.completeautomate.com
             description: Network monitoring
             ping: https://netalertx.completeautomate.com
-    - Services:
+        - Vaultwarden:
+            href: https://vault.completeautomate.com
+            description: Password manager
+            ping: https://vault.completeautomate.com
+    - Olympus (Services):
+        - Clio:
+            href: https://wiki.completeautomate.com/docs
+            description: Data persistence (DynamoDB)
+            ping: http://clio.microservices.svc.cluster.local:8000/health
+        - Atlas:
+            href: https://wiki.completeautomate.com/docs
+            description: File storage (S3)
+            ping: http://atlas.microservices.svc.cluster.local:8000/health
+        - Athena:
+            href: https://wiki.completeautomate.com
+            description: Wiki / knowledge base
+            ping: http://athena.microservices.svc.cluster.local:8000/health
+        - Orpheus:
+            href: https://wiki.completeautomate.com/docs
+            description: YouTube video management
+            ping: http://orpheus.microservices.svc.cluster.local:8000/health
+        - Iris:
+            href: https://wiki.completeautomate.com/docs
+            description: Email delivery (SMTP)
+            ping: http://iris.microservices.svc.cluster.local:8000/health
+        - Angelos:
+            href: https://messages.completeautomate.com/docs
+            description: Contact form API
+            ping: http://angelos.microservices.svc.cluster.local:8000/health
+    - Workflows:
         - n8n:
             href: https://n8n.completeautomate.com
             description: Workflow automation
@@ -60,6 +89,9 @@ data:
         - AWS Console:
             href: https://console.aws.amazon.com
             description: AWS management
+        - Linear:
+            href: https://linear.app/completeautomate
+            description: Issue tracking
     - Communications:
         - Zoho Mail:
             href: https://mail.zoho.com/zm/#mail/folder/inbox
@@ -113,5 +145,10 @@ data:
             - href: https://mail.google.com
               abbr: GM
         - Linear:
-            - href: https://linear.app
+            - href: https://linear.app/completeautomate
+              description: Issue tracking
               abbr: LI
+        - Vaultwarden:
+            - href: https://vault.completeautomate.com
+              description: Password manager
+              abbr: VW
