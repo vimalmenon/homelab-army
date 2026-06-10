@@ -15,7 +15,7 @@ spec:
       labels:
         app: angelos
       annotations:
-        rollme: "1"
+        rollme: "2"
     spec:
       containers:
       - name: angelos
@@ -27,6 +27,8 @@ spec:
         env:
         - name: DYNAMO_SVC_URL
           value: http://clio.microservices.svc.cluster.local:8000
+        - name: IRIS_SVC_URL
+          value: http://iris.microservices.svc.cluster.local:8000
         livenessProbe:
           httpGet:
             path: /health
