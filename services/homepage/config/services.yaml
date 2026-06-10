@@ -29,27 +29,23 @@
         - Clio:
             href: https://wiki.completeautomate.com/docs
             description: Data persistence (DynamoDB)
-            ping: http://clio.microservices.svc.cluster.local:8000/health
         - Atlas:
             href: https://wiki.completeautomate.com/docs
             description: File storage (S3)
-            ping: http://atlas.microservices.svc.cluster.local:8000/health
         - Athena:
             href: https://wiki.completeautomate.com
             description: Wiki / knowledge base
-            ping: http://athena.microservices.svc.cluster.local:8000/health
+            ping: https://wiki.completeautomate.com/health
         - Orpheus:
             href: https://wiki.completeautomate.com/docs
             description: YouTube video management
-            ping: http://orpheus.microservices.svc.cluster.local:8000/health
         - Iris:
             href: https://wiki.completeautomate.com/docs
             description: Email delivery (SMTP)
-            ping: http://iris.microservices.svc.cluster.local:8000/health
         - Angelos:
             href: https://messages.completeautomate.com/docs
             description: Contact form API
-            ping: http://angelos.microservices.svc.cluster.local:8000/health
+            ping: https://messages.completeautomate.com/health
     - Workflows:
         - n8n:
             href: https://n8n.completeautomate.com
