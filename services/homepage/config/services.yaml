@@ -1,65 +1,98 @@
----
-# Homepage Services
-# https://gethomepage.dev/configs/services/
-
-- Monitoring:
-    - Grafana:
-        href: https://grafana.completeautomate.com
-        description: Cluster metrics & dashboards
-        ping: https://grafana.completeautomate.com
-
-    - Prometheus:
-        href: https://grafana.completeautomate.com
-        description: Metrics collection
-
-    - Loki:
-        href: https://grafana.completeautomate.com/explore
-        description: Log aggregation
-
-- Infrastructure:
-    - ArgoCD:
-        href: https://argocd.completeautomate.com
-        description: GitOps deployment
-        ping: https://argocd.completeautomate.com
-
-    - Traefik:
-        href: https://grafana.completeautomate.com
-        description: Ingress controller
-
-    - NetAlertX:
-        href: https://netalertx.completeautomate.com
-        description: Network monitoring
-        ping: https://netalertx.completeautomate.com
-
-- Services:
-    - n8n:
-        href: https://n8n.completeautomate.com
-        description: Workflow automation
-        ping: https://n8n.completeautomate.com
-
-    - Pi-hole:
-        href: https://grafana.completeautomate.com/d/pihole-dns-dashboard/pi-hole-dns
-        description: DNS & ad blocking
-
-    - Slides:
-        href: https://slides.completeautomate.com
-        description: AI slides generator
-        ping: https://slides.completeautomate.com
-
-- Development:
-    - GitHub:
-        href: https://github.com/vimalmenon
-        description: Source code
-
-    - Cloudflare:
-        href: https://dash.cloudflare.com
-        description: DNS & CDN
-
-    - AWS Console:
-        href: https://console.aws.amazon.com
-        description: AWS management
-
-- Communications:
-    - Zoho Mail:
-        href: https://mail.zoho.com/zm/#mail/folder/inbox
-        description: Email inbox
+    - Monitoring:
+        - Grafana:
+            href: https://grafana.completeautomate.com
+            description: Cluster metrics & dashboards
+            ping: https://grafana.completeautomate.com
+        - Prometheus:
+            href: https://grafana.completeautomate.com
+            description: Metrics collection
+        - Loki:
+            href: https://grafana.completeautomate.com/explore
+            description: Log aggregation
+    - Infrastructure:
+        - ArgoCD:
+            href: https://argocd.completeautomate.com
+            description: GitOps deployment
+            ping: https://argocd.completeautomate.com
+        - Traefik:
+            href: https://grafana.completeautomate.com
+            description: Ingress controller
+        - NetAlertX:
+            href: https://netalertx.completeautomate.com
+            description: Network monitoring
+            ping: https://netalertx.completeautomate.com
+        - Vaultwarden:
+            href: https://vault.completeautomate.com
+            description: Password manager
+            ping: https://vault.completeautomate.com
+    - Olympus (Services):
+        - Clio:
+            href: https://wiki.completeautomate.com/docs
+            description: Data persistence (DynamoDB)
+            ping: http://clio.microservices.svc.cluster.local:8000/health
+        - Atlas:
+            href: https://wiki.completeautomate.com/docs
+            description: File storage (S3)
+            ping: http://atlas.microservices.svc.cluster.local:8000/health
+        - Athena:
+            href: https://wiki.completeautomate.com
+            description: Wiki / knowledge base
+            ping: http://athena.microservices.svc.cluster.local:8000/health
+        - Orpheus:
+            href: https://wiki.completeautomate.com/docs
+            description: YouTube video management
+            ping: http://orpheus.microservices.svc.cluster.local:8000/health
+        - Iris:
+            href: https://wiki.completeautomate.com/docs
+            description: Email delivery (SMTP)
+            ping: http://iris.microservices.svc.cluster.local:8000/health
+        - Angelos:
+            href: https://messages.completeautomate.com/docs
+            description: Contact form API
+            ping: http://angelos.microservices.svc.cluster.local:8000/health
+    - Workflows:
+        - n8n:
+            href: https://n8n.completeautomate.com
+            description: Workflow automation
+            ping: https://n8n.completeautomate.com
+        - Pi-hole:
+            href: https://grafana.completeautomate.com/d/pihole-dns-dashboard/pi-hole-dns
+            description: DNS & ad blocking
+        - Slides:
+            href: https://slides.completeautomate.com
+            description: AI slides generator
+            ping: https://slides.completeautomate.com
+    - Development:
+        - GitHub:
+            href: https://github.com/vimalmenon
+            description: Source code
+        - Cloudflare:
+            href: https://dash.cloudflare.com
+            description: DNS & CDN
+        - AWS Console:
+            href: https://console.aws.amazon.com
+            description: AWS management
+        - Linear:
+            href: https://linear.app/completeautomate
+            description: Issue tracking
+    - Communications:
+        - Zoho Mail:
+            href: https://mail.zoho.com/zm/#mail/folder/inbox
+            description: Email inbox
+    - Nodes:
+        - homelab01:
+            href: https://grafana.completeautomate.com/d/k3s-cluster-resources
+            description: Control-plane · 192.168.128.54
+            ping: 192.168.128.54
+        - homelab02:
+            href: https://grafana.completeautomate.com/d/k3s-cluster-resources
+            description: Worker · 192.168.128.60
+            ping: 192.168.128.60
+        - homelab03:
+            href: https://grafana.completeautomate.com/d/k3s-cluster-resources
+            description: Worker, NFS · 192.168.128.59
+            ping: 192.168.128.59
+        - Hermes Pi:
+            href: https://grafana.completeautomate.com/d/ee5218d2-51d3-471b-80a0-70bc95f6ae64/hermes-pi
+            description: Host machine · 192.168.128.52
+            ping: 192.168.128.52
