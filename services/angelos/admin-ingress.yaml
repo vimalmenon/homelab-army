@@ -1,0 +1,35 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: messages-admin
+  namespace: microservices
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: microservices-messages-admin-auth@kubernetescrd
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: admin.messages.completeautomate.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: angelos
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix
+    - host: admin.messages.homelab.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: angelos
+                port:
+                  number: 8000
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - admin.messages.completeautomate.com
+        - admin.messages.homelab.local
