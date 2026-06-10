@@ -1,15 +1,15 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: messages-admin
+  name: admin
   namespace: microservices
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: microservices-messages-admin-auth@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
-    - host: admin.messages.completeautomate.com
+    - host: admin.completeautomate.com
       http:
         paths:
           - backend:
@@ -19,7 +19,7 @@ spec:
                   number: 8000
             path: /
             pathType: Prefix
-    - host: admin.messages.homelab.local
+    - host: admin.homelab.local
       http:
         paths:
           - backend:
@@ -31,5 +31,5 @@ spec:
             pathType: Prefix
   tls:
     - hosts:
-        - admin.messages.completeautomate.com
-        - admin.messages.homelab.local
+        - admin.completeautomate.com
+        - admin.homelab.local
