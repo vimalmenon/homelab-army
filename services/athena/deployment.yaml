@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: athena
+  namespace: microservices
+  labels:
+    app: athena
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: athena
+  template:
+    metadata:
+      labels:
+        app: athena
+      annotations:
+        rollme: "3"
+    spec:
+      containers:
+      - name: athena
+        image: ghcr.io/vimalmenon/micro-army/athena:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DYNAMO_SVC_URL
+          value: http://clio.microservices.svc.cluster.local:8000
+        - name: S3_SVC_URL
+          value: http://atlas.microservices.svc.cluster.local:8000
+        - name: MAX_FILE_SIZE
+          value: "10485760"
+        - name: ALLOWED_EXTENSIONS
+          value: "png,jpg,jpeg,gif,pdf,txt,md,svg,csv,json"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi

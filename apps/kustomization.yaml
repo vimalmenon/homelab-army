@@ -11,19 +11,20 @@ resources:
   - grafana-stack.yaml
   - nfs-provisioner.yaml
   - metallb.yaml
-  - dynamo-svc.yaml
-  - messages-svc.yaml
   - external-secrets.yaml
   - aws-secrets.yaml
-  - s3-svc.yaml
-  - email-svc.yaml
   - dashboards.yaml
   - kube-router.yaml
   - network-policies.yaml
   - homepage.yaml
   - homelab-backup.yaml
   - vaultwarden.yaml
-  - wiki-svc.yaml
-  - youtube-svc.yaml
   - cert-manager.yaml
   - cluster-issuer.yaml
+  - clio.yaml
+  - atlas.yaml
+  - athena.yaml
+  - orpheus.yaml
+  - iris.yaml
+  - angelos.yaml
+  - arachne.yaml
