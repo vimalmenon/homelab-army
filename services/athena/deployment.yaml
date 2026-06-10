@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: athena
-        image: ghcr.io/vimalmenon/micro-army/wiki-svc:latest
+        image: ghcr.io/vimalmenon/micro-army/athena:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

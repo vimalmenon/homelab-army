@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: atlas
-        image: ghcr.io/vimalmenon/micro-army/s3-svc:latest
+        image: ghcr.io/vimalmenon/micro-army/atlas:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

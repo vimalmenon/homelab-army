@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: angelos
-        image: ghcr.io/vimalmenon/micro-army/messages-svc:latest
+        image: ghcr.io/vimalmenon/micro-army/angelos:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
