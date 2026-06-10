@@ -10,12 +10,12 @@ configMapGenerator:
   - name: dashboard-k3s-cluster
     files:
       - k3s-cluster-resources.json
-  - name: dashboard-s3-svc
+  - name: dashboard-atlas
     files:
-      - s3-svc.json
-  - name: dashboard-email-svc
+      - atlas.json
+  - name: dashboard-iris
     files:
-      - email-svc.json
+      - iris.json
   - name: dashboard-pihole-dns
     files:
       - pihole.json
