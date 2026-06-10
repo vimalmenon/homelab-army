@@ -1,8 +1,0 @@
-apiVersion: traefik.io/v1alpha1
-kind: Middleware
-metadata:
-  name: messages-admin-auth
-  namespace: microservices
-spec:
-  basicAuth:
-    secret: messages-admin-auth
