@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: helios
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: helios
+  template:
+    metadata:
+      labels:
+        app: helios
+    spec:
+      containers:
+        - name: helios
+          image: ghcr.io/vimalmenon/micro-army/helios:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

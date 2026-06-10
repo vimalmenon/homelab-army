@@ -27,4 +27,5 @@ resources:
   - orpheus.yaml
   - iris.yaml
   - angelos.yaml
+  - helios.yaml
   - arachne.yaml
