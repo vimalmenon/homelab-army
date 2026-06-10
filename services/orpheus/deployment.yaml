@@ -44,6 +44,11 @@ spec:
             secretKeyRef:
               name: youtube-oauth
               key: refresh_token
+        - name: YOUTUBE_CHANNEL_ID
+          valueFrom:
+            secretKeyRef:
+              name: youtube-oauth
+              key: channel_id
         livenessProbe:
           httpGet:
             path: /health
