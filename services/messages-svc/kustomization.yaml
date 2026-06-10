@@ -7,4 +7,3 @@ resources:
   - servicemonitor.yaml
   - middleware.yaml
   - ingress.yaml
-  - ingress-public.yaml
