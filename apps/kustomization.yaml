@@ -25,3 +25,5 @@ resources:
   - vaultwarden.yaml
   - wiki-svc.yaml
   - youtube-svc.yaml
+  - cert-manager.yaml
+  - cluster-issuer.yaml
