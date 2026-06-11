@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: helios
   namespace: microservices
-  annotations:
-    rollme: "2"
 spec:
   replicas: 1
   selector:
@@ -14,6 +12,8 @@ spec:
     metadata:
       labels:
         app: helios
+      annotations:
+        rollme: "2"
     spec:
       containers:
         - name: helios
