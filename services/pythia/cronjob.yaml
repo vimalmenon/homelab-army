@@ -4,7 +4,7 @@ metadata:
   name: pythia
   namespace: microservices
 spec:
-  schedule: "0 8 * * *"
+  schedule: "0 4 * * *"
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 3
   failedJobsHistoryLimit: 3
