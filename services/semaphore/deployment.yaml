@@ -21,6 +21,8 @@ spec:
         - containerPort: 3000
           protocol: TCP
         env:
+        - name: SEMAPHORE_PORT
+          value: ":3000"
         - name: SEMAPHORE_DB_DIALECT
           value: bolt
         - name: SEMAPHORE_DB_HOST
