@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: excalidraw
+  namespace: excalidraw
+data:
+  CLOUD_ENABLED: "false"
