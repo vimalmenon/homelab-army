@@ -17,24 +17,24 @@ spec:
       - name: semaphore
         image: semaphoreui/semaphore:latest
         imagePullPolicy: Always
+        command:
+        - sh
+        - -c
+        - |
+          set -e
+          # Create admin user (ignore failure if already exists)
+          semaphore user add --admin \
+            --login admin \
+            --name "Vimal Menon" \
+            --email hello@completeautomate.com \
+            --password "$SEMAPHORE_ADMIN_PASSWORD" \
+            --config /etc/semaphore/config.json 2>/dev/null || true
+          echo "Starting Semaphore server..."
+          exec semaphore server --config /etc/semaphore/config.json
         ports:
         - containerPort: 3000
           protocol: TCP
         env:
-        - name: SEMAPHORE_PORT
-          value: ":3000"
-        - name: SEMAPHORE_DB_DIALECT
-          value: bolt
-        - name: SEMAPHORE_DB_HOST
-          value: /var/lib/semaphore/database.sqlite
-        - name: SEMAPHORE_PLAYBOOK_PATH
-          value: /tmp/semaphore
-        - name: SEMAPHORE_ADMIN
-          value: admin
-        - name: SEMAPHORE_ADMIN_NAME
-          value: "Vimal Menon"
-        - name: SEMAPHORE_ADMIN_EMAIL
-          value: hello@completeautomate.com
         - name: SEMAPHORE_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
@@ -46,6 +46,8 @@ spec:
               name: semaphore-secrets
               key: encryption_key
         volumeMounts:
+        - mountPath: /etc/semaphore
+          name: config
         - mountPath: /var/lib/semaphore
           name: data
         livenessProbe:
@@ -68,6 +70,9 @@ spec:
             cpu: 200m
             memory: 256Mi
       volumes:
+      - name: config
+        configMap:
+          name: semaphore-config
       - name: data
         persistentVolumeClaim:
           claimName: semaphore-data
