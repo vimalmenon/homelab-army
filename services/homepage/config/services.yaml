@@ -25,6 +25,10 @@
             href: https://vault.completeautomate.com
             description: Password manager
             ping: https://vault.completeautomate.com
+        - Semaphore:
+            href: https://ops.completeautomate.com
+            description: Ansible & Terraform automation
+            ping: https://ops.completeautomate.com/api/ping
     - Olympus (Services):
         - Clio:
             href: https://wiki.completeautomate.com/docs
