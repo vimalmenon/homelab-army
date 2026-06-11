@@ -4,7 +4,7 @@ metadata:
   name: excalidraw
   namespace: excalidraw
   annotations:
-    traefik.ingress.kubernetes.io/router.tls: "true"
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
 spec:
   ingressClassName: traefik
   rules:
@@ -21,4 +21,3 @@ spec:
   tls:
   - hosts:
     - excalidraw.completeautomate.com
-    secretName: completeautomate-com-tls
