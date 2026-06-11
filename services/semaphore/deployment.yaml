@@ -35,6 +35,8 @@ spec:
         - containerPort: 3000
           protocol: TCP
         env:
+        - name: SEMAPHORE_PORT
+          value: ":3000"
         - name: SEMAPHORE_ADMIN_PASSWORD
           valueFrom:
             secretKeyRef:
