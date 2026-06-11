@@ -17,7 +17,7 @@ spec:
           - name: pythia
             image: ghcr.io/vimalmenon/micro-army/pythia:latest
             imagePullPolicy: Always
-            args: ["sh", "-c", "cd /app/src && python3 -c \"import asyncio; from runner import run_pipeline; asyncio.run(run_pipeline())\""]
+            args: ["sh", "-c", "cd /app/src && python3 -u -c \"import asyncio; from runner import run_pipeline; asyncio.run(run_pipeline())\""]
             env:
             - name: DYNAMO_SVC_URL
               value: http://clio.microservices.svc.cluster.local:8000
