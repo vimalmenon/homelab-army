@@ -23,6 +23,10 @@ spec:
         env:
         - name: SEMAPHORE_DB_DIALECT
           value: sqlite
+        - name: SEMAPHORE_DB_HOST
+          value: /var/lib/semaphore/database.sqlite
+        - name: SEMAPHORE_PLAYBOOK_PATH
+          value: /tmp/semaphore
         - name: SEMAPHORE_ADMIN
           value: admin
         - name: SEMAPHORE_ADMIN_NAME
