@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: semaphore
+  namespace: semaphore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semaphore
+  template:
+    metadata:
+      labels:
+        app: semaphore
+    spec:
+      containers:
+      - name: semaphore
+        image: semaphoreui/semaphore:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: SEMAPHORE_DB_DIALECT
+          value: sqlite
+        - name: SEMAPHORE_ADMIN
+          value: admin
+        - name: SEMAPHORE_ADMIN_NAME
+          value: "Vimal Menon"
+        - name: SEMAPHORE_ADMIN_EMAIL
+          value: hello@completeautomate.com
+        - name: SEMAPHORE_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-secrets
+              key: admin_password
+        - name: SEMAPHORE_ACCESS_KEY_ENCRYPTION
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-secrets
+              key: encryption_key
+        volumeMounts:
+        - mountPath: /var/lib/semaphore
+          name: data
+        livenessProbe:
+          httpGet:
+            path: /api/ping
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/ping
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: semaphore-data
