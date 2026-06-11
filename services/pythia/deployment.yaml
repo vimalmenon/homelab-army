@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pythia-api
+  namespace: microservices
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pythia-api
+  template:
+    metadata:
+      labels:
+        app: pythia-api
+    spec:
+      containers:
+      - name: pythia-api
+        image: ghcr.io/vimalmenon/micro-army/pythia:latest
+        imagePullPolicy: Always
+        args: ["sh", "-c", "cd /app/src && python3 -u -m uvicorn main:app --host 0.0.0.0 --port 8000"]
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DYNAMO_SVC_URL
+          value: http://clio.microservices.svc.cluster.local:8000
+        - name: LLM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: llm-api-creds
+              key: LLM_API_KEY
+        - name: LLM_MODEL
+          value: deepseek-chat
+        - name: LLM_BASE_URL
+          value: https://api.deepseek.com/v1
+        - name: TELEGRAM_BOT_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: telegram-bot-creds
+              key: TELEGRAM_BOT_TOKEN
+        - name: TELEGRAM_CHAT_ID
+          valueFrom:
+            secretKeyRef:
+              name: telegram-bot-creds
+              key: TELEGRAM_CHAT_ID
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi

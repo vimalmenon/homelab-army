@@ -5,7 +5,7 @@ metadata:
   namespace: microservices
 spec:
   selector:
-    app: pythia
+    app: pythia-api
   ports:
   - port: 8000
     targetPort: 8000
