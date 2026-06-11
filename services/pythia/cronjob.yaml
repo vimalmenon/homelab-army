@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: pythia
+  namespace: microservices
+spec:
+  schedule: "0 8 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: pythia
+            image: ghcr.io/vimalmenon/micro-army/pythia:latest
+            imagePullPolicy: Always
+            args: ["python3", "-c", "import asyncio; from src.runner import run_pipeline; asyncio.run(run_pipeline())"]
+            env:
+            - name: DYNAMO_SVC_URL
+              value: http://clio.microservices.svc.cluster.local:8000
+            - name: LLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: llm-api-creds
+                  key: LLM_API_KEY
+            - name: LLM_MODEL
+              value: deepseek/deepseek-chat
+            - name: LLM_BASE_URL
+              value: https://openrouter.ai/api/v1
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-bot-creds
+                  key: TELEGRAM_BOT_TOKEN
+            - name: TELEGRAM_CHAT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-bot-creds
+                  key: TELEGRAM_CHAT_ID
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 500m
+                memory: 512Mi
