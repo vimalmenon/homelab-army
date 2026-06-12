@@ -34,6 +34,10 @@ data:
         - Traefik:
             href: https://grafana.completeautomate.com
             description: Ingress controller
+        - Architecture Map:
+            href: https://arch.completeautomate.com
+            description: 3D system architecture viewer
+            ping: https://arch.completeautomate.com
         - NetAlertX:
             href: https://netalertx.completeautomate.com
             description: Network monitoring
