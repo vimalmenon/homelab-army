@@ -2,6 +2,10 @@
 # Homepage Widgets
 # https://gethomepage.dev/widgets/
 
+- greeting:
+        text_size: xl
+        text: Complete Automate
+
 - datetime:
         text_size: xl
         format:
@@ -12,9 +16,19 @@
         cluster:
             show: true
             cpu: true
+            memory: false
+            showLabel: true
+            label: Cluster CPU
+        nodes:
+            show: false
+
+- kubernetes:
+        cluster:
+            show: true
+            cpu: false
             memory: true
             showLabel: true
-            label: Cluster
+            label: Cluster Memory
         nodes:
             show: false
 
