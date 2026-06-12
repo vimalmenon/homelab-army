@@ -13,6 +13,7 @@ configMapGenerator:
   - name: homepage-config
     files:
       - config/bookmarks.yaml
+      - config/custom.css
       - config/kubernetes.yaml
       - config/services.yaml
       - config/settings.yaml
@@ -29,6 +30,18 @@ replacements:
           name: homepage
         fieldPaths:
           - spec.template.metadata.annotations.homepage-config/bookmarks
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: homepage-config
+      fieldPath: data.[custom.css]
+    targets:
+      - select:
+          kind: Deployment
+          name: homepage
+        fieldPaths:
+          - spec.template.metadata.annotations.homepage-config/custom-css
         options:
           create: true
   - source:
