@@ -5,7 +5,84 @@ resources:
   - namespace.yaml
   - serviceaccount.yaml
   - rbac.yaml
-  - configmap.yaml
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+
+configMapGenerator:
+  - name: homepage-config
+    files:
+      - config/bookmarks.yaml
+      - config/kubernetes.yaml
+      - config/services.yaml
+      - config/settings.yaml
+      - config/widgets.yaml
+
+replacements:
+  - source:
+      kind: ConfigMap
+      name: homepage-config
+      fieldPath: data.[bookmarks.yaml]
+    targets:
+      - select:
+          kind: Deployment
+          name: homepage
+        fieldPaths:
+          - spec.template.metadata.annotations.homepage-config/bookmarks
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: homepage-config
+      fieldPath: data.[kubernetes.yaml]
+    targets:
+      - select:
+          kind: Deployment
+          name: homepage
+        fieldPaths:
+          - spec.template.metadata.annotations.homepage-config/kubernetes
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: homepage-config
+      fieldPath: data.[services.yaml]
+    targets:
+      - select:
+          kind: Deployment
+          name: homepage
+        fieldPaths:
+          - spec.template.metadata.annotations.homepage-config/services
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: homepage-config
+      fieldPath: data.[settings.yaml]
+    targets:
+      - select:
+          kind: Deployment
+          name: homepage
+        fieldPaths:
+          - spec.template.metadata.annotations.homepage-config/settings
+        options:
+          create: true
+  - source:
+      kind: ConfigMap
+      name: homepage-config
+      fieldPath: data.[widgets.yaml]
+    targets:
+      - select:
+          kind: Deployment
+          name: homepage
+        fieldPaths:
+          - spec.template.metadata.annotations.homepage-config/widgets
+        options:
+          create: true
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+images:
+  - name: ghcr.io/gethomepage/homepage
+    newTag: v1.13.2
