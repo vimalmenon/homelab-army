@@ -1,0 +1,40 @@
+/* Target the Kubernetes nodes widget container */
+.kubernetes-widget .nodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Each node becomes a grid row */
+.kubernetes-widget .node-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.5fr;  /* Node, CPU, Memory, Others */
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Optional: Style the column headers */
+.kubernetes-widget .nodes-list::before {
+  content: "Node  CPU  Memory  Others";
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 0.5fr;
+  gap: 1rem;
+  font-weight: bold;
+  padding: 0.5rem;
+  border-bottom: 2px solid var(--border-color);
+  margin-bottom: 0.25rem;
+}
+
+/* Adjust CPU/memory text alignment */
+.kubernetes-widget .node-item .cpu,
+.kubernetes-widget .node-item .memory {
+  text-align: left;
+}
+
+/* Hide original labels if they interfere */
+.kubernetes-widget .node-label {
+  display: inline-block;
+  width: auto;
+}
