@@ -7,12 +7,6 @@ data:
   kubernetes.yaml: |
     ---
     mode: cluster
-    cluster:
-      show: true
-      cpu: true
-      memory: true
-      showLabel: true
-      nodes: true
   services.yaml: |
     ---
     - Monitoring:
@@ -123,6 +117,17 @@ data:
         text_size: xl
         text:
           - Welcome to Complete Automate
+    - kubernetes:
+        cluster:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
+        nodes:
+          show: true
+          cpu: true
+          memory: true
+          showLabel: true
     - resources:
         cpu: true
         memory: true
