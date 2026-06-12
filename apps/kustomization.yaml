@@ -30,3 +30,4 @@ resources:
   - helios.yaml
   - arachne.yaml
   - semaphore.yaml
+  - arch.yaml
