@@ -12,12 +12,10 @@ spec:
     metadata:
       labels:
         app: helios
-      annotations:
-        rollme: "4"
     spec:
       containers:
         - name: helios
-          image: ghcr.io/vimalmenon/micro-army/helios:latest
+          image: ghcr.io/vimalmenon/micro-army/helios
           ports:
             - containerPort: 80
           resources:

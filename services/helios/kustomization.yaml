@@ -5,3 +5,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - ingress.yaml
+
+images:
+  - name: ghcr.io/vimalmenon/micro-army/helios
+    newTag: v0.0.1
