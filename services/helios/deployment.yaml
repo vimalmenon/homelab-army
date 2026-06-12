@@ -13,7 +13,7 @@ spec:
       labels:
         app: helios
       annotations:
-        rollme: "2"
+        rollme: "3"
     spec:
       containers:
         - name: helios
