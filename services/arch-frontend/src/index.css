@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+/* Cyberpunk theme */
+@theme inline {
+  --color-background: #0a0e27;
+  --color-foreground: #e8e8e8;
+  --color-primary: #00d9ff;
+  --color-secondary: #ff006e;
+  --color-accent: #39ff14;
+  --color-card: #1a1f3a;
+  --color-muted: #2a2f4a;
+  --color-muted-foreground: #8a8fa8;
+  --color-border: #2a2f4a;
+}
