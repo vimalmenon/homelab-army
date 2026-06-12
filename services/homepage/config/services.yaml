@@ -62,23 +62,7 @@
             href: https://slides.completeautomate.com
             description: AI slides generator
             ping: https://slides.completeautomate.com
-    - Development:
-        - GitHub:
-            href: https://github.com/vimalmenon
-            description: Source code
-        - Cloudflare:
-            href: https://dash.cloudflare.com
-            description: DNS & CDN
-        - AWS Console:
-            href: https://console.aws.amazon.com
-            description: AWS management
-        - Linear:
-            href: https://linear.app/completeautomate
-            description: Issue tracking
-    - Communications:
-        - Zoho Mail:
-            href: https://mail.zoho.com/zm/#mail/folder/inbox
-            description: Email inbox
+
     - Nodes:
         - homelab01:
             href: https://grafana.completeautomate.com/d/k3s-cluster-resources

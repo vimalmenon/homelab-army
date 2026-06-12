@@ -11,8 +11,22 @@
         - href: https://youtube.com/@real_vimal_menon
           description: real_vimal_menon
 
-    - Gmail:
-        - href: https://mail.google.com
 
     - Linear:
         - href: https://linear.app
+
+    - Zoho Mail:
+        - href: https://mail.zoho.com/zm/#mail/folder/inbox
+          description: Email inbox
+
+    - Cloudflare:
+        - href: https://dash.cloudflare.com
+          description: DNS & CDN
+
+    - AWS Console:
+        - href: https://console.aws.amazon.com
+          description: AWS management
+
+    - GitHub:
+        - href: https://github.com/vimalmenon
+          description: Source code

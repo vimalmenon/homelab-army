@@ -5,19 +5,19 @@
 - greeting:
     text_size: xl
     text:
-      - Welcome to Complete Automate
+      - Complete Automate
 
 - kubernetes:
-        cluster:
-            show: true
-            cpu: true
-            memory: true
-            showLabel: true
-        nodes:
-            show: true
-            cpu: true
-            memory: true
-            showLabel: true
+    cluster:
+        show: true
+        cpu: true
+        memory: true
+        showLabel: true
+    nodes:
+        show: true
+        cpu: true
+        memory: true
+        showLabel: true
 
 - resources:
     cpu: true
@@ -25,10 +25,6 @@
     disk: /
     cputemp: true
     uptime: true
-
-- search:
-    provider: google
-    target: _blank
 
 - datetime:
     text_size: xl
