@@ -71,7 +71,7 @@
         - Hestia:
             href: https://hestia.completeautomate.com/health
             description: Admin backend API
-            ping: https://hestia.completeautomate.com/health
+            ping: http://hestia.microservices.svc:8000/health
 
     - Nodes:
         - homelab01:
