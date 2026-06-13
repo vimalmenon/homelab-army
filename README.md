@@ -206,6 +206,38 @@ Secrets use **External Secrets Operator** backed by **AWS Secrets Manager** (`ap
 | Pi-hole password | `pihole-secret` | Pi-hole |
 | n8n auth password | `n8n-secret` | n8n |
 
+## 🏗️ Adding a New Service
+
+Every service follows the same GitOps pipeline. Reference the **Hestia** deployment for a complete example → [`services/hestia/README.md`](services/hestia/README.md)
+
+| Step | What | Where |
+|---|---|---|
+| 1 | Create k8s manifests | `services/<name>/deployment.yaml`, `service.yaml`, `ingress.yaml`, `kustomization.yaml` |
+| 2 | Register ArgoCD app | `apps/<name>.yaml` — points `source.path` at `services/<name>/` |
+| 3 | List in App-of-Apps | Add `- <name>.yaml` to `apps/kustomization.yaml` |
+| 4 | Add DNS | Cloudflare CNAME record → tunnel UUID (proxied) |
+| 5 | Document | Update "What's Deployed", "Repo Structure", "Public URLs" tables + service-level README |
+| 6 | Push & verify | ArgoCD auto-syncs; tunnel-sync refreshes tunnel config |
+
+### DNS Setup
+
+1. Go to Cloudflare dashboard → DNS → `completeautomate.com`
+2. Add a **CNAME** record: `<name>` → `011a9625-236e-42dc-b716-e5de75390eaa.cfargotunnel.com`
+3. Ensure **Proxied** (orange cloud) is ON
+4. Verify: `dig <name>.completeautomate.com @1.1.1.1` returns Cloudflare edge IPs
+
+### Service-Level README
+
+Each service directory should have its own `README.md` documenting:
+- What it does and its stack
+- Live endpoints and their URLs
+- DNS records and how they were configured
+- k8s manifest structure
+- Environment variables and their sources
+- Monitoring hooks (health probes, metrics, logs)
+
+See [`services/hestia/README.md`](services/hestia/README.md) as a template.
+
 ## 🔗 Related Repos
 
 - **[micro-army](https://github.com/vimalmenon/micro-army)** — Source code & Dockerfiles for the microservices (dynamo-svc, email-svc, s3-svc, messages-svc, tunnel-sync). CI builds push to `ghcr.io/vimalmenon/micro-army/*`.
