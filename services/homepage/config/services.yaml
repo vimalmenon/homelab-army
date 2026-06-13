@@ -63,6 +63,16 @@
             description: AI slides generator
             ping: https://slides.completeautomate.com
 
+    - Operations:
+        - Helios:
+            href: https://admin.completeautomate.com
+            description: Lead intelligence dashboard
+            ping: https://admin.completeautomate.com
+        - Hestia:
+            href: https://hestia.completeautomate.com/health
+            description: Admin backend API
+            ping: https://hestia.completeautomate.com/health
+
     - Nodes:
         - homelab01:
             href: https://grafana.completeautomate.com/d/k3s-cluster-resources
