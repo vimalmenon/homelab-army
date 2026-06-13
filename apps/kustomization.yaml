@@ -28,6 +28,7 @@ resources:
   - iris.yaml
   - angelos.yaml
   - helios.yaml
+  - hestia.yaml
   - arachne.yaml
   - semaphore.yaml
   - arch.yaml

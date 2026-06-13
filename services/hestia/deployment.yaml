@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hestia
+  namespace: microservices
+  labels:
+    app: hestia
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hestia
+  template:
+    metadata:
+      labels:
+        app: hestia
+      annotations:
+        rollme: "1"
+    spec:
+      containers:
+      - name: hestia
+        image: ghcr.io/vimalmenon/micro-army/hestia:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        env:
+        - name: DYNAMO_SVC_URL
+          value: http://clio.microservices.svc.cluster.local:8000
+        - name: PYTHIA_SVC_URL
+          value: http://pythia.microservices.svc.cluster.local:8000
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 300m
+            memory: 256Mi
