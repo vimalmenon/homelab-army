@@ -1,4 +1,10 @@
 /* Target the Kubernetes nodes widget container */
+
+#widgets-wrap {
+    background: red;
+    color: yellow;
+}
+
 .kubernetes-widget .nodes-list {
   display: flex;
   flex-direction: column;
