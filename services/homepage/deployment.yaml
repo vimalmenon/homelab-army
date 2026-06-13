@@ -41,7 +41,7 @@ spec:
       containers:
       - name: homepage
         image: ghcr.io/gethomepage/homepage
-        imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 3000
           protocol: TCP
