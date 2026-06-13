@@ -37,6 +37,7 @@ homelab-army is a GitOps-powered Kubernetes cluster running on three Raspberry P
 | 📬 **email-svc**       | `apps/email-svc.yaml`           | Email sending microservice                |
 | 🗄️ **dynamo-svc**     | `apps/dynamo-svc.yaml`          | DynamoDB gateway microservice             |
 | 💬 **messages-svc**    | `apps/messages-svc.yaml`        | Contact form submission microservice      |
+| 🏛️ **Hestia**         | `apps/hestia.yaml`              | Admin backend — messages & leads API      |
 | 📝 **Loki**            | `apps/loki.yaml`                | Log aggregation                           |
 | 📝 **Promtail**        | `apps/promtail.yaml`            | Log shipper (cluster-wide DaemonSet)      |
 | 📝 **Loki Datasource** | `apps/loki-datasource.yaml`     | Grafana Loki data source config           |
@@ -79,6 +80,7 @@ homelab-army/
     ├── email-svc/            # Email sending microservice
     ├── grafana-stack/        # Grafana + Prometheus via Helm
     ├── hermes-monitoring/    # Hermes Pi node_exporter + dashboard
+    ├── hestia/               # Admin backend — messages & leads API
     ├── homelab-backup/       # S3 backup CronJob + check CronJob
     ├── homepage/             # Homelab dashboard
     ├── kube-router/          # Network policy DaemonSet
@@ -185,6 +187,8 @@ This cluster runs on the philosophy of **CICD — Continuous Integration, Contin
 | n8n | `n8n.completeautomate.com` | Basic auth |
 | Slides | `slides.completeautomate.com` | Authelia SSO |
 | Vaultwarden | `vault.completeautomate.com` | Authelia SSO |
+| Helios | `admin.completeautomate.com` | None (Cloudflare) |
+| Hestia | `hestia.completeautomate.com` | None (Cloudflare) |
 
 ## 🔑 Secrets Management
 
