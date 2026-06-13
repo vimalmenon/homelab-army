@@ -15,7 +15,7 @@ spec:
       labels:
         app: hestia
       annotations:
-        rollme: "1"
+        rollme: "2"
     spec:
       containers:
       - name: hestia
