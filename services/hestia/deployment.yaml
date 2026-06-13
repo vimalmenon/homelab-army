@@ -29,6 +29,11 @@ spec:
           value: http://clio.microservices.svc.cluster.local:8000
         - name: PYTHIA_SVC_URL
           value: http://pythia.microservices.svc.cluster.local:8000
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: hestia-secrets
+              key: api_key
         livenessProbe:
           httpGet:
             path: /health
