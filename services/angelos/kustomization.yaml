@@ -7,3 +7,7 @@ resources:
   - servicemonitor.yaml
   - middleware.yaml
   - ingress.yaml
+
+images:
+  - name: ghcr.io/vimalmenon/micro-army/angelos
+    newTag: v0.0.3

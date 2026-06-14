@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: pythia-api
-        image: ghcr.io/vimalmenon/micro-army/pythia:latest
+        image: ghcr.io/vimalmenon/micro-army/pythia
         imagePullPolicy: Always
         args: ["sh", "-c", "cd /app/src && python3 -u -m uvicorn main:app --host 0.0.0.0 --port 8000"]
         ports:

@@ -14,12 +14,10 @@ spec:
     metadata:
       labels:
         app: atlas
-      annotations:
-        rollme: "1"
     spec:
       containers:
       - name: atlas
-        image: ghcr.io/vimalmenon/micro-army/atlas:latest
+        image: ghcr.io/vimalmenon/micro-army/atlas
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

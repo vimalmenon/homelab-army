@@ -5,3 +5,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - servicemonitor.yaml
+
+images:
+  - name: ghcr.io/vimalmenon/micro-army/atlas
+    newTag: v0.0.3

@@ -5,3 +5,7 @@ resources:
   - deployment.yaml
   - service.yaml
   - servicemonitor.yaml
+
+images:
+  - name: ghcr.io/vimalmenon/micro-army/clio
+    newTag: v0.0.3

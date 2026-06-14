@@ -14,12 +14,10 @@ spec:
     metadata:
       labels:
         app: orpheus
-      annotations:
-        rollme: "1"
     spec:
       containers:
       - name: orpheus
-        image: ghcr.io/vimalmenon/micro-army/orpheus:latest
+        image: ghcr.io/vimalmenon/micro-army/orpheus
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

@@ -14,12 +14,10 @@ spec:
     metadata:
       labels:
         app: athena
-      annotations:
-        rollme: "3"
     spec:
       containers:
       - name: athena
-        image: ghcr.io/vimalmenon/micro-army/athena:latest
+        image: ghcr.io/vimalmenon/micro-army/athena
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

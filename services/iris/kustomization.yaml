@@ -6,3 +6,7 @@ resources:
   - service.yaml
   - servicemonitor.yaml
   - poddisruptionbudget.yaml
+
+images:
+  - name: ghcr.io/vimalmenon/micro-army/iris
+    newTag: v0.0.3

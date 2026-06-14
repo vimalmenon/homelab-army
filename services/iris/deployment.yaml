@@ -14,12 +14,10 @@ spec:
     metadata:
       labels:
         app: iris
-      annotations:
-        rollme: "2"
     spec:
       containers:
       - name: iris
-        image: ghcr.io/vimalmenon/micro-army/iris:latest
+        image: ghcr.io/vimalmenon/micro-army/iris
         imagePullPolicy: Always
         ports:
         - containerPort: 8000

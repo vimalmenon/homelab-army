@@ -14,12 +14,10 @@ spec:
     metadata:
       labels:
         app: angelos
-      annotations:
-        rollme: "2"
     spec:
       containers:
       - name: angelos
-        image: ghcr.io/vimalmenon/micro-army/angelos:latest
+        image: ghcr.io/vimalmenon/micro-army/angelos
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
