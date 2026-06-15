@@ -7,6 +7,7 @@ Helper scripts and documentation for managing the homelab GitOps pipeline. These
 | File | What It Does |
 |------|-------------|
 | [`add-subdomain.sh`](./add-subdomain.sh) | **One-shot subdomain deployment** — creates k8s manifests, ArgoCD Application, Cloudflare DNS record, tunnel ingress route, and homepage widget in one command |
+| [`delete-subdomain.sh`](./delete-subdomain.sh) | **Reverse of add** — deletes Cloudflare DNS record, removes tunnel ingress, removes k8s manifests & ArgoCD app, removes homepage widget, commits |
 | [`adding-new-subdomains.md`](./adding-new-subdomains.md) | **Complete reference guide** — documents the full manual process across all 5 layers (DNS → Tunnel → k8s → ArgoCD → Homepage), plus troubleshooting and verification steps |
 | [`ping-homelab.sh`](./ping-homelab.sh) | **Cluster connectivity check** — runs `ansible-playbook playbooks/ping.yml` to ping every node and return a summary table (status, architecture, IP)
 
@@ -28,6 +29,27 @@ The script handles **~80% of the work**. After it finishes, you still need to:
 1. Restart the Cloudflare tunnel — `pkill cloudflared && sleep 2 && cloudflared tunnel --config ~/.cloudflared/config.yml run &`
 2. Force ArgoCD sync — `kubectl annotate application myservice -n argocd argocd.argoproj.io/refresh=hard --overwrite`
 3. Restart Homepage — `kubectl rollout restart deployment homepage -n homepage`
+
+### Delete (teardown)
+
+```bash
+# Remove a subdomain and all its resources
+export CF_API_TOKEN=<your-token>
+./tools/delete-subdomain.sh --name myservice
+```
+
+The script reverses every layer that `add-subdomain.sh` creates:
+- Deletes the Cloudflare CNAME DNS record (via API, zone lookup)
+- Removes the tunnel ingress route from `~/.cloudflared/config.yml`
+- Deletes the `services/<name>/` directory (k8s manifests)
+- Removes the ArgoCD Application YAML + app-of-apps registration
+- Removes the Homepage widget
+- Commits and pushes the cleanup
+
+**Manual steps after the script:**
+1. Restart the tunnel — `pkill cloudflared && sleep 2 && cloudflared tunnel --config ~/.cloudflared/config.yml run &`
+2. Delete the ArgoCD App + namespace from the cluster — `kubectl delete application <name> -n argocd && kubectl delete namespace <name>`
+3. Restart Homepage if a widget was removed — `kubectl rollout restart deployment homepage -n homepage`
 
 ### Manual (documentation)
 
