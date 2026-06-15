@@ -8,6 +8,7 @@ Helper scripts and documentation for managing the homelab GitOps pipeline. These
 |------|-------------|
 | [`add-subdomain.sh`](./add-subdomain.sh) | **One-shot subdomain deployment** — creates k8s manifests, ArgoCD Application, Cloudflare DNS record, tunnel ingress route, and homepage widget in one command |
 | [`adding-new-subdomains.md`](./adding-new-subdomains.md) | **Complete reference guide** — documents the full manual process across all 5 layers (DNS → Tunnel → k8s → ArgoCD → Homepage), plus troubleshooting and verification steps |
+| [`ping-homelab.sh`](./ping-homelab.sh) | **Cluster connectivity check** — runs `ansible-playbook playbooks/ping.yml` to ping every node and return a summary table (status, architecture, IP)
 
 ## Quick Start
 

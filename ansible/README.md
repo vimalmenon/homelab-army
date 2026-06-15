@@ -62,7 +62,8 @@ ansible/
     ├── site.yml             # Master orchestrator (imports all)
     ├── os-hardening.yml     # Kernel, swap, packages, firewall
     ├── k3s-install.yml      # Install k3s server on control-plane
-    └── node-join.yml        # Join worker nodes
+    ├── node-join.yml        # Join worker nodes
+    └── ping.yml             # Cluster connectivity check
 ```
 
 ## What each playbook does
@@ -86,6 +87,19 @@ ansible/
 - Creates config.yaml pointing at the master
 - Runs k3s agent installer
 - Verifies the node joins by checking on the master via SSH
+
+### `ping.yml`
+- Pings every node in the cluster using the `ansible.builtin.ping` module
+- Prints a formatted summary table with hostname, IP, status, OS/distribution version, architecture, and uptime
+- Fast & safe — no side effects, no sudo escalation needed
+
+  ```bash
+  # From the ansible/ directory:
+  ansible-playbook -i inventory/hosts.ini playbooks/ping.yml
+
+  # Or from the repo root via the convenience script:
+  ./tools/ping-homelab.sh
+  ```
 
 ## Nodes
 
