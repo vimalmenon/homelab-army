@@ -4,4 +4,6 @@ resources:
 - deployment.yaml
 - ingress.yaml
 - service.yaml
-- configmap.yaml
+images:
+- name: ghcr.io/vimalmenon/micro-army/arch
+  newTag: v0.0.24

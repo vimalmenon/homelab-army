@@ -14,25 +14,15 @@ spec:
         app: arch
     spec:
       containers:
-      - name: nginx
-        image: nginx:alpine
+      - name: arch
+        image: ghcr.io/vimalmenon/micro-army/arch
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
         resources:
           requests:
             cpu: 50m
-            memory: 32Mi
+            memory: 64Mi
           limits:
             cpu: 200m
             memory: 128Mi
-        volumeMounts:
-        - name: html
-          mountPath: /usr/share/nginx/html
-          readOnly: true
-      volumes:
-      - name: html
-        configMap:
-          name: arch-html
-          items:
-          - key: arch.html
-            path: index.html
