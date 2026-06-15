@@ -73,7 +73,8 @@ homelab-army/
 │   ├── network-policies/     # Per-namespace NetworkPolicies (31 total)
 │   ├── nfs-provisioner/      # NFS client provisioner deployment
 │   └── storage-classes.yaml  # nfs-client + local-path storage classes
-└── services/                 # Per-service Kustomize configs
+├── tools/                    # Automation scripts + docs (subdomain deploy)
+├── services/                 # Per-service Kustomize configs
     ├── authelia/             # Authelia (SSO)
     ├── aws-secrets/          # ExternalSecret + ClusterSecretStore
     ├── dynamo-svc/           # DynamoDB gateway microservice
@@ -237,6 +238,15 @@ Each service directory should have its own `README.md` documenting:
 - Monitoring hooks (health probes, metrics, logs)
 
 See [`services/hestia/README.md`](services/hestia/README.md) as a template.
+
+### Automation Scripts (`tools/`)
+
+For a faster path through steps 1–5, the [`tools/`](tools/README.md) directory provides:
+
+- **[`add-subdomain.sh`](tools/add-subdomain.sh)** — One-shot script that creates all k8s manifests, registers the ArgoCD Application, adds the Cloudflare DNS CNAME, appends the tunnel ingress route, and adds a Homepage widget. Run it and just restart the tunnel + force ArgoCD sync.
+- **[`adding-new-subdomains.md`](tools/adding-new-subdomains.md)** — Full manual reference with API calls, example manifests, and a common-issues troubleshooting table.
+
+Both are documented in [`tools/README.md`](tools/README.md).
 
 ## 🔗 Related Repos
 
