@@ -14,6 +14,13 @@ spec:
         paths:
           - backend:
               service:
+                name: hestia
+                port:
+                  number: 8000
+            path: /api/v1/services/status
+            pathType: Prefix
+          - backend:
+              service:
                 name: helios
                 port:
                   number: 80
