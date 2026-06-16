@@ -15,6 +15,7 @@ spec:
       labels:
         app: hestia
     spec:
+      serviceAccountName: hestia
       containers:
       - name: hestia
         image: ghcr.io/vimalmenon/micro-army/hestia:1f63bf2

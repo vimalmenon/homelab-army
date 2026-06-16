@@ -8,6 +8,12 @@ resources:
   - ingress.yaml
   - externalsecret.yaml
 
+resources:
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  - rbac.yaml
+
 images:
   - name: ghcr.io/vimalmenon/micro-army/hestia
     newTag: 1f63bf2
