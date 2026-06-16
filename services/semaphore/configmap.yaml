@@ -9,9 +9,10 @@ data:
       "port": ":3000",
       "tmp_path": "/tmp/semaphore",
       "web_root": "",
-      "sqlite": {
-        "host": "/var/lib/semaphore/database.sqlite"
+      "bolt": {
+        "host": "/var/lib/semaphore/database.boltdb"
       },
+      "dialect": "bolt",
       "max_task_duration_sec": 0,
       "max_parallel_tasks": 10,
       "email_alert": false,
