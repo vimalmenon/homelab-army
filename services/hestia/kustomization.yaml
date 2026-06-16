@@ -7,11 +7,6 @@ resources:
   - servicemonitor.yaml
   - ingress.yaml
   - externalsecret.yaml
-
-resources:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
   - rbac.yaml
 
 images:
