@@ -37,8 +37,8 @@ spec:
           value: 'false'
         - name: DNSMASQ_LISTENING
           value: all
-        image: pihole/pihole:latest
-        imagePullPolicy: Always
+        image: pihole/pihole:2026.06.0
+        imagePullPolicy: IfNotPresent
         name: pihole
         ports:
         - containerPort: 53

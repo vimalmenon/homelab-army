@@ -41,8 +41,8 @@ spec:
               key: auth-password
         - name: TZ
           value: Asia/Hong_Kong
-        image: n8nio/n8n:latest
-        imagePullPolicy: Always
+        image: n8nio/n8n:2.26.4
+        imagePullPolicy: IfNotPresent
         name: n8n
         ports:
         - containerPort: 5678
