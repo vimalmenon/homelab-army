@@ -83,3 +83,14 @@ data:
     notifier:
       filesystem:
         filename: /config/notifications.yml
+    
+  users.yml: |
+    users:
+      admin:
+        disabled: false
+        displayname: "Vimal Menon"
+        password: "$6$PKZ25nKWOEHmWvfH$vYJetBFKdIxIVdHlfLYlUXi7gV51.DLNgIbinPUTwJC1C1BHBuOTmbXHTyg1WaSZ/AgA/2/nHGsyzDEj11yJi/"
+        email: hello@completeautomate.com
+        groups:
+          - admins
+    
