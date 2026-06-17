@@ -1,40 +1,106 @@
 apiVersion: v1
-data:
-  configuration.yml: "###############################################################\n\
-    #                   Authelia configuration                    #\n###############################################################\n\
-    theme: dark\n\nidentity_validation:\n  reset_password:\n    jwt_secret: REPLACED_BY_ENV_VAR_jwt_secret\n\
-    \nserver:\n  address: tcp://0.0.0.0:9091/\n  buffers:\n    read: 4096\n    write:\
-    \ 4096\n  endpoints:\n    enable_pprof: false\n    enable_expvars: false\n  disable_healthcheck:\
-    \ false\n  headers:\n    csp_template: \n\nlog:\n  level: info\n\ntelemetry:\n\
-    \  metrics:\n    enabled: false\n\nauthentication_backend:\n  password_reset:\n\
-    \    disable: true\n  file:\n    path: /config/users.yml\n    watch: false\n \
-    \   password:\n      algorithm: argon2id\n      iterations: 1\n      key_length:\
-    \ 32\n      salt_length: 16\n      memory: 64\n      parallelism: 4\n\npassword_policy:\n\
-    \  standard:\n    enabled: false\n  zxcvbn:\n    enabled: false\n\naccess_control:\n\
-    \  default_policy: deny\n  rules:\n    - domain: auth.completeautomate.com\n \
-    \     policy: bypass\n    - domain: auth.homelab.local\n      policy: bypass\n\
-    \    - domain: n8n.homelab.local\n      policy: one_factor\n    - domain: n8n.completeautomate.com\n\
-    \      policy: one_factor\n    - domain: argocd.homelab.local\n      policy: one_factor\n\
-    \    - domain: argocd.completeautomate.com\n      policy: one_factor\n    - domain:\
-    \ grafana.homelab.local\n      policy: one_factor\n    - domain: prometheus.homelab.local\n\
-    \      policy: one_factor\n    - domain: netalertx.homelab.local\n      policy:\
-    \ one_factor\n    - domain: netalertx.completeautomate.com\n      policy: one_factor\n\
-    \    - domain: \"*.homelab.local\"\n      policy: bypass\n    - domain: \"*.completeautomate.com\"\
-    \n      policy: bypass\n\nsession:\n  name: authelia_session\n  secret: REPLACED_BY_ENV_VAR_session_secret\n\
-    \  expiration: 8h\n  inactivity: 45m\n  remember_me: 30d\n  cookies:\n    - name:\
-    \ authelia_session\n      domain: completeautomate.com\n      authelia_url: https://auth.completeautomate.com\n\
-    \      default_redirection_url: https://n8n.completeautomate.com\n    - name:\
-    \ authelia_session_local\n      domain: homelab.local\n      authelia_url: https://auth.homelab.local\n\
-    \      default_redirection_url: https://n8n.homelab.local\n  redis:\n    host:\
-    \ redis\n    port: 6379\n    database_index: 0\n    maximum_active_connections:\
-    \ 10\n    minimum_idle_connections: 3\n\nregulation:\n  max_retries: 3\n  find_time:\
-    \ 2m\n  ban_time: 5m\n\nstorage:\n  encryption_key: REPLACED_BY_ENV_VAR_encryption_key\n\
-    \  local:\n    path: /config/db.sqlite3\n\nnotifier:\n  filesystem:\n    filename:\
-    \ /config/notifications.json\n"
-  users.yml: "users:\n  admin:\n    disabled: false\n    displayname: \"Vimal Menon\"\
-    \n    password: \"$6$PKZ25nKWOEHmWvfH$vYJetBFKdIxIVdHlfLYlUXi7gV51.DLNgIbinPUTwJC1C1BHBuOTmbXHTyg1WaSZ/AgA/2/nHGsyzDEj11yJi/\"\
-    \n    email: hello@completeautomate.com\n    groups:\n      - admins\n"
 kind: ConfigMap
 metadata:
   name: authelia-config
   namespace: authelia
+data:
+  configuration.yml: |
+    ###############################################################
+    #                   Authelia configuration                    #
+    ###############################################################
+    host: 0.0.0.0
+    port: 9091
+    log_level: debug
+    jwt_secret: REPLACED_BY_ENV_VAR_jwt_secret
+    theme: dark
+    identity_providers:
+      oidc:
+        hmac_secret: REPLACED_BY_ENV_VAR_oidc_hmac_secret
+        issuer_private_key: |
+          ---
+          REPLACED_BY_ENV_VAR_oidc_issuer_private_key
+        cors:
+          endpoints:
+            - authorization
+            - token
+            - revocation
+            - end_session
+          allowed_origins:
+            - https://n8n.completeautomate.com
+          allowed_origins_from_client_redirect_uris: false
+        access_token_lifespan: 1h
+        authorize_code_lifespan: 5m
+        id_token_lifespan: 30m
+        refresh_token_lifespan: 90m
+        enable_client_debug_messages: false
+        clients: []
+    log:
+      format: json
+    totp:
+      issuer: auth.completeautomate.com
+      period: 30
+      skew: 1
+    authentication_backend:
+      file:
+        path: /config/users.yml
+      password_reset:
+        disable: false
+    password_policy:
+      standard:
+        enabled: false
+      zxcvbn:
+        enabled: false
+    access_control:
+      default_policy: deny
+      rules:
+        - domain: auth.completeautomate.com
+          policy: bypass
+        - domain: auth.homelab.local
+          policy: bypass
+        - domain: n8n.homelab.local
+          policy: one_factor
+        - domain: n8n.completeautomate.com
+          policy: one_factor
+        - domain: argocd.homelab.local
+          policy: one_factor
+        - domain: argocd.completeautomate.com
+          policy: one_factor
+        - domain: admin.completeautomate.com
+          policy: one_factor
+        - domain: grafana.homelab.local
+          policy: one_factor
+        - domain: prometheus.homelab.local
+          policy: one_factor
+        - domain: netalertx.homelab.local
+          policy: one_factor
+        - domain: netalertx.completeautomate.com
+          policy: one_factor
+        - domain: "*.homelab.local"
+          policy: bypass
+        - domain: "*.completeautomate.com"
+          policy: bypass
+    session:
+      name: authelia_session
+      secret: REPLACED_BY_ENV_VAR_session_secret
+      expiration: 8h
+      inactivity: 45m
+      remember_me: 30d
+      cookies:
+        - name: authelia_session
+          domain: completeautomate.com
+          authelia_url: https://auth.completeautomate.com
+          default_redirection_url: https://n8n.completeautomate.com
+        - name: authelia_session
+          domain: homelab.local
+          authelia_url: https://auth.homelab.local
+          default_redirection_url: https://n8n.homelab.local
+    regulation:
+      max_retries: 5
+      find_time: 2m
+      ban_time: 5m
+    storage:
+      local:
+        path: /config/db.sqlite3
+    notifier:
+      filesystem:
+        filename: /config/notifications.yml
