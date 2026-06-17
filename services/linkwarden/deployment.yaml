@@ -37,6 +37,8 @@ spec:
             secretKeyRef:
               name: linkwarden-secrets
               key: nextauth_url
+        - name: NEXT_PUBLIC_DISABLE_REGISTRATION
+          value: "true"
         resources:
           requests:
             cpu: 200m
