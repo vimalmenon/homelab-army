@@ -11,3 +11,7 @@ spec:
   selector:
     app: authelia
   type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
