@@ -53,11 +53,6 @@ spec:
             secretKeyRef:
               name: authelia-secrets
               key: ENCRYPTION_KEY
-        - name: AUTHELIA_IDENTITY_PROVIDERS_OIDC_ISSUER_PRIVATE_KEY
-          valueFrom:
-            secretKeyRef:
-              key: OIDC_ISSUER_PRIVATE_KEY
-              name: authelia-secrets
         ports:
         - containerPort: 9091
           protocol: TCP
