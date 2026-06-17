@@ -3,8 +3,6 @@ kind: Ingress
 metadata:
   name: bookmarks
   namespace: bookmarks
-  annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
