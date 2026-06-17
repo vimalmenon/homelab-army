@@ -49,16 +49,17 @@ spec:
           periodSeconds: 30
         readinessProbe:
           httpGet:
-            path: /api/trpc/health.check
+            path: /
             port: 3000
-          initialDelaySeconds: 5
+          initialDelaySeconds: 10
           periodSeconds: 10
         resources:
           requests:
-            cpu: 100m
-            memory: 256Mi
+            cpu: 200m
+            memory: 512Mi
           limits:
-            cpu: 500m
+            cpu: 1
+            memory: 1.5Gi
             memory: 512Mi
       volumes:
       - name: data
