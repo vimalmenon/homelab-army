@@ -17,8 +17,7 @@ data:
       oidc:
         hmac_secret: REPLACED_BY_ENV_VAR_oidc_hmac_secret
         issuer_private_key: |
-          ---
-          REPLACED_BY_ENV_VAR_oidc_issuer_private_key
+          ${OIDC_ISSUER_PRIVATE_KEY}
         cors:
           endpoints:
             - authorization
