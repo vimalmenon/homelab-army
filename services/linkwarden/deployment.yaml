@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: linkwarden
-        image: ghcr.io/linkwarden/linkwarden:latest
+        image: ghcr.io/linkwarden/linkwarden:v2.14.1
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
