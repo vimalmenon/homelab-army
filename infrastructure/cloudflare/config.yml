@@ -16,4 +16,6 @@ ingress:
     service: http://192.168.128.200
   - hostname: status.completeautomate.com
     service: http://192.168.128.200
+  - hostname: bookmarks.completeautomate.com
+    service: http://192.168.128.200
   - service: http_status:404
