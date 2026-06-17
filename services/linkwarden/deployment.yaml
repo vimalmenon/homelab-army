@@ -21,7 +21,6 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
-          protocol: TCP
         env:
         - name: DATABASE_URL
           valueFrom:
@@ -38,29 +37,30 @@ spec:
             secretKeyRef:
               name: linkwarden-secrets
               key: nextauth_url
-        volumeMounts:
-        - name: data
-          mountPath: /data/data
-        livenessProbe:
-          httpGet:
-            path: /api/trpc/health.check
-            port: 3000
-          initialDelaySeconds: 15
-          periodSeconds: 30
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 1.5Gi
         readinessProbe:
           httpGet:
             path: /
             port: 3000
           initialDelaySeconds: 10
           periodSeconds: 10
-        resources:
-          requests:
-            cpu: 200m
-            memory: 512Mi
-          limits:
-            cpu: 1
-            memory: 1.5Gi
-            memory: 512Mi
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data/data
       volumes:
       - name: data
         persistentVolumeClaim:
