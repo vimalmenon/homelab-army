@@ -13,53 +13,6 @@ data:
     log_level: debug
     jwt_secret: REPLACED_BY_ENV_VAR_jwt_secret
     theme: dark
-    identity_providers:
-      oidc:
-        hmac_secret: REPLACED_BY_ENV_VAR_oidc_hmac_secret
-        issuer_private_key: |
-          -----BEGIN PRIVATE KEY-----
-          MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCWaUtL6jifG/Kd
-          Z8//3M3iYjeIwLoopWzq6e6vw7LBjKGuxDdZ14h0pzB/4XIYfH3DzdAwXWNSmbLY
-          qxPzLjFraXdnuFNFcB3jFA6gMeYTyXSLTDoHozmQLyNN/R6WXbdhXcjxI8uHSZXo
-          cOiUm9+CwNSOKavVcUrXZ9OEbvWQvbDPZwYLSFTu2jSa00/7ihsRxZGsshBwjCOZ
-          zNblgTGrBmnAcCL4bLydOwhLVc9Pme37qXopQ4iJXvc59eMzF0nrRDXo9M93XNTn
-          +h7K5NQ0FJKhrvRheU0wFiYVX7DVxRzPVG2EDgexjiKWzwpXOgTdFB5hu0nZVNcE
-          Q6PBdFh/AgMBAAECggEAQclnEhqtTkZCjP9BdhclA93SjWFCaxHDvFG6QK03S7mP
-          ZCnVTdncCK2xpFU+eqBEv7YO14CZNyEbnPHixWvQWLsl6zsvTME3iUEWDpIUoFXu
-          QBkEjp+hR0OezPcngDwYP6FuCK6P0Cnqw+JSj+FHVuCxd0aZrj8hrWpvlM6VYIsz
-          hx9v4N+y8qzBYls8cHtAWLnoWKKIHnsmmenZfngg7sAK8lAOXzajLXqbxxcY+xcB
-          wj7lCcIPNESt0w+oSaEliBQT6qj/DufClK/vEt6nR/MdBfILNaXLFvXSo2eeGmyP
-          MPZwIdrtik4YKu6SSRW6iroJel5EDd4vXgp2BzmPvQKBgQDJ9oQlqwK0i7Eprj2Q
-          pVU4qPgSSSpfYp3V1ibRFKiPnPj/YYmj1cAF5GR1yTB+ovnblH/7h/1Gti6yryVO
-          kqxxfVdaNPAULv8Ghlvmxh64RIMiaNo4Bi7Ff2iqtvYTE+O4rQhffu0vl64QKQ/n
-          2f28TrFZbARt9f8RPtwqj1ZEbQKBgQC+p71hSnrY7heYemFA3BjXyCRxnfB0D4gU
-          cfLzLboAOlmUvFp2ep8nNK0RbZ6C6djFZySSORgzZguDAwU+Novn/U9aT2Get9JB
-          o74KsjAPQel6wEI5DFiqYUc43gK3/dPkG/We300H3tPPYlb3lpOpi9b9atq3nAdO
-          1hD7PvkFGwKBgF0PYDjTIb37mDiydt/NrwUapqQWXpXxJPVBZkV1FW6HUBys3vVF
-          KuQMJ1Y2zEet5R+Ov6IxOT15+O6Q0cnwv9DThoqkVfOW7CAfjP07UTBrMVmLovGp
-          t6d9W8c94wlLYuTXpkIKhFQnuibsJM4anlZElGe15Bye+1cA9gYOYhvJAoGAft0t
-          NkUSM7FSwCKG/lq2qTdDkNrQutnu6fPc/xXpU+d/3mnrJDV6G+OAWj2AIYqrtMdq
-          XWZihSkc9eOXpIs1U3yKRgTWZ3/YB9eGSKXDNxPb4dN2/XEKuu0aMGwCkR301jAI
-          o9vg7SDH/pJoXj2zKjmkKGLnARBxCHOHPzfrCgsCgYEAx8DKEWdco5+70Sq65NzT
-          UcS1pLpSyJRpRnTPfAjItudLXpojfrj3Wi65i2M7nSa9AM6oMWWvvAXnSfuprw0E
-          bCufHmCZmG67pThduS9qYL59+kZgw3t77CNpG9y1tailRXqZ0HfKqhMU1+mVjpfh
-          Zz5ZFGZ8Yw8uRjrqfSc4ik0=
-          -----END PRIVATE KEY-----
-        cors:
-          endpoints:
-            - authorization
-            - token
-            - revocation
-            - end_session
-          allowed_origins:
-            - https://n8n.completeautomate.com
-          allowed_origins_from_client_redirect_uris: false
-        access_token_lifespan: 1h
-        authorize_code_lifespan: 5m
-        id_token_lifespan: 30m
-        refresh_token_lifespan: 90m
-        enable_client_debug_messages: false
-        clients: []
     log:
       format: json
     totp:
