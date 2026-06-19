@@ -150,9 +150,28 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
+  ignoreDifferences:
+    - kind: PersistentVolumeClaim
+      jsonPointers:
+        - /spec/volumeName
+        - /spec/storageClassName
+        - /spec/volumeMode
+        - /spec/accessModes
+        - /status
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/template/metadata/annotations
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/terminationMessagePath
+        - /spec/template/spec/containers/0/terminationMessagePolicy
+        - /spec/template/spec/containers/0/livenessProbe
+        - /spec/template/spec/containers/0/readinessProbe
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true
