@@ -4,14 +4,56 @@ metadata:
   name: nfs-provisioner
   namespace: argocd
 spec:
+  destination:
+    namespace: nfs-provisioner
+    server: https://kubernetes.default.svc
   project: default
   source:
+    path: infrastructure/nfs-provisioner
     repoURL: https://github.com/vimalmenon/homelab-army.git
     targetRevision: main
-    path: infrastructure/nfs-provisioner
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: nfs-provisioner
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /metadata/annotations
+        - /metadata/generation
+        - /spec/strategy
+        - /spec/progressDeadlineSeconds
+        - /spec/revisionHistoryLimit
+        - /spec/template/metadata/annotations
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/resources
+        - /spec/template/spec/containers/0/terminationMessagePath
+        - /spec/template/spec/containers/0/terminationMessagePolicy
+    - kind: ServiceAccount
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: Namespace
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: ClusterRole
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: ClusterRoleBinding
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: Role
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: RoleBinding
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: StorageClass
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
   syncPolicy:
     automated:
       prune: true
