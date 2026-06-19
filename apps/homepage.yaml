@@ -4,15 +4,67 @@ metadata:
   name: homepage
   namespace: argocd
 spec:
+  destination:
+    namespace: homepage
+    server: https://kubernetes.default.svc
   project: default
   source:
+    path: services/homepage
     repoURL: https://github.com/vimalmenon/homelab-army.git
     targetRevision: main
-    path: services/homepage
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: homepage
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /metadata/annotations
+        - /metadata/generation
+        - /spec/strategy
+        - /spec/progressDeadlineSeconds
+        - /spec/revisionHistoryLimit
+        - /spec/template/metadata/annotations
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/metadata/labels
+        - /spec/template/spec/containers/0/terminationMessagePath
+        - /spec/template/spec/containers/0/terminationMessagePolicy
+        - /spec/template/spec/containers/0/livenessProbe
+        - /spec/template/spec/containers/0/readinessProbe
+        - /spec/template/spec/initContainers/0
+        - /spec/template/spec/volumes
+    - kind: ServiceAccount
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: Namespace
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: ConfigMap
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRole
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - group: rbac.authorization.k8s.io
+      kind: ClusterRoleBinding
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - kind: Service
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
+    - group: networking.k8s.io
+      kind: Ingress
+      jsonPointers:
+        - /metadata/annotations/argocd.argoproj.io~1tracking-id
+        - /metadata/generation
   syncPolicy:
     automated:
+      allowEmpty: false
       prune: true
       selfHeal: true
+    syncOptions:
+      - ApplyOutOfSyncOnly=true
