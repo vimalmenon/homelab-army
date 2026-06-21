@@ -68,6 +68,8 @@ spec:
           args:
             - |
               ln -sf /usr/sbin/iptables-legacy /usr/sbin/iptables
+              ln -sf /usr/sbin/iptables-legacy-restore /usr/sbin/iptables-restore
+              ln -sf /usr/sbin/iptables-legacy-save /usr/sbin/iptables-save
               exec kube-router --run-router=false --run-firewall=true --run-service-proxy=false
           env:
             - name: KUBE_ROUTER_CNI_CONF_FILE
