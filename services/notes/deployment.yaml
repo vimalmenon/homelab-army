@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookstack
+  namespace: notes
+  labels:
+    app: bookstack
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bookstack
+  template:
+    metadata:
+      labels:
+        app: bookstack
+    spec:
+      containers:
+      - name: bookstack
+        image: ghcr.io/bookstackapp/bookstack:v25.06
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        env:
+        - name: APP_KEY
+          valueFrom:
+            secretKeyRef:
+              name: bookstack-secrets
+              key: app_key
+        - name: APP_URL
+          value: "https://notes.completeautomate.com"
+        - name: DB_HOST
+          value: "bookstack-db"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_DATABASE
+          value: "bookstack"
+        - name: DB_USERNAME
+          value: "bookstack"
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bookstack-secrets
+              key: postgres_password
+        - name: STORAGE_TYPE
+          value: local
+        - name: STORAGE_ATTACHMENTS
+          value: local
+        - name: ALLOWED_IFRAME_SOURCES
+          value: "https://notes.completeautomate.com"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          failureThreshold: 3
+        volumeMounts:
+        - name: uploads
+          mountPath: /var/www/bookstack/public/uploads
+        - name: storage
+          mountPath: /var/www/bookstack/storage
+      volumes:
+      - name: uploads
+        persistentVolumeClaim:
+          claimName: bookstack-uploads
+      - name: storage
+        persistentVolumeClaim:
+          claimName: bookstack-uploads

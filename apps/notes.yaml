@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: notes
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/vimalmenon/homelab-army.git
+    targetRevision: main
+    path: services/notes
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: notes
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
