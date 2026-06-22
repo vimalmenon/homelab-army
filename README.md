@@ -42,8 +42,8 @@ homelab-army is a GitOps-powered Kubernetes cluster running on three Raspberry P
 | 📝 **Promtail**        | `apps/promtail.yaml`            | Log shipper (cluster-wide DaemonSet)      |
 | 📝 **Loki Datasource** | `apps/loki-datasource.yaml`     | Grafana Loki data source config           |
 | 📊 **Dashboards**      | `apps/dashboards.yaml`          | Custom Grafana dashboards (ConfigMaps)    |
-| 🛡️ **Network Policies** | `apps/network-policies.yaml`  | Zero-trust network policies via kube-router|
-| 🧱 **kube-router**     | `apps/kube-router.yaml`         | Network policy enforcement DaemonSet      |
+| 🛡️ **Network Policies** | `apps/network-policies.yaml`  | Defined but not enforced[^kr]             |
+| 🧱 **kube-router**     | `apps/kube-router.yaml`[^kr]    | Service proxy DaemonSet (`--run-firewall=false`) |
 | 🔑 **AWS Secrets**     | `apps/aws-secrets.yaml`         | External Secrets + ClusterSecretStore     |
 | 🔑 **External Secrets**| `apps/external-secrets.yaml`    | ESO operator deployment                   |
 | 💾 **Backup**          | `apps/homelab-backup.yaml`      | S3 backup cron job                        |
@@ -253,5 +253,7 @@ Both are documented in [`tools/README.md`](tools/README.md).
 - **[micro-army](https://github.com/vimalmenon/micro-army)** — Source code & Dockerfiles for the microservices (dynamo-svc, email-svc, s3-svc, messages-svc, tunnel-sync). CI builds push to `ghcr.io/vimalmenon/micro-army/*`.
 
 ---
+
+[^kr]: kube-router runs with `--run-firewall=false` after a v2.10.0 ipset bug made policy enforcement unstable. See [`docs/network/kube-router.md`](docs/network/kube-router.md) for the full incident log.
 
 Built with 🫘 and 🥧 on a kitchen table somewhere.
