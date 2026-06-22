@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: bookstack
-        image: ghcr.io/bookstackapp/bookstack:v25.06
+        image: lscr.io/linuxserver/bookstack:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 80
@@ -35,19 +35,17 @@ spec:
           value: "5432"
         - name: DB_DATABASE
           value: "bookstack"
-        - name: DB_USERNAME
+        - name: DB_USER
           value: "bookstack"
-        - name: DB_PASSWORD
+        - name: DB_PASS
           valueFrom:
             secretKeyRef:
               name: bookstack-secrets
               key: postgres_password
-        - name: STORAGE_TYPE
-          value: local
-        - name: STORAGE_ATTACHMENTS
-          value: local
-        - name: ALLOWED_IFRAME_SOURCES
-          value: "https://notes.completeautomate.com"
+        - name: PUID
+          value: "1000"
+        - name: PGID
+          value: "1000"
         resources:
           requests:
             cpu: 200m
@@ -70,14 +68,9 @@ spec:
           periodSeconds: 30
           failureThreshold: 3
         volumeMounts:
-        - name: uploads
-          mountPath: /var/www/bookstack/public/uploads
-        - name: storage
-          mountPath: /var/www/bookstack/storage
+        - name: config
+          mountPath: /config
       volumes:
-      - name: uploads
-        persistentVolumeClaim:
-          claimName: bookstack-uploads
-      - name: storage
+      - name: config
         persistentVolumeClaim:
           claimName: bookstack-uploads
