@@ -17,39 +17,48 @@ spec:
         app: bookstack-db
     spec:
       containers:
-      - name: postgres
-        image: postgres:16-alpine
+      - name: mariadb
+        image: mariadb:11.6
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 5432
+        - containerPort: 3306
           protocol: TCP
         env:
-        - name: POSTGRES_DB
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: bookstack-secrets
+              key: root_password
+        - name: MYSQL_DATABASE
           value: bookstack
-        - name: POSTGRES_USER
+        - name: MYSQL_USER
           value: bookstack
-        - name: POSTGRES_PASSWORD
+        - name: MYSQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: bookstack-secrets
               key: postgres_password
         volumeMounts:
         - name: data
-          mountPath: /var/lib/postgresql/data
+          mountPath: /var/lib/mysql
         livenessProbe:
           exec:
             command:
-            - pg_isready
-            - -U
-            - bookstack
+            - mysqladmin
+            - ping
+            - -u
+            - root
+            - --password=$(MYSQL_ROOT_PASSWORD)
           initialDelaySeconds: 30
           periodSeconds: 10
         readinessProbe:
           exec:
             command:
-            - pg_isready
-            - -U
-            - bookstack
+            - mysqladmin
+            - ping
+            - -u
+            - root
+            - --password=$(MYSQL_ROOT_PASSWORD)
           initialDelaySeconds: 5
           periodSeconds: 5
         resources:

@@ -3,10 +3,10 @@ kind: Kustomization
 
 resources:
   - namespace.yaml
-  - pvc-postgres.yaml
+  - pvc-mariadb.yaml
   - pvc-uploads.yaml
-  - postgres-service.yaml
-  - postgres-statefulset.yaml
+  - mariadb-service.yaml
+  - mariadb-statefulset.yaml
   - service.yaml
   - deployment.yaml
   - externalsecret.yaml
