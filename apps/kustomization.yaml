@@ -34,4 +34,3 @@ resources:
   - arachne.yaml
   - semaphore.yaml
   - arch.yaml
-  - notes.yaml
