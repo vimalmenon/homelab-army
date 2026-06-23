@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: obsidian-sync
+  namespace: obsidian-sync
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+    - host: sync.completeautomate.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: couchdb
+                port:
+                  number: 5984
