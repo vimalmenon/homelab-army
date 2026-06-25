@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: azure-quiz
+  namespace: azure-quiz
+  labels:
+    app: azure-quiz
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: azure-quiz
+  template:
+    metadata:
+      labels:
+        app: azure-quiz
+    spec:
+      containers:
+      - name: app
+        image: ghcr.io/vimalmenon/azure.completeautomate
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 3
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi

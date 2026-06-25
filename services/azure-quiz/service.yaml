@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-quiz
+  namespace: azure-quiz
+spec:
+  type: ClusterIP
+  selector:
+    app: azure-quiz
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
