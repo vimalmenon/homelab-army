@@ -3,14 +3,8 @@ kind: Ingress
 metadata:
   name: azure-quiz
   namespace: azure-quiz
-  annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
   ingressClassName: traefik
-  tls:
-  - hosts:
-    - azure.completeautomate.com
-    secretName: azure-quiz-tls
   rules:
   - host: azure.completeautomate.com
     http:
