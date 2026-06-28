@@ -58,6 +58,8 @@ data:
           policy: bypass
         - domain: "*.completeautomate.com"
           policy: bypass
+        - domain: secrets.completeautomate.internal
+          policy: one_factor
     session:
       name: authelia_session
       secret: REPLACED_BY_ENV_VAR_session_secret

@@ -33,5 +33,6 @@ resources:
   - hestia.yaml
   - arachne.yaml
   - semaphore.yaml
+  - secrets.yaml
   - arch.yaml
   - azure-quiz.yaml
