@@ -56,10 +56,10 @@ data:
           policy: one_factor
         - domain: "*.homelab.local"
           policy: bypass
+        - domain: secrets.completeautomate.com
+          policy: one_factor
         - domain: "*.completeautomate.com"
           policy: bypass
-        - domain: secrets.completeautomate.internal
-          policy: one_factor
     session:
       name: authelia_session
       secret: REPLACED_BY_ENV_VAR_session_secret
