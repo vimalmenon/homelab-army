@@ -82,6 +82,19 @@
         state: present
       tags: [packages, pip]
 
+    # ── Passwordless Sudo ──────────────────
+    # Ansible runs as the homelab user; passwordless sudo is required
+    # for Semaphore / ops to run playbooks non-interactively.
+
+    - name: Ensure passwordless sudo for sudo group
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/10-homelab-nopasswd
+        content: |
+          %sudo ALL=(ALL) NOPASSWD: ALL
+        mode: "0440"
+        validate: /usr/sbin/visudo -csf %s
+      tags: [sudo, passwordless]
+
     # ── Firewall (UFW) ─────────────────────
     # k3s ports: https://docs.k3s.io/installation/requirements#networking
 
