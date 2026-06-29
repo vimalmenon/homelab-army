@@ -1,0 +1,45 @@
+---
+# ──────────────────────────────────────────────
+# Deploy SSH Public Key to homelab nodes
+# ──────────────────────────────────────────────
+# - Adds the homelab user's SSH public key to authorized_keys
+# - Run after passwordless sudo is configured (COM-84)
+# - The private key should be stored in vaultwarden
+#
+# Usage:
+#   ansible-playbook playbooks/ssh-key-deploy.yml
+# ──────────────────────────────────────────────
+
+- name: Deploy SSH Public Key — k3s Cluster Nodes
+  hosts: k3s_cluster
+  become: true
+  gather_facts: false
+  tags: [ssh, keys, access]
+
+  vars:
+    ssh_user: "{{ ansible_user | default('homelab') }}"
+    ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBfZdiznirZTsV8O31vaMGE7FPSeK3haSzWSUc5VlIBo homelab@completeautomate.com"
+
+  tasks:
+    - name: Ensure .ssh directory exists for the user
+      ansible.builtin.file:
+        path: "/home/{{ ssh_user }}/.ssh"
+        state: directory
+        mode: "0700"
+        owner: "{{ ssh_user }}"
+        group: "{{ ssh_user }}"
+
+    - name: Add public key to authorized_keys
+      ansible.builtin.authorized_key:
+        user: "{{ ssh_user }}"
+        key: "{{ ssh_public_key }}"
+        state: present
+        comment: "homelab@completeautomate.com"
+      tags: [authorized_keys]
+
+    - name: Set correct permissions on authorized_keys
+      ansible.builtin.file:
+        path: "/home/{{ ssh_user }}/.ssh/authorized_keys"
+        mode: "0600"
+        owner: "{{ ssh_user }}"
+        group: "{{ ssh_user }}"

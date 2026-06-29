@@ -15,3 +15,4 @@ Thumbs.db
 
 # K8s
 *.secret.yaml
+ansible/files/*.pem
