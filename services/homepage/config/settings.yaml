@@ -1,9 +1,0 @@
----
-# Homepage Configuration
-# https://gethomepage.dev/configs/settings/
-
-title: Complete Automate
-
-providers:
-  openweathermap: openweathermap
-  weatherapi: weatherapi

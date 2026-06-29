@@ -18,7 +18,6 @@ resources:
   - dashboards.yaml
   - kube-router.yaml
   - network-policies.yaml
-  - homepage.yaml
   - homelab-backup.yaml
   - vaultwarden.yaml
   - cert-manager.yaml
