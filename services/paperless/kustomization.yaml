@@ -13,5 +13,4 @@ resources:
   - redis-statefulset.yaml
   - service.yaml
   - deployment.yaml
-  - deployment-consumer.yaml
   - ingress.yaml
