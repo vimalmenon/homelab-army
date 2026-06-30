@@ -35,13 +35,15 @@ spec:
               mkdir -p "$BACKUP_DIR"
 
               echo "=== Backing up k3s server data ==="
-              cp -a /host/var/lib/rancher/k3s/server/db/state.db "$BACKUP_DIR/"
-              cp -a /host/var/lib/rancher/k3s/server/db/state.db-shm "$BACKUP_DIR/" 2>/dev/null || true
-              cp -a /host/var/lib/rancher/k3s/server/db/state.db-wal "$BACKUP_DIR/" 2>/dev/null || true
-              cp -a /host/var/lib/rancher/k3s/server/token "$BACKUP_DIR/" 2>/dev/null || true
+              SRV="/host/var/lib/rancher/k3s/server"
+              mkdir -p "$BACKUP_DIR/server"
+              cp -a "$SRV/db/" "$BACKUP_DIR/server/db/"
+              cp -a "$SRV/token" "$BACKUP_DIR/server/" 2>/dev/null || true
+              cp -a "$SRV/tls/" "$BACKUP_DIR/server/tls/" 2>/dev/null || true
+              cp -a "$SRV/cred/" "$BACKUP_DIR/server/cred/" 2>/dev/null || true
 
               echo "=== Creating tar.gz ==="
-              tar -czf /tmp/k3s-server-backup.tar.gz -C /tmp k3s-backup
+              tar -czf /tmp/k3s-server-backup.tar.gz -C /tmp k3s-backup .
 
               SIZE=$(stat -c %s /tmp/k3s-server-backup.tar.gz)
               echo "=== Backup size: $SIZE bytes ==="
