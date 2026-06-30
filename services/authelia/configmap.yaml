@@ -58,6 +58,8 @@ data:
           policy: bypass
         - domain: secrets.completeautomate.com
           policy: one_factor
+        - domain: documents.completeautomate.com
+          policy: one_factor
         - domain: "*.completeautomate.com"
           policy: bypass
     session:

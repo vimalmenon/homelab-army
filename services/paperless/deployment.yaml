@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: paperless-web
+  namespace: paperless
+  labels:
+    app: paperless
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: paperless
+  template:
+    metadata:
+      labels:
+        app: paperless
+    spec:
+      initContainers:
+      - name: migrations
+        image: ghcr.io/paperless-ngx/paperless-ngx:latest
+        imagePullPolicy: Always
+        command: ["paperless", "migrate"]
+        env:
+        - name: PAPERLESS_REDIS
+          value: redis://paperless-redis.paperless.svc.cluster.local:6379
+        - name: PAPERLESS_DBHOST
+          value: paperless-db.paperless.svc.cluster.local
+        - name: PAPERLESS_DBNAME
+          value: paperless
+        - name: PAPERLESS_DBUSER
+          value: paperless
+        - name: PAPERLESS_DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: paperless-secrets
+              key: postgres_password
+        - name: PAPERLESS_DBPORT
+          value: "5432"
+        - name: PAPERLESS_URL
+          value: https://documents.completeautomate.com
+        - name: PAPERLESS_TIME_ZONE
+          value: Asia/Singapore
+        - name: PAPERLESS_OCR_LANGUAGE
+          value: eng
+        - name: PAPERLESS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: paperless-secrets
+              key: PAPERLESS_SECRET_KEY
+        volumeMounts:
+        - name: data
+          mountPath: /usr/src/paperless
+      containers:
+      - name: webserver
+        image: ghcr.io/paperless-ngx/paperless-ngx:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PAPERLESS_REDIS
+          value: redis://paperless-redis.paperless.svc.cluster.local:6379
+        - name: PAPERLESS_DBHOST
+          value: paperless-db.paperless.svc.cluster.local
+        - name: PAPERLESS_DBNAME
+          value: paperless
+        - name: PAPERLESS_DBUSER
+          value: paperless
+        - name: PAPERLESS_DBPASS
+          valueFrom:
+            secretKeyRef:
+              name: paperless-secrets
+              key: postgres_password
+        - name: PAPERLESS_DBPORT
+          value: "5432"
+        - name: PAPERLESS_URL
+          value: https://documents.completeautomate.com
+        - name: PAPERLESS_TIME_ZONE
+          value: Asia/Singapore
+        - name: PAPERLESS_OCR_LANGUAGE
+          value: eng
+        - name: PAPERLESS_SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: paperless-secrets
+              key: PAPERLESS_SECRET_KEY
+        volumeMounts:
+        - name: data
+          mountPath: /usr/src/paperless
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 1Gi
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: paperless-data

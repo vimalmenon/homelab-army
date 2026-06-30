@@ -26,6 +26,7 @@ resources:
   - atlas.yaml
   - athena.yaml
   - orpheus.yaml
+  - paperless.yaml
   - iris.yaml
   - angelos.yaml
   - helios.yaml
