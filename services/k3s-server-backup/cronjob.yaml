@@ -1,0 +1,90 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: k3s-server-backup
+  namespace: backups
+  labels:
+    app: k3s-server-backup
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 86400
+      template:
+        spec:
+          nodeName: homelab01
+          hostPID: true
+          restartPolicy: Never
+          containers:
+          - name: backup
+            image: alpine:3.19
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              echo "=== Installing deps ==="
+              apk add --no-cache aws-cli python3 >/dev/null 2>&1
+
+              DATE=$(date -u +%Y-%m-%d)
+              BACKUP_DIR="/tmp/k3s-backup"
+              mkdir -p "$BACKUP_DIR"
+
+              echo "=== Backing up k3s server data ==="
+              cp -a /host/var/lib/rancher/k3s/server/db/state.db "$BACKUP_DIR/"
+              cp -a /host/var/lib/rancher/k3s/server/db/state.db-shm "$BACKUP_DIR/" 2>/dev/null || true
+              cp -a /host/var/lib/rancher/k3s/server/db/state.db-wal "$BACKUP_DIR/" 2>/dev/null || true
+              cp -a /host/var/lib/rancher/k3s/server/token "$BACKUP_DIR/" 2>/dev/null || true
+
+              echo "=== Creating tar.gz ==="
+              tar -czf /tmp/k3s-server-backup.tar.gz -C /tmp k3s-backup
+
+              SIZE=$(stat -c %s /tmp/k3s-server-backup.tar.gz)
+              echo "=== Backup size: $SIZE bytes ==="
+
+              echo "=== Uploading to S3 ==="
+              S3_KEY="backups/k3s-server/$DATE/k3s-server-backup.tar.gz"
+              aws s3 cp /tmp/k3s-server-backup.tar.gz "s3://${BUCKET}/${S3_KEY}"
+
+              echo "=== Pruning backups older than ${RETENTION_DAYS} days ==="
+              CUTOFF=$(python3 -c "from datetime import datetime, timedelta, timezone; d = datetime.now(timezone.utc) - timedelta(days=${RETENTION_DAYS}); print(d.strftime('%Y-%m-%d'))")
+              aws s3 ls "s3://${BUCKET}/backups/k3s-server/" --recursive 2>/dev/null | while read -r line; do
+                KEY_DATE=$(echo "$line" | awk '{print $1}')
+                if [[ "$KEY_DATE" < "$CUTOFF" ]]; then
+                  KEY_PATH=$(echo "$line" | awk '{print $4}')
+                  echo "  Pruning: $KEY_PATH"
+                  aws s3 rm "s3://${BUCKET}/$KEY_PATH" >/dev/null 2>&1
+                fi
+              done
+
+              echo "=== Done! ==="
+              rm -rf /tmp/k3s-backup /tmp/k3s-server-backup.tar.gz
+            env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_ACCESS_KEY_ID
+                  name: aws-dynamo-creds
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: AWS_SECRET_ACCESS_KEY
+                  name: aws-dynamo-creds
+            - name: AWS_REGION
+              value: us-east-1
+            - name: BUCKET
+              value: completeautomate-media
+            - name: RETENTION_DAYS
+              value: "30"
+            volumeMounts:
+            - name: host
+              mountPath: /host
+              readOnly: true
+          volumes:
+          - name: host
+            hostPath:
+              path: /
