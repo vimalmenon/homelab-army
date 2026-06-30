@@ -50,7 +50,14 @@ spec:
               key: PAPERLESS_SECRET_KEY
         volumeMounts:
         - name: data
-          mountPath: /usr/src/paperless
+          mountPath: /usr/src/paperless/data
+          subPath: data
+        - name: data
+          mountPath: /usr/src/paperless/media
+          subPath: media
+        - name: data
+          mountPath: /usr/src/paperless/consume
+          subPath: consume
         livenessProbe:
           httpGet:
             path: /
