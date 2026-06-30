@@ -8,6 +8,5 @@ resources:
   - serviceaccount.yaml
   - clusterrole.yaml
   - clusterrolebinding.yaml
-  - externalsecret.yaml
   - configmap-script.yaml
   - cronjob.yaml

@@ -4,7 +4,6 @@ resources:
 - configmap.yaml
 - deployment-authelia.yaml
 - deployment-redis.yaml
-- externalsecret.yaml
 - ingress.yaml
 - poddisruptionbudget.yaml
 - pvc-redis-data.yaml

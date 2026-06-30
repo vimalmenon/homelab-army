@@ -10,6 +10,5 @@ resources:
   - clusterrolebinding.yaml
   - configmap-backup-script.yaml
   - configmap-check-script.yaml
-  - externalsecret.yaml
   - cronjob.yaml
   - cronjob-check.yaml
