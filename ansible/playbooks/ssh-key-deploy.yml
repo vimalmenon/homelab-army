@@ -18,7 +18,9 @@
 
   vars:
     ssh_user: "{{ ansible_user | default('homelab') }}"
-    ssh_public_key: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBfZdiznirZTsV8O31vaMGE7FPSeK3haSzWSUc5VlIBo homelab@completeautomate.com"
+    ssh_public_key: |
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBfZdiznirZTsV8O31vaMGE7FPSeK3haSzWSUc5VlIBo homelab@completeautomate.com
+      ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIP0pekS9T8LnXivzVTEfC5MNaT0Hyp+DivWGmtlCWL43 vimal menon@DESKTOP-8RJJLN0
 
   tasks:
     - name: Ensure .ssh directory exists for the user
@@ -30,7 +32,7 @@
         group: "{{ ssh_user }}"
 
     - name: Add public key to authorized_keys
-      ansible.builtin.authorized_key:
+      ansible.posix.authorized_key:
         user: "{{ ssh_user }}"
         key: "{{ ssh_public_key }}"
         state: present
