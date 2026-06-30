@@ -41,12 +41,10 @@ homelab-army is a GitOps-powered Kubernetes cluster running on three Raspberry P
 | 📝 **Loki**            | `apps/loki.yaml`                | Log aggregation                           |
 | 📝 **Promtail**        | `apps/promtail.yaml`            | Log shipper (cluster-wide DaemonSet)      |
 | 📝 **Loki Datasource** | `apps/loki-datasource.yaml`     | Grafana Loki data source config           |
-| 📊 **Dashboards**      | `apps/dashboards.yaml`          | Custom Grafana dashboards (ConfigMaps)    |
-| 🛡️ **Network Policies** | `apps/network-policies.yaml`  | Defined but not enforced[^kr]             |
-| 🧱 **kube-router**     | `apps/kube-router.yaml`[^kr]    | Service proxy DaemonSet (`--run-firewall=false`) |
-| 🔑 **AWS Secrets**     | `apps/aws-secrets.yaml`         | External Secrets + ClusterSecretStore     |
 | 🔑 **External Secrets**| `apps/external-secrets.yaml`    | ESO operator deployment                   |
-| 💾 **Backup**          | `apps/homelab-backup.yaml`      | S3 backup cron job                        |
+| 💾 **Backup (PVC + k8s)**   | `apps/homelab-backup.yaml`      | PVC data + k8s manifests → S3 (daily 3am) |
+| 💾 **Backup (k3s server)**  | `apps/k3s-server-backup.yaml`   | DB + TLS + token → S3 (daily 2am)         |
+| 📊 **Dashboards**      | `apps/dashboards.yaml`          | Grafana dashboards as Git-backed ConfigMaps |
 | 📡 **Hermes Monitoring** | `apps/hermes-monitoring.yaml` | Hermes Pi node_exporter scraping          |
 
 ## 📁 Repo Structure
@@ -82,7 +80,8 @@ homelab-army/
     ├── grafana-stack/        # Grafana + Prometheus via Helm
     ├── hermes-monitoring/    # Hermes Pi node_exporter + dashboard
     ├── hestia/               # Admin backend — messages & leads API
-    ├── homelab-backup/       # S3 backup CronJob + check CronJob
+    ├── homelab-backup/       # PVC data + k8s manifests → S3 (daily 3am)
+    ├── k3s-server-backup/    # DB + TLS + token → S3 (daily 2am)
     ├── homepage/             # Homelab dashboard
     ├── kube-router/          # Network policy DaemonSet
     ├── loki/                 # Log aggregation
@@ -162,7 +161,7 @@ This cluster runs on the philosophy of **CICD — Continuous Integration, Contin
 | ✅ | **Homepage dashboard** | Service dashboard at `homepage.completeautomate.com` behind Authelia SSO |
 | ✅ | **Uptime Kuma** | Uptime monitoring at `status.completeautomate.com` |
 | ✅ | **Hermes Pi monitoring** | node_exporter scraped by Prometheus + Grafana dashboard |
-| ✅ | **Homelab backup** | Hermes host backup → S3 (daily), k8s CronJob backup check (every 4h) |
+| ✅ | **Homelab backup** | 3 layers: Hermes host → S3 (daily), k3s PVC + manifests → S3 (daily 3am), k3s server DB + TLS → S3 (daily 2am). All verified every 4h via backup-check. |
 | ✅ | **Tunnel Sync** | Auto-syncs k3s Ingress hostnames → Cloudflare tunnel config (every 15m) |
 | ✅ | **Network Policies** | 31 zero-trust policies across 8 namespaces via kube-router |
 | ✅ | **External Secrets** | AWS Secrets Manager → ESO → k8s Secrets for all sensitive data |

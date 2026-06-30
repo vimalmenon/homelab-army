@@ -1,6 +1,15 @@
 # Grafana Dashboards
 
-This directory contains Grafana dashboard JSON files managed as GitOps ConfigMaps.
+This directory contains Grafana dashboard JSON files managed as **GitOps ConfigMaps**. Every dashboard here is part of the daily backup — the JSON files are version-controlled in this Git repo and synced to the cluster via ArgoCD.
+
+## Part of daily backup
+
+All dashboards in this directory are backed up by **two redundant layers**:
+
+| Layer | What's protected | Restore |
+|-------|-----------------|---------|
+| **📝 Git (this repo)** | The JSON definition itself — version history, branches, PRs | `git clone` + ArgoCD auto-syncs |
+| **💾 S3 backup** | The k3s server state that hosts Grafana | Restore cluster → ArgoCD re-syncs everything |
 
 ## How it works
 
