@@ -19,3 +19,6 @@ configMapGenerator:
   - name: dashboard-pihole-dns
     files:
       - pihole.json
+  - name: dashboard-nfs-storage
+    files:
+      - nfs-storage.json
