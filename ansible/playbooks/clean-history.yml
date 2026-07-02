@@ -1,0 +1,58 @@
+# ──────────────────────────────────────────────────────
+# clean-history.yml — Purge Semaphore task history
+# ──────────────────────────────────────────────────────
+# Deletes all completed/failed tasks from the Semaphore
+# task list. Keeps running tasks. Optionally keep the
+# last N tasks with --keep.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini \
+#     playbooks/clean-history.yml
+#
+# Dry-run:
+#   ansible-playbook -i inventory/hosts.ini \
+#     playbooks/clean-history.yml -e dry_run=true
+#
+# Keep last 5 tasks:
+#   ansible-playbook -i inventory/hosts.ini \
+#     playbooks/clean-history.yml -e keep=5
+#
+# NOTE: SEMAPHORE_PASSWORD must be set in the environment
+# or in Semaphore's project environment config.
+# ──────────────────────────────────────────────────────
+---
+- name: 🧹 Clean Semaphore Task History
+  hosts: k3s_master
+  gather_facts: false
+
+  vars:
+    script_src: ../files/semaphore-clean-history.py
+    script_dest: /tmp/semaphore-clean-history.py
+    keep: 0
+    dry_run: false
+
+  tasks:
+    - name: Copy cleanup script to control-plane
+      ansible.builtin.copy:
+        src: "{{ script_src }}"
+        dest: "{{ script_dest }}"
+        mode: "0755"
+
+    - name: Run cleanup
+      ansible.builtin.command:
+        cmd: >
+          python3 {{ script_dest }}
+          {% if keep | int > 0 %}--keep {{ keep }}{% endif %}
+          {% if not dry_run %}--execute{% endif %}
+      environment:
+        SEMAPHORE_PASSWORD: "{{ lookup('env', 'SEMAPHORE_PASSWORD') | default('', true) }}"
+        SEMAPHORE_USER: "{{ lookup('env', 'SEMAPHORE_USER') | default('admin', true) }}"
+        SEMAPHORE_URL: "{{ lookup('env', 'SEMAPHORE_URL') | default('http://192.168.128.200', true) }}"
+      args:
+        chdir: /tmp
+      register: cleanup_output
+      changed_when: false
+
+    - name: Show result
+      ansible.builtin.debug:
+        var: cleanup_output.stdout_lines
