@@ -1,0 +1,132 @@
+# ──────────────────────────────────────────────────────
+# cluster-health.yml — k3s cluster health check
+# ──────────────────────────────────────────────────────
+# Reports: node status, pod counts (by phase), pods with
+# recent restarts, non-ready/pending/error pods, resource
+# usage summary.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbooks/cluster-health.yml
+#
+# Requires kubectl on the control-plane node (homelab01).
+# ──────────────────────────────────────────────────────
+---
+- name: 🔍 Cluster Health — Pods, nodes, resource usage
+  hosts: k3s_master
+  gather_facts: false
+  vars:
+    kubectl: /usr/local/bin/kubectl   # k3s kubectl symlink
+    restart_hours: 24                  # highlight restarts within this window
+
+  tasks:
+    - name: Get node status
+      ansible.builtin.command:
+        cmd: "{{ kubectl }} get nodes --no-headers"
+      register: node_output
+      changed_when: false
+
+    - name: Get all pods (wide)
+      ansible.builtin.command:
+        cmd: "{{ kubectl }} get pods --all-namespaces --no-headers -o wide"
+      register: pods_output
+      changed_when: false
+
+    - name: Get pod resource usage
+      ansible.builtin.command:
+        cmd: "{{ kubectl }} top nodes --no-headers 2>/dev/null || echo 'metrics not available'"
+      register: top_output
+      changed_when: false
+      ignore_errors: true
+
+    - name: Get pod restarts with age
+      ansible.builtin.command:
+        cmd: "{{ kubectl }} get pods --all-namespaces -o json"
+      register: pods_json
+      changed_when: false
+
+    - name: Parse and format health report
+      ansible.builtin.set_fact:
+        node_lines: "{{ node_output.stdout_lines | default([]) }}"
+        pod_lines: "{{ pods_output.stdout_lines | default([]) }}"
+        top_lines: "{{ top_output.stdout_lines | default([]) }}"
+        pod_data: "{{ pods_json.stdout | from_json | default({}) }}"
+
+    - name: Build summary counts
+      ansible.builtin.set_fact:
+        nodes_ready: "{{ node_lines | select('search', ' Ready ') | list | length }}"
+        nodes_total: "{{ node_lines | length }}"
+        pods_running: "{{ pod_lines | select('search', 'Running') | list | length }}"
+        pods_pending: "{{ pod_lines | select('search', 'Pending') | list | length }}"
+        pods_error: "{{ pod_lines | select('search', 'Error|CrashLoop|ImagePullBackOff|CreateContainer') | list | length }}"
+        pods_completed: "{{ pod_lines | select('search', 'Completed') | list | length }}"
+
+    - name: Find high-restart pods
+      ansible.builtin.set_fact:
+        restarted_pods: >-
+          {%- set items = [] -%}
+          {%- for item in pod_data['items'] | default([]) -%}
+          {%-   set rc = item['status']['containerStatuses'] | default([]) -%}
+          {%-   set restarts = rc | map(attribute='restartCount') | map('int') | sum -%}
+          {%-   if restarts > 0 -%}
+          {%-     set _ = items.append({
+                  'ns': item['metadata']['namespace'],
+                  'name': item['metadata']['name'],
+                  'restarts': restarts,
+                  'ready': item['status']['conditions'] | selectattr('type', 'equalto', 'Ready') | map(attribute='status') | first | default('Unknown')
+                }) -%}
+          {%-   endif -%}
+          {%- endfor -%}
+          {{ items | sort(attribute='restarts', reverse=True) }}
+
+    - name: Show health report
+      ansible.builtin.debug:
+        msg: |-
+          ┌────────────────────────────────────────────────────────────┐
+          │              🔍  Cluster Health Report                     │
+          └────────────────────────────────────────────────────────────┘
+
+          ── Nodes ──────────────────────────────
+          {{ '%-16s %-10s %-10s %s' | format('NODE', 'STATUS', 'ROLE', 'VERSION') }}
+          ───────────────────────────────────────
+          {% for line in node_lines %}
+          {%   set parts = line.split() %}
+          {{ '%-16s %-10s %-10s %s' | format(parts[0], parts[1], parts[2] | default(''), parts[4] | default('')) }}
+          {% endfor %}
+
+          Nodes: {{ nodes_ready }}/{{ nodes_total }} Ready
+
+          ── Pod Summary ────────────────────────
+          Running:      {{ pods_running }}
+          Pending:      {{ pods_pending }}
+          Error:        {{ pods_error }}
+          Completed:    {{ pods_completed }}
+          Total:        {{ pods_running + pods_pending + pods_error + pods_completed }}
+
+          {% if pods_pending > 0 or pods_error > 0 %}
+          ⚠️  Non-healthy pods:
+          {% for line in pod_lines %}
+          {%   if 'Pending' in line or 'Error' in line or 'CrashLoop' in line or 'ImagePullBackOff' in line %}
+          {%     set p = line.split() %}
+            • {{ p[0] }}/{{ p[1] }} — {{ p[3] }} ({{ p[2] }})
+          {%   endif %}
+          {% endfor %}
+          {% endif %}
+
+          {% if restarted_pods | length > 0 %}
+          ── Pods with Restarts ──────────────────
+          {% for p in restarted_pods[:15] %}
+          {%   set flag = '⚠️ ' if p.restarts > 5 else '· ' %}
+            {{ flag }}{{ p.ns }}/{{ p.name }} — {{ p.restarts }} restarts
+          {% endfor %}
+          {% endif %}
+
+          {% if top_lines | length > 0 %}
+          ── Node Resources ──────────────────────
+          {{ '%-12s %-10s %-10s' | format('NODE', 'CPU%', 'MEM%') }}
+          ───────────────────────────────────────
+          {% for line in top_lines %}
+          {%   set parts = line.split() %}
+          {{ '%-12s %-10s %-10s' | format(parts[0], parts[1], parts[3]) }}
+          {% endfor %}
+          {% endif %}
+      run_once: true
