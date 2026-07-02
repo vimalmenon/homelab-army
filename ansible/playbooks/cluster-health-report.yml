@@ -30,6 +30,7 @@
         mode: "0755"
 
     - name: Run health report
+      become: yes
       ansible.builtin.command:
         cmd: "python3 {{ script_dest }}"
       environment:

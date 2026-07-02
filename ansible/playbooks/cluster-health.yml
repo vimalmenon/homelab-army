@@ -20,18 +20,21 @@
 
   tasks:
     - name: Get node status
+      become: yes
       ansible.builtin.command:
         cmd: "{{ kubectl }} get nodes --no-headers"
       register: node_output
       changed_when: false
 
     - name: Get all pods (wide)
+      become: yes
       ansible.builtin.command:
         cmd: "{{ kubectl }} get pods --all-namespaces --no-headers -o wide"
       register: pods_output
       changed_when: false
 
     - name: Get pod resource usage
+      become: yes
       ansible.builtin.command:
         cmd: "{{ kubectl }} top nodes --no-headers 2>/dev/null || echo 'metrics not available'"
       register: top_output
@@ -39,6 +42,7 @@
       ignore_errors: true
 
     - name: Get pod restarts with age
+      become: yes
       ansible.builtin.command:
         cmd: "{{ kubectl }} get pods --all-namespaces -o json"
       register: pods_json
