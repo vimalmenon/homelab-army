@@ -13,7 +13,7 @@
   gather_facts: false
 
   vars:
-    script_src: files/cluster-health-report.py
+    script_src: ../files/cluster-health-report.py
     script_dest: /tmp/cluster-health-report.py
 
   tasks:
