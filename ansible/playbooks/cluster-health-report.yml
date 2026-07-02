@@ -1,14 +1,14 @@
 # ──────────────────────────────────────────────────────
-# cluster-health-report.yml — Run health report on k3s
+# cluster-health-report.yml — k3s health + Telegram delivery
 # ──────────────────────────────────────────────────────
-# Copies the health report script to homelab01,
-# runs it, and shows the output.
+# Runs the health report Python script on homelab01.
+# Optional Telegram delivery via --telegram flag.
 #
 # Usage:
 #   ansible-playbook -i inventory/hosts.ini \
 #     playbooks/cluster-health-report.yml
 #
-# Optional Telegram delivery:
+# With Telegram:
 #   BOT_TOKEN=xxx CHAT_ID=yyy ansible-playbook \
 #     -i inventory/hosts.ini playbooks/cluster-health-report.yml \
 #     -e telegram=true
@@ -30,7 +30,6 @@
         mode: "0755"
 
     - name: Run health report
-      become: yes
       ansible.builtin.command:
         cmd: "python3 {{ script_dest }}"
       environment:
