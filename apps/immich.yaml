@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: immich
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://immich-app.github.io/immich-charts
+    chart: immich
+    targetRevision: 0.12.0
+    helm:
+      releaseName: immich
+      values: |
+        immich:
+          persistence:
+            library:
+              existingClaim: immich-library
+
+        controllers:
+          main:
+            containers:
+              main:
+                env:
+                  DB_HOSTNAME: immich-postgres
+                  DB_USERNAME: immich
+                  DB_DATABASE_NAME: immich
+                  DB_PASSWORD: "31bd51eb8a6411d27f3cfc762873744a"
+
+        server:
+          ingress:
+            main:
+              enabled: false
+
+        machine-learning:
+          enabled: true
+
+        valkey:
+          enabled: true
+          persistence:
+            data:
+              enabled: true
+              type: persistentVolumeClaim
+              size: 1Gi
+              storageClass: nfs-client
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: immich
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
