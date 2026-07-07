@@ -63,6 +63,7 @@ ansible/
     ├── os-hardening.yml     # Kernel, swap, packages, firewall
     ├── k3s-install.yml      # Install k3s server on control-plane
     ├── node-join.yml        # Join worker nodes
+    ├── immich-deploy.yml    # Deploy Immich photo management
     └── ping.yml             # Cluster connectivity check
 ```
 
