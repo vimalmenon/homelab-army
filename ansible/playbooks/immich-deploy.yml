@@ -2,45 +2,104 @@
 # ──────────────────────────────────────────────
 # immich-deploy.yml — Deploy / Update Immich
 # ──────────────────────────────────────────────
-# Run: ansible-playbook -i inventory/hosts.ini playbooks/immich-deploy.yml
-# Target: homelab03 (runs immich components)
+# Fully dynamic — all values can be overridden via -e flags.
+#
+# Examples:
+#
+#   # Default deploy (immich.completeautomate.com on homelab03)
+#   ansible-playbook -i inventory/hosts.ini playbooks/immich-deploy.yml
+#
+#   # Custom hostname and storage
+#   ansible-playbook -i inventory/hosts.ini playbooks/immich-deploy.yml \
+#     -e hostname=photos.mydomain.com \
+#     -e namespace=photos \
+#     -e photo_storage=500Gi
+#
+#   # Minimal — ML disabled, smaller DB
+#   ansible-playbook -i inventory/hosts.ini playbooks/immich-deploy.yml \
+#     -e machine_learning=false \
+#     -e db_storage=5Gi \
+#     -e ml_disabled=true
+#
+#   # Existing install — just update config / restart
+#   ansible-playbook -i inventory/hosts.ini playbooks/immich-deploy.yml \
+#     -e helm_chart_version=0.13.0 \
+#     -e state=present
+#
 # ──────────────────────────────────────────────
-#
-# This playbook deploys Immich photo management on homelab03:
-#   - PostgreSQL 16 + pgvector on local-path (NVMe)
-#   - Immich server + ML via Helm chart
-#   - Valkey cache on NFS
-#   - Traefik ingress with Authelia auth
-#
-# Prerequisites:
-#   - kubectl + helm on the control node
-#   - immich helm repo added
-#   - Cloudflare tunnel configured for *.completeautomate.com
-
 - name: Deploy Immich on k3s cluster
   hosts: localhost
   connection: local
   gather_facts: false
   vars:
-    namespace: immich
-    helm_chart_version: 0.12.0
-    pg_password: "{{ lookup('password', '/dev/null chars=hexdigits length=32') }}"
-    storage_nfs: nfs-client
-    storage_local: local-path
-    photo_storage_size: 100Gi
-    db_storage_size: 10Gi
+    # ── Core identity ──
+    namespace: "{{ namespace | default('immich') }}"
+    hostname: "{{ hostname | default('immich.completeautomate.com') }}"
+    dns_name: "{{ hostname.split('.')[0] }}"
+
+    # ── Version ──
+    helm_chart_version: "{{ helm_chart_version | default('0.12.0') }}"
+
+    # ── Storage ──
+    photo_storage: "{{ photo_storage | default('100Gi') }}"
+    db_storage: "{{ db_storage | default('10Gi') }}"
+    cache_storage: "{{ cache_storage | default('1Gi') }}"
+    storage_nfs: "{{ storage_nfs | default('nfs-client') }}"
+    storage_local: "{{ storage_local | default('local-path') }}"
+
+    # ── Features ──
+    machine_learning: "{{ machine_learning | default(true) | bool }}"
+    ml_disabled: "{{ not machine_learning }}"
+
+    # ── Postgres ──
+    pg_user: "{{ pg_user | default('immich') }}"
+    pg_db: "{{ pg_db | default('immich') }}"
+    pg_password: "{{ pg_password | default(lookup('password', '/dev/null chars=hexdigits length=32')) }}"
+
+    # ── Cloudflare ──
+    cf_token: "{{ lookup('env', 'CLOUDFLARE_API_TOKEN') | default('', true) }}"
+    cf_zone_id: "{{ lookup('env', 'CF_ZONE_ID') | default('', true) }}"
+    tunnel_id: "{{ tunnel_id | default('011a9625-236e-42dc-b716-e5de75390eaa') }}"
+
+    # ── Auth ──
+    authelia_middleware: "{{ authelia_middleware | default('authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd') }}"
+
+    # ── Operation ──
+    state: "{{ state | default('present') }}"
 
   tasks:
+    - name: Validate required variables
+      ansible.builtin.assert:
+        that:
+          - hostname is defined
+          - hostname | length > 0
+        fail_msg: "hostname is required (e.g. -e hostname=photos.mydomain.com)"
+
+    - name: Print configuration
+      ansible.builtin.debug:
+        msg:
+          - "═══ Immich Deploy ═══"
+          - "  Hostname:    {{ hostname }}"
+          - "  Namespace:   {{ namespace }}"
+          - "  Helm Chart:  {{ helm_chart_version }}"
+          - "  ML enabled:  {{ machine_learning }}"
+          - "  Photo storage: {{ photo_storage }} ({{ storage_nfs }})"
+          - "  DB storage:    {{ db_storage }} ({{ storage_local }})"
+          - "  Cache storage: {{ cache_storage }} ({{ storage_nfs }})"
+          - "  DNS record:  {{ dns_name }} → {{ tunnel_id }}.cfargotunnel.com"
+          - "══════════════════════"
+
+    # ── 1. Infrastructure ──
     - name: Ensure namespace exists
       kubernetes.core.k8s:
         name: "{{ namespace }}"
         api_version: v1
         kind: Namespace
-        state: present
+        state: "{{ state }}"
 
     - name: Create postgres password secret
       kubernetes.core.k8s:
-        state: present
+        state: "{{ state }}"
         definition:
           apiVersion: v1
           kind: Secret
@@ -49,13 +108,13 @@
             namespace: "{{ namespace }}"
           type: Opaque
           stringData:
-            POSTGRES_USER: immich
-            POSTGRES_DB: immich
+            POSTGRES_USER: "{{ pg_user }}"
+            POSTGRES_DB: "{{ pg_db }}"
             POSTGRES_PASSWORD: "{{ pg_password }}"
 
     - name: Create photo library PVC (NFS)
       kubernetes.core.k8s:
-        state: present
+        state: "{{ state }}"
         definition:
           apiVersion: v1
           kind: PersistentVolumeClaim
@@ -67,11 +126,11 @@
             storageClassName: "{{ storage_nfs }}"
             resources:
               requests:
-                storage: "{{ photo_storage_size }}"
+                storage: "{{ photo_storage }}"
 
-    - name: Create postgres PVC (local-path NVMe)
+    - name: Create postgres PVC (local-path / fast storage)
       kubernetes.core.k8s:
-        state: present
+        state: "{{ state }}"
         definition:
           apiVersion: v1
           kind: PersistentVolumeClaim
@@ -83,11 +142,12 @@
             storageClassName: "{{ storage_local }}"
             resources:
               requests:
-                storage: "{{ db_storage_size }}"
+                storage: "{{ db_storage }}"
 
+    # ── 2. PostgreSQL + pgvector ──
     - name: Deploy postgres StatefulSet with pgvector
       kubernetes.core.k8s:
-        state: present
+        state: "{{ state }}"
         definition:
           apiVersion: apps/v1
           kind: StatefulSet
@@ -136,7 +196,7 @@
 
     - name: Deploy postgres service
       kubernetes.core.k8s:
-        state: present
+        state: "{{ state }}"
         definition:
           apiVersion: v1
           kind: Service
@@ -167,12 +227,15 @@
       kubernetes.core.k8s_exec:
         namespace: "{{ namespace }}"
         pod: "{{ pg_pod.resources[0].metadata.name }}"
-        command: psql -U immich -d immich -c "CREATE EXTENSION IF NOT EXISTS vector;"
+        command: psql -U {{ pg_user }} -d {{ pg_db }} -c "CREATE EXTENSION IF NOT EXISTS vector;"
+      when: state == "present"
 
+    # ── 3. Immich Helm chart ──
     - name: Ensure immich helm repo is added
       kubernetes.core.helm_repository:
         name: immich
         repo_url: https://immich-app.github.io/immich-charts
+      when: state == "present"
 
     - name: Deploy Immich via Helm
       kubernetes.core.helm:
@@ -180,6 +243,7 @@
         chart_ref: immich/immich
         chart_version: "{{ helm_chart_version }}"
         release_namespace: "{{ namespace }}"
+        state: "{{ state }}"
         values:
           immich:
             persistence:
@@ -191,27 +255,29 @@
                 main:
                   env:
                     DB_HOSTNAME: immich-postgres
-                    DB_USERNAME: immich
-                    DB_DATABASE_NAME: immich
+                    DB_USERNAME: "{{ pg_user }}"
+                    DB_DATABASE_NAME: "{{ pg_db }}"
                     DB_PASSWORD: "{{ pg_password }}"
           server:
             ingress:
               main:
                 enabled: false
           machine-learning:
-            enabled: true
+            enabled: "{{ machine_learning }}"
           valkey:
             enabled: true
             persistence:
               data:
                 enabled: true
                 type: persistentVolumeClaim
-                size: 1Gi
+                size: "{{ cache_storage }}"
                 storageClass: "{{ storage_nfs }}"
+      when: state == "present"
 
+    # ── 4. Ingress ──
     - name: Deploy Traefik ingress with Authelia auth
       kubernetes.core.k8s:
-        state: present
+        state: "{{ state }}"
         definition:
           apiVersion: networking.k8s.io/v1
           kind: Ingress
@@ -219,11 +285,11 @@
             name: immich
             namespace: "{{ namespace }}"
             annotations:
-              traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
+              traefik.ingress.kubernetes.io/router.middlewares: "{{ authelia_middleware }}"
           spec:
             ingressClassName: traefik
             rules:
-            - host: immich.completeautomate.com
+            - host: "{{ hostname }}"
               http:
                 paths:
                 - path: /
@@ -233,7 +299,30 @@
                       name: immich-server
                       port:
                         number: 2283
+      when: state == "present"
 
+    # ── 5. Cloudflare DNS ──
+    - name: Create Cloudflare DNS record
+      uri:
+        url: "https://api.cloudflare.com/client/v4/zones/{{ cf_zone_id }}/dns_records"
+        method: POST
+        headers:
+          Authorization: "Bearer {{ cf_token }}"
+          Content-Type: application/json
+        body:
+          type: "CNAME"
+          name: "{{ dns_name }}"
+          content: "{{ tunnel_id }}.cfargotunnel.com"
+          proxied: true
+          ttl: 1
+        status_code: 200
+      ignore_errors: true
+      when:
+        - state == "present"
+        - cf_token | length > 0
+        - cf_zone_id | length > 0
+
+    # ── 6. Wait for readiness ──
     - name: Wait for immich pods to be ready
       kubernetes.core.k8s_info:
         api_version: v1
@@ -247,29 +336,21 @@
       until:
         - immich_pods.resources | length > 0
         - immich_pods.resources | selectattr('status.phase', 'equalto', 'Running') | list | length == immich_pods.resources | length
+      when: state == "present"
 
-    - name: Create Cloudflare DNS record
-      uri:
-        url: "https://api.cloudflare.com/client/v4/zones/{{ lookup('env', 'CF_ZONE_ID') }}/dns_records"
-        method: POST
-        headers:
-          Authorization: "Bearer {{ lookup('env', 'CLOUDFLARE_API_TOKEN') }}"
-          Content-Type: application/json
-        body:
-          type: "CNAME"
-          name: "immich"
-          content: "{{ tunnel_id | default('011a9625-236e-42dc-b716-e5de75390eaa') }}.cfargotunnel.com"
-          proxied: true
-          ttl: 1
-        status_code: 200
-      ignore_errors: true
-      when: lookup('env', 'CLOUDFLARE_API_TOKEN') | default('', true) | length > 0
-
+    # ── 7. Summary ──
     - name: Print summary
-      debug:
+      ansible.builtin.debug:
         msg:
-          - "✅ Immich deployed on {{ namespace }} namespace"
-          - "📍 Access: https://immich.completeautomate.com"
-          - "📸 Photo storage: {{ photo_storage_size }} on NFS"
-          - "🗄️  Database: {{ db_storage_size }} on local-path (NVMe)"
-          - "🧠 Machine Learning: enabled"
+          - "═══ Immich Deploy Complete ═══"
+          - "  Status:    ✅ {{ state | capitalize }}"
+          - "  Namespace: {{ namespace }}"
+          - "  Access:    https://{{ hostname }}"
+          - "  Storage:"
+          - "    📸 Photos:  {{ photo_storage }} ({{ storage_nfs }})"
+          - "    🗄️  DB:      {{ db_storage }} ({{ storage_local }})"
+          - "    ⚡ Cache:   {{ cache_storage }} ({{ storage_nfs }})"
+          - "  🧠 ML enabled: {{ machine_learning }}"
+          - "  🌐 CF Tunnel: {{ 'Yes' if cf_token | length > 0 else 'No (manual DNS needed)' }}"
+          - "═══════════════════════════════"
+      when: state == "present"
