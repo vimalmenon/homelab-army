@@ -56,7 +56,10 @@ spec:
               CUTOFF=$(python3 -c "from datetime import datetime, timedelta, timezone; d = datetime.now(timezone.utc) - timedelta(days=${RETENTION_DAYS}); print(d.strftime('%Y-%m-%d'))")
               aws s3 ls "s3://${BUCKET}/backups/k3s-server/" --recursive 2>/dev/null | while read -r line; do
                 KEY_DATE=$(echo "$line" | awk '{print $1}')
-                if [[ "$KEY_DATE" < "$CUTOFF" ]]; then
+                # POSIX numeric comparison (strip dashes: 2026-07-01 → 20260701)
+                KEY_NUM=$(echo "$KEY_DATE" | tr -d '-')
+                CUTOFF_NUM=$(echo "$CUTOFF" | tr -d '-')
+                if [ "$KEY_NUM" -lt "$CUTOFF_NUM" ] 2>/dev/null; then
                   KEY_PATH=$(echo "$line" | awk '{print $4}')
                   echo "  Pruning: $KEY_PATH"
                   aws s3 rm "s3://${BUCKET}/$KEY_PATH" >/dev/null 2>&1
