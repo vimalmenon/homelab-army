@@ -5,7 +5,6 @@ namespace: microservices
 resources:
 - cronjob.yaml
 - deployment.yaml
-- secrets.yaml
 - service.yaml
 
 images:
