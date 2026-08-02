@@ -1,0 +1,66 @@
+apiVersion: v1
+data:
+  backup.py: "#!/usr/bin/env python3\n\"\"\"Homelab backup \u2014 PVC data + k8s resources\
+    \ \u2192 S3.\"\"\"\n\nimport boto3\nimport gzip\nimport logging\nimport os\nimport\
+    \ shutil\nimport subprocess\nimport tarfile\nimport tempfile\nfrom datetime import\
+    \ datetime, timezone, timedelta\nfrom pathlib import Path\n\nlogging.basicConfig(level=logging.INFO,\
+    \ format=\"%(asctime)s [%(levelname)s] %(message)s\")\nlog = logging.getLogger(\"\
+    backup\")\n\nBUCKET = os.environ[\"BUCKET\"]\nAWS_REGION = os.environ.get(\"AWS_REGION\"\
+    , \"us-east-1\")\nNFS_MOUNT = Path(\"/nfs\")\nRETENTION_DAYS = int(os.environ.get(\"\
+    RETENTION_DAYS\", \"30\"))\nBACKUP_PREFIX = f\"backups/{datetime.now(timezone.utc).strftime('%Y-%m-%d')}\"\
+    \n\ndef run(cmd: list[str], **kwargs) -> str:\n    log.info(\"Running: %s\", \"\
+    \ \".join(cmd))\n    result = subprocess.run(cmd, capture_output=True, text=True,\
+    \ timeout=300, **kwargs)\n    if result.returncode != 0:\n        log.warning(\"\
+    Exit %d: %s\", result.returncode, result.stderr.strip())\n    return result.stdout\n\
+    \ndef tar_directory(src: Path, dst: Path) -> Path:\n    \"\"\"Tar+gzip a directory\
+    \ into dst/name.tar.gz.\"\"\"\n    out = dst / f\"{src.name}.tar.gz\"\n    with\
+    \ tarfile.open(out, \"w:gz\") as tar:\n        tar.add(src, arcname=src.name)\n\
+    \    log.info(\"  \u2192 %s (%d bytes)\", out.name, out.stat().st_size)\n    return\
+    \ out\n\ndef upload_file(s3, local_path: Path, key: str):\n    s3.upload_file(str(local_path),\
+    \ BUCKET, key)\n    log.info(\"  \u2601\uFE0F Uploaded: %s\", key)\n\ndef prune_old_backups(s3):\n\
+    \    \"\"\"Delete backups/older than RETENTION_DAYS.\"\"\"\n    cutoff = datetime.now(timezone.utc)\
+    \ - timedelta(days=RETENTION_DAYS)\n    prefix = \"backups/\"\n    log.info(\"\
+    Pruning backups older than %s (%d days)\", cutoff.date(), RETENTION_DAYS)\n  \
+    \  deleted = 0\n    paginator = s3.get_paginator(\"list_objects_v2\")\n    for\
+    \ page in paginator.paginate(Bucket=BUCKET, Prefix=prefix):\n        for obj in\
+    \ page.get(\"Contents\", []):\n            key = obj[\"Key\"]\n            # Parse\
+    \ date from key: backups/YYYY-MM-DD/...\n            parts = key.split(\"/\")\n\
+    \            if len(parts) >= 2:\n                try:\n                    date\
+    \ = datetime.strptime(parts[1], \"%Y-%m-%d\").replace(tzinfo=timezone.utc)\n \
+    \                   if date < cutoff:\n                        s3.delete_object(Bucket=BUCKET,\
+    \ Key=key)\n                        deleted += 1\n                except ValueError:\n\
+    \                    continue\n    if deleted:\n        log.info(\"Pruned %d old\
+    \ objects\", deleted)\n\ndef main():\n    log.info(\"=== Homelab Backup ===\"\
+    )\n    log.info(\"Bucket: %s  Prefix: %s\", BUCKET, BACKUP_PREFIX)\n\n    s3 =\
+    \ boto3.client(\"s3\", region_name=AWS_REGION)\n\n    with tempfile.TemporaryDirectory(prefix=\"\
+    homelab-backup-\") as tmpdir:\n        tmp = Path(tmpdir)\n\n        # --- Step\
+    \ 1: PVC data from NFS ---\n        pvc_dir = tmp / \"pvc\"\n        pvc_dir.mkdir()\n\
+    \        log.info(\"\U0001F4E6 Backing up PVCs from NFS...\")\n        nfs_items\
+    \ = sorted(NFS_MOUNT.iterdir())\n        if not nfs_items:\n            log.warning(\"\
+    NFS mount at %s is empty!\", NFS_MOUNT)\n        for item in nfs_items:\n    \
+    \        if item.is_dir():\n                tarball = tar_directory(item, pvc_dir)\n\
+    \                key = f\"{BACKUP_PREFIX}/pvc/{tarball.name}\"\n             \
+    \   upload_file(s3, tarball, key)\n\n        # --- Step 2: k8s resource dump ---\n\
+    \        k8s_dir = tmp / \"k8s\"\n        k8s_dir.mkdir()\n        log.info(\"\
+    \U0001F4CB Dumping k8s resources...\")\n        resources = {\n            \"\
+    all-resources\": [\"get\", \"all\", \"--all-namespaces\", \"-o\", \"yaml\"],\n\
+    \            \"pv\": [\"get\", \"pv\", \"-o\", \"yaml\"],\n            \"pvc\"\
+    : [\"get\", \"pvc\", \"--all-namespaces\", \"-o\", \"yaml\"],\n            \"\
+    namespaces\": [\"get\", \"ns\", \"-o\", \"yaml\"],\n            \"nodes\": [\"\
+    get\", \"nodes\", \"-o\", \"yaml\"],\n            \"storageclasses\": [\"get\"\
+    , \"sc\", \"-o\", \"yaml\"],\n        }\n        for name, args in resources.items():\n\
+    \            out = k8s_dir / f\"{name}.yaml\"\n            try:\n            \
+    \    yaml_text = run([\"kubectl\"] + args)\n                out.write_text(yaml_text)\n\
+    \                log.info(\"  \u2713 %s.yaml (%d bytes)\", name, out.stat().st_size)\n\
+    \            except Exception as e:\n                log.error(\"  \u2717 %s failed:\
+    \ %s\", name, e)\n                out.write_text(f\"# Error dumping {name}: {e}\\\
+    n\")\n\n        # Upload k8s dump as a single tar\n        k8s_tar = tmp / \"\
+    k8s-dump.tar.gz\"\n        with tarfile.open(k8s_tar, \"w:gz\") as tar:\n    \
+    \        tar.add(k8s_dir, arcname=\"k8s\")\n        key = f\"{BACKUP_PREFIX}/k8s-dump.tar.gz\"\
+    \n        upload_file(s3, k8s_tar, key)\n\n        log.info(\"\u2705 Backup complete:\
+    \ %s\", BACKUP_PREFIX)\n\n    # --- Step 3: Prune old backups ---\n    prune_old_backups(s3)\n\
+    \    log.info(\"\U0001F3C1 Done!\")\n\nif __name__ == \"__main__\":\n    main()\n"
+kind: ConfigMap
+metadata:
+  name: homelab-backup-scripts
+  namespace: backups

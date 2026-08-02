@@ -1,73 +1,82 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: homelab-backup
-  namespace: backups
   labels:
     app: homelab-backup
+  name: homelab-backup
+  namespace: backups
 spec:
-  schedule: "0 3 * * *"
-  successfulJobsHistoryLimit: 3
+  concurrencyPolicy: Allow
   failedJobsHistoryLimit: 1
   jobTemplate:
+    metadata: {}
     spec:
       backoffLimit: 2
-      ttlSecondsAfterFinished: 86400
       template:
+        metadata: {}
         spec:
-          serviceAccountName: homelab-backup
-          restartPolicy: Never
           containers:
-          - name: backup
-            image: alpine:3.19
-            command:
+          - command:
             - /bin/sh
             - -c
-            - |
-              apk add --no-cache python3 py3-pip curl nfs-utils >/dev/null 2>&1
-              KUBE_VERSION=$(curl -sL --connect-timeout 5 https://dl.k8s.io/release/stable.txt)
-              curl -sL --connect-timeout 10 \
-                "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl" \
-                -o /usr/local/bin/kubectl
-              chmod +x /usr/local/bin/kubectl
-              pip3 install boto3 --break-system-packages --quiet 2>/dev/null
-              python3 /scripts/backup.py
+            - "apk add --no-cache python3 py3-pip curl nfs-utils >/dev/null 2>&1\n\
+              KUBE_VERSION=$(curl -sL --connect-timeout 5 https://dl.k8s.io/release/stable.txt)\n\
+              curl -sL --connect-timeout 10 \\\n  \"https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl\"\
+              \ \\\n  -o /usr/local/bin/kubectl\nchmod +x /usr/local/bin/kubectl\n\
+              pip3 install boto3 --break-system-packages --quiet 2>/dev/null\npython3\
+              \ /scripts/backup.py\n"
             env:
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
-                  name: aws-dynamo-creds
                   key: AWS_ACCESS_KEY_ID
+                  name: aws-dynamo-creds
             - name: AWS_SECRET_ACCESS_KEY
               valueFrom:
                 secretKeyRef:
-                  name: aws-dynamo-creds
                   key: AWS_SECRET_ACCESS_KEY
+                  name: aws-dynamo-creds
             - name: AWS_REGION
               value: us-east-1
             - name: BUCKET
               value: completeautomate-media
             - name: RETENTION_DAYS
-              value: "30"
-            volumeMounts:
-            - name: nfs-root
-              mountPath: /nfs
-              readOnly: true
-            - name: scripts
-              mountPath: /scripts
+              value: '30'
+            image: alpine:3.19
+            imagePullPolicy: IfNotPresent
+            name: backup
             resources:
-              requests:
-                cpu: 200m
-                memory: 256Mi
               limits:
                 cpu: 500m
                 memory: 512Mi
+              requests:
+                cpu: 200m
+                memory: 256Mi
+            terminationMessagePath: /dev/termination-log
+            terminationMessagePolicy: File
+            volumeMounts:
+            - mountPath: /nfs
+              name: nfs-root
+              readOnly: true
+            - mountPath: /scripts
+              name: scripts
+          dnsPolicy: ClusterFirst
+          restartPolicy: Never
+          schedulerName: default-scheduler
+          securityContext: {}
+          serviceAccount: homelab-backup
+          serviceAccountName: homelab-backup
+          terminationGracePeriodSeconds: 30
           volumes:
           - name: nfs-root
             nfs:
-              server: 192.168.128.59
               path: /mnt/nextcloud-storage
-          - name: scripts
-            configMap:
+              server: 192.168.128.59
+          - configMap:
+              defaultMode: 493
               name: homelab-backup-scripts
-              defaultMode: 0755
+            name: scripts
+      ttlSecondsAfterFinished: 86400
+  schedule: 0 3 * * *
+  successfulJobsHistoryLimit: 3
+  suspend: false
