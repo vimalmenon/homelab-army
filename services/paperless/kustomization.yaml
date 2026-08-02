@@ -6,8 +6,7 @@ resources:
   - pvc-data.yaml
   - pvc-postgres.yaml
   - pvc-redis.yaml
-  - secret.yaml
-  - postgres-service.yaml
+    - postgres-service.yaml
   - postgres-statefulset.yaml
   - redis-service.yaml
   - redis-statefulset.yaml
