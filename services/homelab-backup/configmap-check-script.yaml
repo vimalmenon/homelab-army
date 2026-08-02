@@ -1,22 +1,42 @@
 apiVersion: v1
-data:
-  check.py: "#!/usr/bin/env python3\n\"\"\"Check if the latest Hermes S3 backup is\
-    \ fresh. Exit 0 = healthy.\"\"\"\nimport boto3\nfrom datetime import datetime,\
-    \ timezone, timedelta\n\nS3_BUCKET = \"completeautomate-media\"\nS3_PREFIX = \"\
-    backups/hermes\"\nMAX_AGE_HOURS = 28\n\ns3 = boto3.client(\"s3\")\npaginator =\
-    \ s3.get_paginator(\"list_objects_v2\")\npages = paginator.paginate(Bucket=S3_BUCKET,\
-    \ Prefix=f\"{S3_PREFIX}/\")\n\nlatest_key = None\nlatest_lm = None\nfor page in\
-    \ pages:\n    for obj in page.get(\"Contents\", []):\n        lm = obj[\"LastModified\"\
-    ].replace(tzinfo=timezone.utc)\n        if latest_lm is None or lm > latest_lm:\n\
-    \            latest_lm = lm\n            latest_key = obj[\"Key\"]\n\nnow = datetime.now(timezone.utc)\n\
-    if latest_key is None:\n    print(f\"[FAIL] No Hermes backup found in S3 ({S3_BUCKET}/{S3_PREFIX}/)\"\
-    )\n    exit(1)\n\nage_hours = (now - latest_lm).total_seconds() / 3600\nif age_hours\
-    \ < MAX_AGE_HOURS:\n    print(f\"[OK] Latest: {latest_key} ({age_hours:.1f}h old)\"\
-    )\n    exit(0)\n\nprint(f\"[FAIL] Stale: {latest_key} is {age_hours:.1f}h old\
-    \ (max {MAX_AGE_HOURS}h)\")\nexit(1)\n"
 kind: ConfigMap
 metadata:
-  labels:
-    app: homelab-backup
   name: homelab-backup-check-script
   namespace: backups
+data:
+  check.py: |
+    #!/usr/bin/env python3
+    """Check if the latest Homelab S3 backup is fresh. Exit 0 = healthy."""
+    import boto3
+    from datetime import datetime, timezone, timedelta
+    
+    S3_BUCKET = "completeautomate-media"
+    S3_PREFIX = "backups/"
+    MAX_AGE_HOURS = 28
+    
+    s3 = boto3.client("s3")
+    paginator = s3.get_paginator("list_objects_v2")
+    pages = paginator.paginate(Bucket=S3_BUCKET, Prefix=f"{S3_PREFIX}")
+    
+    latest_key = None
+    latest_lm = None
+    for page in pages:
+        for obj in page.get("Contents", []):
+            lm = obj["LastModified"].replace(tzinfo=timezone.utc)
+            if latest_lm is None or lm > latest_lm:
+                latest_lm = lm
+                latest_key = obj["Key"]
+    
+    now = datetime.now(timezone.utc)
+    if latest_key is None:
+        print(f"[FAIL] No Homelab backup found in S3 ({S3_BUCKET}/{S3_PREFIX})")
+        exit(1)
+    
+    age_hours = (now - latest_lm).total_seconds() / 3600
+    if age_hours < MAX_AGE_HOURS:
+        print(f"[OK] Latest: {latest_key} ({age_hours:.1f}h old)")
+        exit(0)
+    
+    print(f"[FAIL] Stale: {latest_key} is {age_hours:.1f}h old (max {MAX_AGE_HOURS}h)")
+    exit(1)
+    
