@@ -24,7 +24,7 @@ spec:
         - name: PROVISIONER_NAME
           value: nfs-provisioner
         - name: NFS_SERVER
-          value: 192.168.128.59
+          value: 192.168.10.106
         - name: NFS_PATH
           value: /mnt/nextcloud-storage
         image: registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2
@@ -53,4 +53,4 @@ spec:
       - name: nfs-root
         nfs:
           path: /mnt/nextcloud-storage
-          server: 192.168.128.59
+          server: 192.168.10.106

@@ -71,7 +71,7 @@ spec:
           - name: nfs-root
             nfs:
               path: /mnt/nextcloud-storage
-              server: 192.168.128.59
+              server: 192.168.10.106
           - configMap:
               defaultMode: 493
               name: homelab-backup-scripts
