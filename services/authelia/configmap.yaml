@@ -12,6 +12,15 @@ data:
     port: 9091
     log_level: debug
     jwt_secret: REPLACED_BY_ENV_VAR_jwt_secret
+    server:
+      address: 'tcp://0.0.0.0:9091'
+      buffers:
+        read: 8192
+        write: 8192
+      timeouts:
+        read: 15s
+        write: 15s
+        idle: 5m
     theme: dark
     log:
       format: json
