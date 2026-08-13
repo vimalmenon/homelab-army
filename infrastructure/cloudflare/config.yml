@@ -1,21 +1,45 @@
 tunnel: homelab-k8s
-credentials-file: /home/hermes/.cloudflared/011a9625-236e-42dc-b716-e5de75390eaa.json
+credentials-file: /home/homelab/.cloudflared/011a9625-236e-42dc-b716-e5de75390eaa.json
 
 ingress:
+  - hostname: admin.completeautomate.com
+    service: http://192.168.128.200
   - hostname: argocd.completeautomate.com
     service: http://192.168.128.200
   - hostname: auth.completeautomate.com
     service: http://192.168.128.200
+  - hostname: azure.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: bookmarks.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: documents.completeautomate.com
+    service: http://192.168.128.200
   - hostname: grafana.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: hestia.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: homepage.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: immich.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: messages.completeautomate.com
     service: http://192.168.128.200
   - hostname: n8n.completeautomate.com
     service: http://192.168.128.200
   - hostname: netalertx.completeautomate.com
     service: http://192.168.128.200
+  - hostname: ops.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: prometheus.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: secrets.completeautomate.com
+    service: http://192.168.128.200
   - hostname: slides.completeautomate.com
     service: http://192.168.128.200
   - hostname: status.completeautomate.com
     service: http://192.168.128.200
-  - hostname: bookmarks.completeautomate.com
+  - hostname: vault.completeautomate.com
+    service: http://192.168.128.200
+  - hostname: wiki.completeautomate.com
     service: http://192.168.128.200
   - service: http_status:404
