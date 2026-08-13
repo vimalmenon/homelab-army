@@ -18,8 +18,6 @@ ingress:
     service: http://192.168.128.200
   - hostname: hestia.completeautomate.com
     service: http://192.168.128.200
-  - hostname: homepage.completeautomate.com
-    service: http://192.168.128.200
   - hostname: immich.completeautomate.com
     service: http://192.168.128.200
   - hostname: messages.completeautomate.com
