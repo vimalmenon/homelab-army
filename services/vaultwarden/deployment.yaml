@@ -30,6 +30,8 @@ spec:
           value: "false"
         - name: INVITATIONS_ALLOWED
           value: "true"
+        - name: DOMAIN
+          value: "https://vault.completeautomate.com"
         volumeMounts:
         - mountPath: /data
           name: data
