@@ -6,6 +6,8 @@ metadata:
   name: netalertx
   namespace: netalertx
 spec:
+  selector:
+    app: netalertx
   ports:
   - name: web
     port: 20211
