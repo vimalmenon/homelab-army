@@ -95,7 +95,7 @@ data:
       admin:
         disabled: false
         displayname: "Vimal Menon"
-        password: "$argon2id$v=19$m=65536,t=3,p=4$Li5+T2NOUlWtd+EpY9UFGw$QCPte24N/cHeC7c/QMAr2awB4biFT2222mlSu44ULh4"
+        password: "$argon2id$v=19$m=65536,t=3,p=4$6gr7cKtPejIHVKfLdRYu8w$42y3yslYCozHw+UA8xPq5BVidJtR3jHcalN4BsHY3Eg"
         email: hello@completeautomate.com
         groups:
           - admins
