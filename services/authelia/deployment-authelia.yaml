@@ -43,11 +43,6 @@ spec:
             secretKeyRef:
               name: authelia-secrets
               key: JWT_SECRET
-        - name: AUTHELIA_JWT_SECRET
-          valueFrom:
-            secretKeyRef:
-              name: authelia-secrets
-              key: JWT_SECRET
         - name: AUTHELIA_SESSION_SECRET
           valueFrom:
             secretKeyRef:

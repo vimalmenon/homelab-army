@@ -8,14 +8,12 @@ data:
     ###############################################################
     #                   Authelia configuration                    #
     ###############################################################
-    host: 0.0.0.0
-    port: 9091
-    log_level: debug
-    jwt_secret: REPLACED_BY_ENV_VAR_jwt_secret
     theme: dark
     log:
+      level: debug
       format: json
     server:
+      address: 'tcp://0.0.0.0:9091/'
       buffers:
         read: 16384
         write: 16384
