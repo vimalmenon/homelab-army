@@ -68,15 +68,15 @@ File: `~/.cloudflared/config.yml`
 ```yaml
 ingress:
   - hostname: argocd.completeautomate.com
-    service: http://192.168.128.200
+    service: http://192.168.10.200
   # ... existing routes ...
   - hostname: myservice.completeautomate.com    # ← ADD
-    service: http://192.168.128.200              # ← ADD
+    service: http://192.168.10.200              # ← ADD
   - service: http_status:404                      # catch-all
 ```
 
 The tunnel routes **everything** through the homelab load balancer
-(`192.168.128.200`), which is Traefik's MetalLB IP. After editing, **restart
+(`192.168.10.200`), which is Traefik's MetalLB IP. After editing, **restart
 the tunnel**:
 
 ```bash

@@ -4,4 +4,4 @@
 
 k3s_role: agent
 k3s_server_mode: false
-k3s_server_url: "https://192.168.128.54:6443"
+k3s_server_url: "https://192.168.10.104:6443"

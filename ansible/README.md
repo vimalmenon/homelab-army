@@ -20,7 +20,7 @@ ansible-galaxy collection install -r requirements.yml
 ### 2. Get the k3s token from the existing master
 
 ```bash
-K3S_TOKEN=$(ssh homelab@192.168.128.54 sudo cat /var/lib/rancher/k3s/server/token)
+K3S_TOKEN=$(ssh homelab@192.168.10.104 sudo cat /var/lib/rancher/k3s/server/token)
 ```
 
 ### 3. Run the full site playbook
@@ -106,9 +106,9 @@ ansible/
 
 | Hostname        | IP               | Role           | Architecture |
 |-----------------|------------------|----------------|--------------|
-| homelab01       | 192.168.128.54   | Control-plane  | aarch64      |
-| homelab02       | 192.168.128.60   | Worker         | aarch64      |
-| homelab03       | 192.168.128.59   | Worker         | aarch64      |
+| homelab01       | 192.168.10.104   | Control-plane  | aarch64      |
+| homelab02       | 192.168.10.107   | Worker         | aarch64      |
+| homelab03       | 192.168.10.106   | Worker         | aarch64      |
 
 ## Variables (in `group_vars/all.yml`)
 
@@ -116,6 +116,6 @@ ansible/
 |----------|---------|-------------|
 | `k3s_version` | `v1.35.5+k3s1` | Pinned k3s release |
 | `k3s_token` | env lookup or fallback | Cluster join token |
-| `metallb_ip_range` | `192.168.128.200-220` | MetalLB IP pool |
+| `metallb_ip_range` | `192.168.10.200-220` | MetalLB IP pool |
 | `timezone` | `Asia/Hong_Kong` | Node timezone |
 | `extra_packages` | curl, wget, vim, ... | Apt packages |

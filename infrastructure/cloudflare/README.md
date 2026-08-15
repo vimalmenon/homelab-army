@@ -8,7 +8,7 @@ user via a shell login.
 
 **Files in this directory:**
 - `config.yml` — the cloudflared ingress configuration (routes hostnames to the
-  MetalLB load balancer IP `192.168.128.200`)
+  MetalLB load balancer IP `192.168.10.200`)
 - `clusterrole.yaml` — the `cloudflared` ClusterRole (exists in the cluster but
   is unused — likely a leftover from a previous k8s-based deployment attempt)
 - `clusterrolebinding.yaml` — the corresponding ClusterRoleBinding

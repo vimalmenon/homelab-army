@@ -60,7 +60,7 @@ Contains:
    sudo cat /var/lib/rancher/k3s/server/token
    
    # On each worker node, rejoin
-   curl -sfL https://get.k3s.io | K3S_URL=https://192.168.128.54:6443 K3S_TOKEN=<TOKEN> sh -
+   curl -sfL https://get.k3s.io | K3S_URL=https://192.168.10.104:6443 K3S_TOKEN=<TOKEN> sh -
    ```
 
 ### Notes

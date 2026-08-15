@@ -21,7 +21,7 @@ import sys
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-SEMAPHORE_BASE = os.environ.get("SEMAPHORE_URL", "http://192.168.128.200")
+SEMAPHORE_BASE = os.environ.get("SEMAPHORE_URL", "http://192.168.10.200")
 SEMAPHORE_HOST = os.environ.get("SEMAPHORE_HOST", "ops.completeautomate.com")
 PROJECT_ID = os.environ.get("SEMAPHORE_PROJECT_ID", "1")
 

@@ -8,7 +8,7 @@
 #   ansible-playbook playbooks/node-join.yml -e k3s_token=<TOKEN>
 #
 # Or set K3S_TOKEN env var:
-#   K3S_TOKEN=$(ssh homelab@192.168.128.54 sudo cat /var/lib/rancher/k3s/server/token)
+#   K3S_TOKEN=$(ssh homelab@192.168.10.104 sudo cat /var/lib/rancher/k3s/server/token)
 #   ansible-playbook playbooks/node-join.yml -e "k3s_token=$K3S_TOKEN"
 
 - name: Join Workers — k3s Agents
