@@ -23,7 +23,7 @@ data:
     CLOUDFLARE_API_BASE = "https://api.cloudflare.com/client/v4"
     DEFAULT_TUNNEL_ID = "011a9625-236e-42dc-b716-e5de75390eaa"
     DEFAULT_ACCOUNT_ID = "3fffdd2b812bcd8b1ee70fb599de63b7"
-    DEFAULT_BACKEND = "http://192.168.128.200"
+    DEFAULT_BACKEND = "http://192.168.10.200"
     INGRESS_HOST_SUFFIX = ".completeautomate.com"
 
     def load_config() -> dict:
