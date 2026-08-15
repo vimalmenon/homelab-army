@@ -15,7 +15,6 @@ resources:
   - metallb.yaml
   - external-secrets.yaml
   - aws-secrets.yaml
-  - dashboards.yaml
   - kube-router.yaml
   - network-policies.yaml
   - homelab-backup.yaml
