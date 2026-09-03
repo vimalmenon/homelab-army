@@ -7,7 +7,7 @@ data:
   backup.py: |
     #!/usr/bin/env python3
     """Homelab backup — PVC data + k8s resources → S3."""
-    
+
     import boto3
     import gzip
     import logging
@@ -18,23 +18,23 @@ data:
     import tempfile
     from datetime import datetime, timezone, timedelta
     from pathlib import Path
-    
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
     log = logging.getLogger("backup")
-    
+
     BUCKET = os.environ["BUCKET"]
     AWS_REGION = os.environ.get("AWS_REGION", "us-east-1")
     NFS_MOUNT = Path("/nfs")
     RETENTION_DAYS = int(os.environ.get("RETENTION_DAYS", "30"))
     BACKUP_PREFIX = f"backups/{datetime.now(timezone.utc).strftime('%Y-%m-%d')}"
-    
+
     def run(cmd: list[str], **kwargs) -> str:
         log.info("Running: %s", " ".join(cmd))
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=300, **kwargs)
         if result.returncode != 0:
             log.warning("Exit %d: %s", result.returncode, result.stderr.strip())
         return result.stdout
-    
+
     def tar_directory(src: Path, dst: Path) -> Path:
         """Tar+gzip a directory into dst/name.tar.gz."""
         out = dst / f"{src.name}.tar.gz"
@@ -42,11 +42,11 @@ data:
             tar.add(src, arcname=src.name)
         log.info("  → %s (%d bytes)", out.name, out.stat().st_size)
         return out
-    
+
     def upload_file(s3, local_path: Path, key: str):
         s3.upload_file(str(local_path), BUCKET, key)
         log.info("  ☁️ Uploaded: %s", key)
-    
+
     def prune_old_backups(s3):
         """Delete backups/older than RETENTION_DAYS."""
         cutoff = datetime.now(timezone.utc) - timedelta(days=RETENTION_DAYS)
@@ -69,29 +69,40 @@ data:
                         continue
         if deleted:
             log.info("Pruned %d old objects", deleted)
-    
+
+    def is_weekly_run() -> bool:
+        """Weekly-only directories (e.g. Immich library) are backed up on Sundays."""
+        return datetime.now(timezone.utc).weekday() == 6  # 6 = Sunday
+
+
     def main():
         log.info("=== Homelab Backup ===")
         log.info("Bucket: %s  Prefix: %s", BUCKET, BACKUP_PREFIX)
-    
+
         s3 = boto3.client("s3", region_name=AWS_REGION)
-    
+
         with tempfile.TemporaryDirectory(prefix="homelab-backup-") as tmpdir:
             tmp = Path(tmpdir)
-    
+
             # --- Step 1: PVC data from NFS ---
             pvc_dir = tmp / "pvc"
             pvc_dir.mkdir()
             log.info("📦 Backing up PVCs from NFS...")
+            weekly = is_weekly_run()
+            weekly_only = ("immich",)  # large, slow-changing dirs → weekly only
             nfs_items = sorted(NFS_MOUNT.iterdir())
             if not nfs_items:
                 log.warning("NFS mount at %s is empty!", NFS_MOUNT)
             for item in nfs_items:
-                if item.is_dir():
-                    tarball = tar_directory(item, pvc_dir)
-                    key = f"{BACKUP_PREFIX}/pvc/{tarball.name}"
-                    upload_file(s3, tarball, key)
-    
+                if not item.is_dir():
+                    continue
+                if not weekly and item.name.startswith(weekly_only):
+                    log.info("  ⏭️ Skipping (weekly-only): %s", item.name)
+                    continue
+                tarball = tar_directory(item, pvc_dir)
+                key = f"{BACKUP_PREFIX}/pvc/{tarball.name}"
+                upload_file(s3, tarball, key)
+
             # --- Step 2: k8s resource dump ---
             k8s_dir = tmp / "k8s"
             k8s_dir.mkdir()
@@ -115,20 +126,19 @@ data:
                 except Exception as e:
                     log.error("  ✗ %s failed: %s", name, e)
                     out.write_text(f"# Error dumping {name}: {e}\n")
-    
+
             # Upload k8s dump as a single tar
             k8s_tar = tmp / "k8s-dump.tar.gz"
             with tarfile.open(k8s_tar, "w:gz") as tar:
                 tar.add(k8s_dir, arcname="k8s")
             key = f"{BACKUP_PREFIX}/k8s-dump.tar.gz"
             upload_file(s3, k8s_tar, key)
-    
+
             log.info("✅ Backup complete: %s", BACKUP_PREFIX)
-    
+
         # --- Step 3: Prune old backups ---
         prune_old_backups(s3)
         log.info("🏁 Done!")
-    
+
     if __name__ == "__main__":
         main()
-    
