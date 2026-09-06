@@ -1,0 +1,50 @@
+---
+# ──────────────────────────────────────────────
+# osv-scan.yml — Weekly OS vulnerability scan of
+# host dpkg packages on all cluster nodes.
+# Uses OSV-Scanner (Go binary) against /var/lib/dpkg.
+# Reports packages affected + total vulnerabilities.
+# ──────────────────────────────────────────────
+
+- name: OSV vulnerability scan
+  hosts: k3s_cluster
+  become: true
+
+  vars:
+    osv_version: "2.5.1"
+    osv_bin: /usr/local/bin/osv-scanner
+    osv_out: /var/tmp/osv-scan.json
+
+  tasks:
+    - name: Check if osv-scanner is installed
+      ansible.builtin.stat:
+        path: "{{ osv_bin }}"
+      register: osv_stat
+
+    - name: Install osv-scanner
+      ansible.builtin.get_url:
+        url: "https://github.com/google/osv-scanner/releases/download/v{{ osv_version }}/osv-scanner_linux_arm64"
+        dest: "{{ osv_bin }}"
+        mode: "0755"
+      when: not osv_stat.stat.exists
+
+    - name: Run OSV scan against host dpkg database
+      ansible.builtin.command:
+        cmd: "{{ osv_bin }} scan source -r /var/lib/dpkg --format json --output-file {{ osv_out }}"
+      register: osv_scan
+      changed_when: false
+      # Exit code 1 = vulnerabilities found (expected); never fail the job.
+      failed_when: false
+
+    - name: Summarize scan
+      ansible.builtin.command:
+        argv:
+          - python3
+          - -c
+          - "import json; d=json.load(open('{{ osv_out }}')); r=d.get('results', []); p=r[0].get('packages', []) if r else []; v=sum(len(x.get('vulnerabilities', [])) for x in p); print('packages_affected=%d vulnerabilities=%d' % (len(p), v))"
+      register: osv_summary
+      changed_when: false
+
+    - name: Report scan summary
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }}: {{ osv_summary.stdout }}"
