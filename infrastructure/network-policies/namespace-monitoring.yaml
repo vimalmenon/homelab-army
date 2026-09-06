@@ -40,3 +40,18 @@ spec:
               kubernetes.io/metadata.name: kube-system
   policyTypes:
     - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-from-bad-request-report
+  namespace: monitoring
+spec:
+  podSelector: {}
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: bad-request-report
+  policyTypes:
+    - Ingress
