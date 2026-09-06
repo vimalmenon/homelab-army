@@ -37,6 +37,7 @@
       failed_when: false
 
     - name: Summarize scan
+      become: false
       ansible.builtin.command:
         argv:
           - python3
