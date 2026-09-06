@@ -7,6 +7,7 @@ resources:
   - atlas.yaml
   - authelia.yaml
   - azure-quiz.yaml
+  - bad-request-report.yaml
   - bookmarks.yaml
   - cert-manager.yaml
   - clio.yaml
