@@ -2,36 +2,34 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - testzone.yaml
-  - bookmarks.yaml
-  - slides.yaml
-  - uptime-kuma.yaml
-  - netalertx.yaml
-  - n8n.yaml
-  - pihole.yaml
-  - authelia.yaml
-  - grafana-stack.yaml
-  - nfs-provisioner.yaml
-  - metallb.yaml
-  - external-secrets.yaml
-  - aws-secrets.yaml
-  - kube-router.yaml
-  - network-policies.yaml
-  - homelab-backup.yaml
-  - vaultwarden.yaml
-  - cert-manager.yaml
-  - cluster-issuer.yaml
-  - clio.yaml
-  - atlas.yaml
-  - athena.yaml
-  - orpheus.yaml
-  - paperless.yaml
-  - iris.yaml
   - angelos.yaml
+  - athena.yaml
+  - atlas.yaml
+  - authelia.yaml
+  - azure-quiz.yaml
+  - bookmarks.yaml
+  - cert-manager.yaml
+  - clio.yaml
+  - cluster-issuer.yaml
+  - grafana-stack.yaml
   - helios.yaml
   - hestia.yaml
-  - arachne.yaml
-  - semaphore.yaml
+  - homelab-backup.yaml
+  - immich.yaml
+  - iris.yaml
+  - k3s-server-backup.yaml
+  - linkwarden.yaml
+  - metallb.yaml
+  - n8n.yaml
+  - netalertx.yaml
+  - network-policies.yaml
+  - nfs-provisioner.yaml
+  - orpheus.yaml
+  - paperless.yaml
+  - pihole.yaml
+  - pythia.yaml
   - secrets.yaml
-  - arch.yaml
-  - azure-quiz.yaml
+  - semaphore.yaml
+  - slides.yaml
+  - uptime-kuma.yaml
+  - vaultwarden.yaml
