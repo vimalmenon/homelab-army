@@ -55,3 +55,10 @@ extra_packages:
   - net-tools
   - nfs-common
   - ufw
+
+# --- Telegram notifications ---
+# Token/chat come from env (never hardcode secrets in git):
+#   TELEGRAM_BOT_TOKEN  — bot token from @BotFather
+#   TELEGRAM_CHAT_ID    — target chat/user id (defaults to Vimal)
+telegram_bot_token: "{{ lookup('env', 'TELEGRAM_BOT_TOKEN') | default('', true) }}"
+telegram_chat_id: "{{ lookup('env', 'TELEGRAM_CHAT_ID') | default('8145517732', true) }}"

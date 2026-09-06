@@ -1,0 +1,23 @@
+---
+# ──────────────────────────────────────────────────────
+# notify-telegram.yml — one-off Telegram notification
+# ──────────────────────────────────────────────────────
+# Usage:
+#   export TELEGRAM_BOT_TOKEN=123456:ABC...
+#   ansible-playbook -i inventory/hosts.ini \
+#     playbooks/notify-telegram.yml -e telegram_message="Deploy done"
+#
+# Optional extras:
+#   -e telegram_parse_mode=Markdown
+#   -e telegram_disable_notification=true
+#   -e telegram_chat_id=123456789
+# ──────────────────────────────────────────────────────
+- name: Notify via Telegram
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Send notification
+      include_tasks: ../tasks/notify-telegram.yml
+      vars:
+        telegram_message: "{{ telegram_message | default('Ansible notification (no message provided)') }}"

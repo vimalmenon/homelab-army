@@ -1,0 +1,22 @@
+---
+# Reusable Telegram notification task.
+#
+# Include it from any playbook, then set `telegram_message`:
+#
+#   - name: Notify
+#     include_tasks: ../tasks/notify-telegram.yml
+#     vars:
+#       telegram_message: "Deploy finished"
+#
+# Requires community.general collection (see requirements.yml).
+# Token + chat_id resolve from group_vars/all.yml (env-driven).
+- name: Send Telegram message
+  community.general.telegram:
+    token: "{{ telegram_bot_token }}"
+    api_args:
+      chat_id: "{{ telegram_chat_id | string }}"
+      text: "{{ telegram_message }}"
+      parse_mode: "{{ telegram_parse_mode | default('HTML') }}"
+      disable_notification: "{{ telegram_disable_notification | default(false) }}"
+  delegate_to: localhost
+  run_once: true
