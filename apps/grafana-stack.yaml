@@ -114,6 +114,14 @@ spec:
 
         nodeExporter:
           enabled: true
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              scheme: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
 
         alertmanager:
           enabled: false
