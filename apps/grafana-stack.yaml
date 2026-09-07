@@ -114,9 +114,12 @@ spec:
 
         nodeExporter:
           enabled: true
+
+        prometheus-node-exporter:
           livenessProbe:
             failureThreshold: 3
             httpGet:
+              httpHeaders: []
               scheme: http
             initialDelaySeconds: 0
             periodSeconds: 10
