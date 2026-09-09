@@ -1,0 +1,55 @@
+# ──────────────────────────────────────────────────────
+# ping.yml — Cluster connectivity check
+# ──────────────────────────────────────────────────────
+# Pings every node in the cluster and prints a summary
+# table with hostname, IP, status, and response time.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbooks/ping.yml
+# ──────────────────────────────────────────────────────
+---
+- name: 🖖 Cluster Ping — Check connectivity to all nodes
+  hosts: k3s_cluster
+  gather_facts: true
+  vars:
+    results: []
+
+  tasks:
+    - name: Ping the node
+      ansible.builtin.ping:
+      register: ping_result
+
+    - name: Capture result
+      ansible.builtin.set_fact:
+        cacheable: false
+        ping_output: "{{ ping_result }}"
+
+    - name: Build summary
+      ansible.builtin.set_fact:
+        results: >-
+          {{
+            results +
+            [{
+              'host': inventory_hostname,
+              'ip': ansible_host | default('unknown'),
+              'status': '✅ Alive' if ping_result.ping is defined and ping_result.ping == 'pong' else '❌ Dead',
+              'dist': ansible_distribution | default('?') + ' ' + ansible_distribution_version | default('?'),
+              'arch': ansible_architecture | default('?'),
+              'uptime': (ansible_uptime_seconds | default(0) // 86400) | string + 'd'
+            }]
+          }}
+      run_once: true
+      delegate_to: localhost
+
+    - name: Print summary
+      ansible.builtin.debug:
+        msg: |
+          ┌────────────────────────────────────────────────────────────┐
+          │                 🖖  Cluster Ping Results                   │
+          └────────────────────────────────────────────────────────────┘
+          {% for r in hostvars[groups['k3s_master'][0]]['results'] | default([]) | sort(attribute='host') %}
+          {{ '%-30s %-16s %s' | format(r.host + ' (' + r.ip + ')', r.status, r.arch) }}
+          {% endfor %}
+          ─────────────────────────────────────────────────────────────
+      run_once: true
+      delegate_to: localhost

@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: semaphore-config
+  namespace: semaphore
+data:
+  config.json: |
+    {
+      "port": ":3000",
+      "tmp_path": "/tmp/semaphore",
+      "web_root": "",
+      "bolt": {
+        "host": "/var/lib/semaphore/database.boltdb"
+      },
+      "dialect": "bolt",
+      "max_task_duration_sec": 0,
+      "max_parallel_tasks": 10,
+      "email_alert": false,
+      "telegram_alert": false,
+      "slack_alert": false,
+      "rocketchat_alert": false,
+      "microsoft_teams_alert": false,
+      "ldap_enable": false,
+      "password_login_disable": false,
+      "non_admin_can_create_project": true,
+      "cookie_hash": "B1MkfO9yTAzypLyiiVIUwEzlwNhh6LkXbORkocm3ekeFHJWhMBKDiGg3nCc7sqSo0dtl5IOzaqGN7haVxau2QQ==",
+      "cookie_encryption": "XHYIL2TLj4z2kb6aSU93r/bzjI7jl6sdRdscNjVCXSk="
+    }

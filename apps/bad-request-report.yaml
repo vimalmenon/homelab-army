@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bad-request-report
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/vimalmenon/homelab-army.git
+    targetRevision: main
+    path: services/bad-request-report
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: bad-request-report
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

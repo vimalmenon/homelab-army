@@ -1,0 +1,15 @@
+# ============================================================================
+# kustomization.yaml - Placeholder only
+#
+# This service is deployed via ArgoCD using Helm (kube-prometheus-stack chart),
+# NOT Kustomize. This file exists as a placeholder for directory structure
+# consistency. The actual deployment is defined in the ArgoCD Application
+# manifest pointing to the Helm chart with values from values.yaml.
+#
+# See README.md for deployment details.
+# ============================================================================
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# No resources or patches defined here - all configuration is via Helm values.
+resources: []

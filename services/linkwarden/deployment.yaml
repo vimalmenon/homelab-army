@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: linkwarden
+  namespace: linkwarden
+  labels:
+    app: linkwarden
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: linkwarden
+  template:
+    metadata:
+      labels:
+        app: linkwarden
+    spec:
+      containers:
+      - name: linkwarden
+        image: ghcr.io/linkwarden/linkwarden:v2.14.1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: linkwarden-secrets
+              key: database_url
+        - name: NEXTAUTH_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: linkwarden-secrets
+              key: nextauth_secret
+        - name: NEXTAUTH_URL
+          valueFrom:
+            secretKeyRef:
+              name: linkwarden-secrets
+              key: nextauth_url
+        - name: NEXT_PUBLIC_DISABLE_REGISTRATION
+          value: "true"
+        resources:
+          requests:
+            cpu: 200m
+            memory: 512Mi
+          limits:
+            cpu: "1"
+            memory: 1.5Gi
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 30
+          failureThreshold: 3
+        volumeMounts:
+        - name: data
+          mountPath: /data/data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: linkwarden-uploads

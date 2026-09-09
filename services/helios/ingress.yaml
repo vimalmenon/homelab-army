@@ -1,0 +1,48 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: admin
+  namespace: microservices
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
+spec:
+  rules:
+    - host: admin.completeautomate.com
+      http:
+        paths:
+          - backend:
+              service:
+                name: hestia
+                port:
+                  number: 8000
+            path: /api/v1/services/status
+            pathType: Prefix
+          - backend:
+              service:
+                name: hestia
+                port:
+                  number: 8000
+            path: /api/v1/cluster/nodes
+            pathType: Prefix
+          - backend:
+              service:
+                name: helios
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+    - host: admin.homelab.local
+      http:
+        paths:
+          - backend:
+              service:
+                name: helios
+                port:
+                  number: 80
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - admin.completeautomate.com
+        - admin.homelab.local

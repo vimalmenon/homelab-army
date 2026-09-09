@@ -1,0 +1,20 @@
+# argocd/install.yaml
+# ArgoCD installation manifest
+#
+# For a fresh bootstrap you can also use:
+#   kubectl create namespace argocd
+#   kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+#
+# This file serves as a local snapshot of the ArgoCD installation.
+# For the full upstream manifest see:
+#   https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.3/manifests/install.yaml
+#
+# Below is the namespace resource followed by the key cluster-scoped resources.
+# The full set of Deployments, Services, ConfigMaps, RBAC, and CRDs can be
+# reproduced by applying the upstream URL above into the argocd namespace.
+
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd

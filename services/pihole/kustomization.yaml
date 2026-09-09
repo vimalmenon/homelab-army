@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- configmap-exporter.yaml
+- deployment.yaml
+- ingress.yaml
+- pihole-exporter.yaml
+- pvc-pihole-config.yaml
+- pvc-pihole-dnsmasq.yaml
+- service-pihole-dns.yaml
+- service-pihole-exporter.yaml
+- service-pihole-web.yaml
+- servicemonitor-pihole.yaml

@@ -1,0 +1,55 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bad-request-report
+  namespace: bad-request-report
+  labels:
+    app: bad-request-report
+spec:
+  schedule: "0 7 * * *"
+  timeZone: Asia/Hong_Kong
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 3600
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: bad-request-report
+            image: python:3.13-slim
+            imagePullPolicy: IfNotPresent
+            command: ["python3", "/scripts/report.py"]
+            env:
+            - name: PROMETHEUS_URL
+              value: http://prometheus-kube-prometheus-prometheus.monitoring.svc:9090
+            - name: LOKI_URL
+              value: http://loki.loki.svc:3100
+            - name: TELEGRAM_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-bot-creds
+                  key: TELEGRAM_BOT_TOKEN
+            - name: TELEGRAM_CHAT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-bot-creds
+                  key: TELEGRAM_CHAT_ID
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            resources:
+              requests:
+                cpu: 50m
+                memory: 64Mi
+              limits:
+                cpu: 200m
+                memory: 128Mi
+          volumes:
+          - name: scripts
+            configMap:
+              name: bad-request-report-scripts
+              defaultMode: 0755

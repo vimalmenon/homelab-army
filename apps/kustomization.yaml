@@ -1,0 +1,35 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - angelos.yaml
+  - athena.yaml
+  - atlas.yaml
+  - authelia.yaml
+  - azure-quiz.yaml
+  - bad-request-report.yaml
+  - bookmarks.yaml
+  - cert-manager.yaml
+  - clio.yaml
+  - cluster-issuer.yaml
+  - grafana-stack.yaml
+  - helios.yaml
+  - hestia.yaml
+  - homelab-backup.yaml
+  - iris.yaml
+  - k3s-server-backup.yaml
+  - linkwarden.yaml
+  - metallb.yaml
+  - n8n.yaml
+  - netalertx.yaml
+  - network-policies.yaml
+  - nfs-provisioner.yaml
+  - orpheus.yaml
+  - paperless.yaml
+  - pihole.yaml
+  - pythia.yaml
+  - secrets.yaml
+  - semaphore.yaml
+  - slides.yaml
+  - uptime-kuma.yaml
+  - vaultwarden.yaml

@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: semaphore
+  namespace: semaphore
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: semaphore
+  template:
+    metadata:
+      labels:
+        app: semaphore
+    spec:
+      containers:
+      - name: semaphore
+        image: semaphoreui/semaphore:v2.17.17
+        imagePullPolicy: Always
+        command:
+        - sh
+        - -c
+        - |
+          set -e
+          # Create admin user (ignore failure if already exists)
+          semaphore user add --admin \
+            --login admin \
+            --name "Vimal Menon" \
+            --email hello@completeautomate.com \
+            --password "$SEMAPHORE_ADMIN_PASSWORD" \
+            --config /etc/semaphore/config.json 2>/dev/null || true
+          echo "Starting Semaphore server..."
+          exec semaphore server --config /etc/semaphore/config.json
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: SEMAPHORE_PORT
+          value: ":3000"
+        - name: SEMAPHORE_ADMIN_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-secrets
+              key: admin_password
+        - name: SEMAPHORE_ACCESS_KEY_ENCRYPTION
+          valueFrom:
+            secretKeyRef:
+              name: semaphore-secrets
+              key: encryption_key
+        volumeMounts:
+        - mountPath: /etc/semaphore
+          name: config
+        - mountPath: /var/lib/semaphore
+          name: data
+        livenessProbe:
+          httpGet:
+            path: /api/ping
+            port: 3000
+          initialDelaySeconds: 15
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /api/ping
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      volumes:
+      - name: config
+        configMap:
+          name: semaphore-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: semaphore-data

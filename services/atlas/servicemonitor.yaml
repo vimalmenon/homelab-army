@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: atlas
+  namespace: microservices
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: atlas
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 15s
+  namespaceSelector:
+    matchNames:
+    - microservices

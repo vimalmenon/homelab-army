@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: authelia-config
+  namespace: authelia
+data:
+  configuration.yml: |
+    ###############################################################
+    #                   Authelia configuration                    #
+    ###############################################################
+    theme: dark
+    log:
+      level: debug
+      format: json
+    server:
+      address: 'tcp://0.0.0.0:9091/'
+      buffers:
+        read: 16384
+        write: 16384
+    totp:
+      issuer: auth.completeautomate.com
+      period: 30
+      skew: 1
+    authentication_backend:
+      file:
+        path: /config/users.yml
+      password_reset:
+        disable: false
+    password_policy:
+      standard:
+        enabled: false
+      zxcvbn:
+        enabled: false
+    access_control:
+      default_policy: deny
+      rules:
+        - domain: auth.completeautomate.com
+          policy: bypass
+        - domain: auth.homelab.local
+          policy: bypass
+        - domain: n8n.homelab.local
+          policy: one_factor
+        - domain: n8n.completeautomate.com
+          policy: one_factor
+        - domain: argocd.homelab.local
+          policy: one_factor
+        - domain: argocd.completeautomate.com
+          policy: one_factor
+        - domain: admin.completeautomate.com
+          policy: one_factor
+        - domain: grafana.homelab.local
+          policy: one_factor
+        - domain: prometheus.homelab.local
+          policy: one_factor
+        - domain: netalertx.homelab.local
+          policy: one_factor
+        - domain: netalertx.completeautomate.com
+          policy: one_factor
+        - domain: "*.homelab.local"
+          policy: bypass
+        - domain: secrets.completeautomate.com
+          policy: one_factor
+        - domain: documents.completeautomate.com
+          policy: one_factor
+        - domain: "*.completeautomate.com"
+          policy: bypass
+    session:
+      name: authelia_session
+      secret: REPLACED_BY_ENV_VAR_session_secret
+      expiration: 8h
+      inactivity: 45m
+      remember_me: 30d
+      cookies:
+        - name: authelia_session
+          domain: completeautomate.com
+          authelia_url: https://auth.completeautomate.com
+          default_redirection_url: https://n8n.completeautomate.com
+        - name: authelia_session
+          domain: homelab.local
+          authelia_url: https://auth.homelab.local
+          default_redirection_url: https://n8n.homelab.local
+    regulation:
+      max_retries: 5
+      find_time: 2m
+      ban_time: 5m
+    storage:
+      local:
+        path: /config/db.sqlite3
+    notifier:
+      filesystem:
+        filename: /config/notifications.yml
+    
+  users.yml: |
+    users:
+      admin:
+        disabled: false
+        displayname: "Vimal Menon"
+        password: "$argon2id$v=19$m=65536,t=3,p=4$6gr7cKtPejIHVKfLdRYu8w$42y3yslYCozHw+UA8xPq5BVidJtR3jHcalN4BsHY3Eg"
+        email: hello@completeautomate.com
+        groups:
+          - admins
+    

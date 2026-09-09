@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: arachne
+  namespace: arachne
+  labels:
+    app: arachne
+spec:
+  schedule: "*/15 * * * *"
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      ttlSecondsAfterFinished: 300
+      template:
+        spec:
+          serviceAccountName: arachne
+          restartPolicy: Never
+          containers:
+          - name: arachne
+            image: python:3.13-slim
+            command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              apt-get update -qq && apt-get install -y -qq curl >/dev/null 2>&1
+              pip install requests --break-system-packages --quiet 2>/dev/null
+              KUBE_VERSION=$(curl -sL --connect-timeout 5 https://dl.k8s.io/release/stable.txt)
+              curl -sL --connect-timeout 10 \
+                "https://dl.k8s.io/release/${KUBE_VERSION}/bin/linux/arm64/kubectl" \
+                -o /usr/local/bin/kubectl
+              chmod +x /usr/local/bin/kubectl
+              python3 /scripts/tunnel_sync.py
+            env:
+            - name: CLOUDFLARE_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: cloudflare-token
+                  key: CLOUDFLARE_API_TOKEN
+            - name: CF_ACCOUNT_ID
+              value: 3fffdd2b812bcd8b1ee70fb599de63b7
+            - name: CF_TUNNEL_ID
+              value: 011a9625-236e-42dc-b716-e5de75390eaa
+            volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+            resources:
+              requests:
+                cpu: 100m
+                memory: 128Mi
+              limits:
+                cpu: 300m
+                memory: 256Mi
+          volumes:
+          - name: scripts
+            configMap:
+              name: arachne-scripts
+              defaultMode: 0755

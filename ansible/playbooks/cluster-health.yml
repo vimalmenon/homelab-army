@@ -1,0 +1,36 @@
+# ──────────────────────────────────────────────────────
+# cluster-health.yml — k3s cluster health check
+# ──────────────────────────────────────────────────────
+# Runs the health report Python script on homelab01
+# and prints the output.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbooks/cluster-health.yml
+# ──────────────────────────────────────────────────────
+---
+- name: 🔍 Cluster Health Report
+  hosts: k3s_master
+  gather_facts: false
+
+  vars:
+    script_src: ../files/cluster-health-report.py
+    script_dest: /tmp/cluster-health-report.py
+
+  tasks:
+    - name: Copy health report script to control-plane
+      ansible.builtin.copy:
+        src: "{{ script_src }}"
+        dest: "{{ script_dest }}"
+        mode: "0755"
+
+    - name: Run health report
+      ansible.builtin.command:
+        cmd: "python3 {{ script_dest }}"
+      args:
+        chdir: /tmp
+      register: report_output
+      changed_when: false
+
+    - name: Show report
+      ansible.builtin.debug:
+        var: report_output.stdout_lines

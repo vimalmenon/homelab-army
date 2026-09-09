@@ -1,0 +1,197 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://prometheus-community.github.io/helm-charts
+    chart: kube-prometheus-stack
+    targetRevision: 86.1.0
+    helm:
+      releaseName: prometheus
+      values: |
+        # Matches current live deployment in monitoring namespace
+
+        prometheusOperator:
+          enabled: true
+
+        prometheus:
+          enabled: true
+          prometheusSpec:
+            replicas: 1
+            retention: 7d
+            resources:
+              requests:
+                cpu: 250m
+                memory: 512Mi
+            scrapeInterval: 30s
+            evaluationInterval: 30s
+            serviceMonitorSelector:
+              matchLabels:
+                release: prometheus
+            podMonitorSelector:
+              matchLabels:
+                release: prometheus
+            ruleSelector:
+              matchLabels:
+                release: prometheus
+            storageSpec:
+              volumeClaimTemplate:
+                spec:
+                  storageClassName: nfs-client
+                  accessModes: ["ReadWriteOnce"]
+                  resources:
+                    requests:
+                      storage: 10Gi
+
+        grafana:
+          enabled: true
+          admin:
+            user: admin
+            existingSecret: grafana-admin
+            passwordKey: admin-password
+          grafana.ini:
+            server:
+              domain: grafana.completeautomate.com
+              root_url: https://grafana.completeautomate.com
+              timezone: Asia/Hong_Kong
+            analytics:
+              check_for_updates: true
+            log:
+              mode: console
+            paths:
+              data: /var/lib/grafana/
+              logs: /var/log/grafana
+              plugins: /var/lib/grafana/plugins
+              provisioning: /etc/grafana/provisioning
+          smtp:
+            enabled: true
+            host: smtp.zoho.com:465
+            user: hello@completeautomate.com
+            fromAddress: hello@completeautomate.com
+            fromName: Grafana Alerts
+            skipVerify: true
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          service:
+            type: ClusterIP
+            port: 80
+          ingress:
+            enabled: false
+          sidecar:
+            dashboards:
+              enabled: true
+              label: grafana_dashboard
+              labelValue: "1"
+              searchNamespace: ALL
+            datasources:
+              enabled: true
+              label: grafana_datasource
+              labelValue: "1"
+              searchNamespace: ALL
+          additionalDataSources: []
+          persistence:
+            enabled: true
+            storageClassName: nfs-client
+            size: 5Gi
+            # Grafana's SQLite DB, plugins, and user settings survive pod restarts
+
+        kubeStateMetrics:
+          enabled: true
+
+        kube-state-metrics:
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+
+        nodeExporter:
+          enabled: true
+
+        prometheus-node-exporter:
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              httpHeaders: []
+              scheme: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+
+        alertmanager:
+          enabled: false
+
+        defaultRules:
+          enabled: true
+          create: true
+          rules:
+            alertmanager: false
+            configReloaders: true
+            etcd: true
+            general: true
+            k8sContainerCpuUsageSecondsTotal: true
+            k8sContainerMemoryMajorPageFaults: true
+            k8sContainerMemoryManagement: true
+            k8sContainerMemoryPageFaults: true
+            k8sContainerMemoryWorkingSetBytes: true
+            k8sContainerRequest: true
+            k8sContainerResource: true
+            k8sContainerThrottling: true
+            k8sPodStatusFailed: true
+            k8sPodStatusPhase: true
+            kubeApiserverAvailability: true
+            kubeApiserverBurnrate: true
+            kubeApiserverHistogram: true
+            kubeApiserverSlos: true
+            kubeControllerManager: true
+            kubelet: true
+            kubeProxy: true
+            kubeScheduler: true
+            kubeStateMetrics: true
+            kubernetesApps: true
+            kubernetesResources: true
+            kubernetesStorage: true
+            kubernetesSystem: true
+            kubeVersion: true
+            network: true
+            node: true
+            nodeExporterAlerting: true
+            nodeExporterRecording: true
+            prometheus: true
+            prometheusOperator: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  ignoreDifferences:
+    - kind: PersistentVolumeClaim
+      jsonPointers:
+        - /spec/volumeName
+        - /spec/storageClassName
+        - /spec/volumeMode
+        - /spec/accessModes
+        - /status
+    - group: apps
+      kind: StatefulSet
+      jsonPointers:
+        - /spec/template/metadata/annotations
+        - /spec/template/metadata/creationTimestamp
+        - /spec/template/spec/containers/0/terminationMessagePath
+        - /spec/template/spec/containers/0/terminationMessagePolicy
+        - /spec/template/spec/containers/0/livenessProbe
+        - /spec/template/spec/containers/0/readinessProbe
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+      - RespectIgnoreDifferences=true

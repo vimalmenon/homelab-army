@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: arachne
+subjects:
+  - kind: ServiceAccount
+    name: arachne
+    namespace: arachne
+roleRef:
+  kind: ClusterRole
+  name: arachne
+  apiGroup: rbac.authorization.k8s.io

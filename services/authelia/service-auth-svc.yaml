@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-svc
+  namespace: authelia
+spec:
+  ports:
+  - port: 9091
+    protocol: TCP
+    targetPort: 9091
+  selector:
+    app: authelia
+  type: ClusterIP
+  sessionAffinity: ClientIP
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
