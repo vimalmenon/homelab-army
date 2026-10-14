@@ -1,0 +1,50 @@
+---
+# ──────────────────────────────────────────────────────
+# backup-health.yml — backup freshness + dead-pod cleanup
+# ──────────────────────────────────────────────────────
+# Runs files/backup-health.py on the Ansible control node:
+#   1. verifies the newest S3 backup is within MAX_AGE_HOURS
+#   2. deletes pods stuck in a terminal Error state (backups ns)
+#   3. delivers the report to Telegram
+#
+# Requires on the control node: kubectl (cluster access),
+# AWS creds (env or ~/.aws), and TELEGRAM_BOT_TOKEN.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.ini playbooks/backup-health.yml
+#
+# Suppress the Telegram delivery:
+#   ansible-playbook -i inventory/hosts.ini playbooks/backup-health.yml \
+#     -e telegram=false
+# ──────────────────────────────────────────────────────
+- name: 🗄️ Backup health check
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    backup_health_src: ../files/backup-health.py
+    backup_health_dest: /tmp/backup-health.py
+
+  tasks:
+    - name: Copy backup-health script
+      ansible.builtin.copy:
+        src: "{{ backup_health_src }}"
+        dest: "{{ backup_health_dest }}"
+        mode: "0755"
+
+    - name: Run backup health check (freshness + cleanup)
+      ansible.builtin.command:
+        cmd: "python3 {{ backup_health_dest }} --cleanup"
+      register: backup_health
+      changed_when: "'deleted' in backup_health.stdout"
+      failed_when: false
+
+    - name: Show report
+      ansible.builtin.debug:
+        var: backup_health.stdout_lines
+
+    - name: Send report to Telegram
+      include_tasks: ../tasks/notify-telegram.yml
+      when: telegram | default(true) | bool
+      vars:
+        telegram_message: "{{ backup_health.stdout }}"
