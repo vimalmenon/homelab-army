@@ -31,6 +31,20 @@
     backup_health_dest: /tmp/backup-health.py
 
   tasks:
+    - name: DIAGNOSTIC environment
+      ansible.builtin.shell: |
+        echo "user=$(whoami) home=$HOME"
+        echo "path=$PATH"
+        command -v aws || echo "aws: not in PATH"
+        ls -l "$HOME/.local/bin/aws" 2>/dev/null || echo "no ~/.local/bin/aws"
+        python3 -c 'import boto3; print("boto3: yes")' 2>&1 | tail -1
+      register: diag
+      changed_when: false
+
+    - name: Show diagnostic
+      ansible.builtin.debug:
+        var: diag.stdout_lines
+
     - name: Copy backup-health script
       ansible.builtin.copy:
         src: "{{ backup_health_src }}"
