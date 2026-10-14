@@ -22,7 +22,9 @@ Exit code: 0 = healthy, 1 = stale / unhealthy.
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import shutil
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -47,12 +49,43 @@ def sh(cmd):
         return 1, "", str(exc)
 
 
+def _age_hours(iso_timestamp):
+    """Hours between now and an ISO-8601 UTC timestamp."""
+    parsed = datetime.fromisoformat(iso_timestamp.replace("Z", "+00:00"))
+    return round((datetime.now(timezone.utc) - parsed).total_seconds() / 3600, 1)
+
+
+def newest_backup_cli():
+    """Newest S3 object under PREFIX via the aws CLI -> (key, age, error).
+
+    Fallback for interpreters without boto3 (e.g. runs launched by Semaphore,
+    whose discovered python differs from the interactive shell's).
+    """
+    aws = shutil.which("aws") or os.path.expanduser("~/.local/bin/aws")
+    if not shutil.which("aws") and not os.path.exists(aws):
+        return None, None, "neither boto3 nor the aws CLI is available"
+
+    rc, out, err = sh([aws, "s3api", "list-objects-v2", "--bucket", BUCKET,
+                       "--prefix", PREFIX, "--output", "json"])
+    if rc != 0 or not out:
+        return None, None, "aws CLI error: %s" % (err or out or "no output")
+    try:
+        objects = json.loads(out).get("Contents", [])
+    except ValueError:
+        return None, None, "unparseable aws CLI output"
+    if not objects:
+        return None, None, "no objects under s3://%s/%s" % (BUCKET, PREFIX)
+
+    latest = max(objects, key=lambda obj: obj["LastModified"])
+    return latest["Key"], _age_hours(latest["LastModified"]), ""
+
+
 def newest_backup():
     """Newest S3 object under PREFIX -> (key, age_hours, error)."""
     try:
         import boto3  # noqa: PLC0415
-    except ImportError as exc:
-        return None, None, "boto3 unavailable (%s)" % exc
+    except ImportError:
+        return newest_backup_cli()
 
     try:
         s3 = boto3.client("s3", region_name=REGION)
