@@ -2,26 +2,31 @@
 # ──────────────────────────────────────────────────────
 # backup-health.yml — backup freshness + dead-pod cleanup
 # ──────────────────────────────────────────────────────
-# Runs files/backup-health.py on the Ansible control node:
+# Runs files/backup-health.py on the Hermes host (.105), which has kubectl
+# with cluster access, AWS credentials and boto3:
 #   1. verifies the newest S3 backup is within MAX_AGE_HOURS
 #   2. deletes pods stuck in a terminal Error state (backups ns)
 #   3. delivers the report to Telegram
 #
-# Requires on the control node: kubectl (cluster access),
-# AWS creds (env or ~/.aws), and TELEGRAM_BOT_TOKEN.
-#
 # Usage:
 #   ansible-playbook -i inventory/hosts.ini playbooks/backup-health.yml
+#
+# Semaphore: template targeted at inventory 7 (hermes) with environment 3
+# (Telegram) so TELEGRAM_BOT_TOKEN is injected into the run.
 #
 # Suppress the Telegram delivery:
 #   ansible-playbook -i inventory/hosts.ini playbooks/backup-health.yml \
 #     -e telegram=false
 # ──────────────────────────────────────────────────────
 - name: 🗄️ Backup health check
-  hosts: localhost
+  hosts: hermes
   gather_facts: false
 
   vars:
+    # Resolved inline — NOT from group_vars/all.yml — because Semaphore
+    # generates its own inventory and ignores the repo's group_vars.
+    telegram_bot_token: "{{ lookup('env', 'TELEGRAM_BOT_TOKEN') | default('', true) }}"
+    telegram_chat_id: "{{ lookup('env', 'TELEGRAM_CHAT_ID') | default('8145517732', true) }}"
     backup_health_src: ../files/backup-health.py
     backup_health_dest: /tmp/backup-health.py
 
