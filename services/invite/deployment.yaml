@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: invite
+  namespace: invite
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: invite
+  template:
+    metadata:
+      labels:
+        app: invite
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:alpine
+        ports:
+        - containerPort: 80
+        resources:
+          requests:
+            cpu: 50m
+            memory: 32Mi
+          limits:
+            cpu: 200m
+            memory: 128Mi
+        volumeMounts:
+        - name: html
+          mountPath: /usr/share/nginx/html
+          readOnly: true
+      volumes:
+      - name: html
+        configMap:
+          name: invite-html
+          items:
+          - key: index.html
+            path: index.html
