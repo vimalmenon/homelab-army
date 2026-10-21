@@ -227,7 +227,7 @@ data:
       }
       .video-hero video{display:block;width:100%;height:100%;object-fit:cover;}
       .sound-btn{
-        position:absolute;right:8px;bottom:8px;
+        position:absolute;right:8px;top:8px;
         width:38px;height:38px;
         display:grid;place-items:center;
         border:0;border-radius:50%;
@@ -235,8 +235,29 @@ data:
         color:#fff;font-size:17px;line-height:1;cursor:pointer;
         backdrop-filter:blur(4px);
         transition:background .15s ease,transform .12s ease;
+        z-index:2;
       }
       .sound-btn:hover{background:rgba(230,51,41,.92);transform:scale(1.06);}
+    
+      .sound-hint{
+        position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
+        display:inline-flex;align-items:center;gap:6px;
+        padding:8px 16px;
+        border:2px solid rgba(255,255,255,.9);
+        border-radius:999px;
+        background:rgba(11,78,162,.88);
+        color:#fff;font-size:12.5px;font-weight:700;
+        letter-spacing:.04em;white-space:nowrap;
+        cursor:pointer;z-index:2;
+        backdrop-filter:blur(4px);
+        animation:pulseHint 2.2s ease-in-out infinite;
+      }
+      .sound-hint:hover{background:rgba(230,51,41,.95);}
+      .sound-hint[hidden]{display:none;}
+      @keyframes pulseHint{
+        0%,100%{transform:translateX(-50%) scale(1);box-shadow:0 0 0 0 rgba(255,199,44,.6);}
+        50%{transform:translateX(-50%) scale(1.045);box-shadow:0 0 0 12px rgba(255,199,44,0);}
+      }
     
       @media (max-width:420px){
         .card{padding:26px 18px 24px;border-radius:26px;}
@@ -261,7 +282,8 @@ data:
       <div class="video-hero">
         <video id="inviteVideo" src="invite.mp4" autoplay loop muted playsinline preload="auto"
                aria-label="Animated Paw Patrol birthday invitation for Krishiv"></video>
-        <button class="sound-btn" id="soundBtn" type="button" aria-label="Toggle sound" title="Toggle sound">&#128263;</button>
+        <button class="sound-btn" id="soundBtn" type="button" aria-label="Turn sound on" title="Toggle sound">&#128263;</button>
+        <button class="sound-hint" id="soundHint" type="button">&#128266; Tap for sound</button>
       </div>
     
       <div class="badge-row">
@@ -339,6 +361,7 @@ data:
       (function () {
         var v = document.getElementById('inviteVideo');
         var b = document.getElementById('soundBtn');
+        var hint = document.getElementById('soundHint');
         if (!v || !b) return;
     
         // Respect the visitor's reduced-motion preference.
@@ -347,14 +370,44 @@ data:
           v.pause();
         }
     
-        function sync() { b.textContent = v.muted ? '🔇' : '🔊'; }
+        function sync() {
+          b.textContent = v.muted ? '🔇' : '🔊';
+          b.setAttribute('aria-label', v.muted ? 'Turn sound on' : 'Turn sound off');
+          if (hint) { hint.hidden = !v.muted; }
+        }
     
-        b.addEventListener('click', function () {
-          v.muted = !v.muted;
-          sync();
+        function withSound() {
+          v.muted = false;
+          v.volume = 1;
           var p = v.play();
           if (p && p.catch) { p.catch(function () {}); }
+          sync();
+        }
+    
+        // Browsers block autoplay WITH sound, so the clip starts muted and the
+        // audio switches on at the visitor's very first tap / click / key press.
+        var gestures = ['pointerdown', 'touchstart', 'keydown'];
+        function firstGesture(e) {
+          var t = e && e.target;
+          if (t && t.closest && t.closest('#soundBtn, #soundHint')) { return; }
+          gestures.forEach(function (ev) { window.removeEventListener(ev, firstGesture); });
+          if (v.muted) { withSound(); }
+        }
+        gestures.forEach(function (ev) {
+          window.addEventListener(ev, firstGesture, { passive: true });
         });
+    
+        b.addEventListener('click', function (e) {
+          e.stopPropagation();
+          if (v.muted) { withSound(); } else { v.muted = true; sync(); }
+        });
+    
+        if (hint) {
+          hint.addEventListener('click', function (e) {
+            e.stopPropagation();
+            withSound();
+          });
+        }
     
         v.addEventListener('volumechange', sync);
         sync();
