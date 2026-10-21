@@ -18,3 +18,7 @@ spec:
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      # The invite ConfigMap embeds a video (binaryData), so its manifest is
+      # ~760 KB — over the 256 KB limit for the last-applied-configuration
+      # annotation that client-side apply writes. SSA avoids that annotation.
+      - ServerSideApply=true
