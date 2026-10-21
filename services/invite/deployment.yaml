@@ -33,6 +33,3 @@ spec:
       - name: html
         configMap:
           name: invite-html
-          items:
-          - key: index.html
-            path: index.html
