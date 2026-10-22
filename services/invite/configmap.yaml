@@ -128,8 +128,24 @@ data:
         background:var(--red);
         padding:7px 18px;
         border-radius:999px;
-        box-shadow:0 6px 0 var(--blue-dark);
+        box-shadow:0 4px 12px rgba(11,78,162,.28), inset 0 -2px 0 rgba(0,0,0,.14);
       }
+    
+      /* ── countdown ───────────────────────────────── */
+      .countdown{
+        display:inline-block;
+        margin:14px auto 0;
+        padding:9px 20px;
+        border-radius:999px;
+        background:#eaf7ff;
+        border:2px dashed var(--sky);
+        color:var(--blue);
+        font-size:13.5px;
+        font-weight:800;
+        letter-spacing:.03em;
+      }
+      .countdown[hidden]{display:none;}
+      .countdown strong{color:var(--red);}
     
       .tagline{
         margin:20px auto 4px;
@@ -192,19 +208,24 @@ data:
       }
       .detail .value small{font-weight:600;color:#5a7397;font-size:13.5px;}
     
-      a.rsvp{
+      /* Tap targets: keep the text tight but give the whole link a 44px thumb area.
+         Padding grows the hit box; the negative margin stops it shifting layout.
+         The dashed rule moves to text-decoration so it hugs the words, not the box. */
+      a.rsvp, a.map-link{
+        display:inline-block;
+        padding:12px 2px;
+        margin:-12px 0;
         color:var(--blue);
-        text-decoration:none;
-        border-bottom:2px dashed var(--sky);
+        text-decoration:underline;
+        text-decoration-style:dashed;
+        text-decoration-color:var(--sky);
+        text-decoration-thickness:2px;
+        text-underline-offset:4px;
       }
-      a.rsvp:hover{color:var(--red);border-bottom-color:var(--red);}
-    
-      a.map-link{
-        color:var(--blue);
-        text-decoration:none;
-        border-bottom:2px dashed var(--sky);
+      a.rsvp:hover, a.map-link:hover{
+        color:var(--red);
+        text-decoration-color:var(--red);
       }
-      a.map-link:hover{color:var(--red);border-bottom-color:var(--red);}
       .detail .sub{
         display:block;
         margin-top:3px;
@@ -222,7 +243,8 @@ data:
       }
       .cal-btn{
         display:inline-flex;align-items:center;gap:7px;
-        padding:11px 18px;
+        min-height:44px;
+        padding:0 20px;
         border-radius:999px;
         background:#ffffff;
         border:2px solid var(--sky-light);
@@ -294,9 +316,9 @@ data:
       .stepper-label{font-size:15px;font-weight:700;color:var(--ink);}
       .stepper-ctrl{display:flex;align-items:center;gap:13px;}
       .stepper-ctrl button{
-        width:34px;height:34px;border-radius:50%;
+        width:44px;height:44px;border-radius:50%;
         border:0;background:var(--blue);color:#fff;
-        font-size:19px;font-weight:700;line-height:1;cursor:pointer;
+        font-size:22px;font-weight:700;line-height:1;cursor:pointer;
         box-shadow:0 3px 8px rgba(11,78,162,.32), inset 0 -2px 0 rgba(0,0,0,.16);
         transition:transform .1s ease,background .15s ease,box-shadow .15s ease;
       }
@@ -344,11 +366,11 @@ data:
       .video-hero video{display:block;width:100%;height:100%;object-fit:cover;}
       .sound-btn{
         position:absolute;right:8px;top:8px;
-        width:38px;height:38px;
+        width:44px;height:44px;
         display:grid;place-items:center;
         border:0;border-radius:50%;
         background:rgba(11,78,162,.8);
-        color:#fff;font-size:17px;line-height:1;cursor:pointer;
+        color:#fff;font-size:19px;line-height:1;cursor:pointer;
         backdrop-filter:blur(4px);
         transition:background .15s ease,transform .12s ease;
         z-index:2;
@@ -358,11 +380,12 @@ data:
       .sound-hint{
         position:absolute;left:50%;bottom:10px;transform:translateX(-50%);
         display:inline-flex;align-items:center;gap:6px;
-        padding:8px 16px;
+        min-height:44px;
+        padding:0 20px;
         border:2px solid rgba(255,255,255,.9);
         border-radius:999px;
         background:rgba(11,78,162,.88);
-        color:#fff;font-size:12.5px;font-weight:700;
+        color:#fff;font-size:13px;font-weight:700;
         letter-spacing:.04em;white-space:nowrap;
         cursor:pointer;z-index:2;
         backdrop-filter:blur(4px);
@@ -396,7 +419,7 @@ data:
     
     <main class="card">
       <div class="video-hero">
-        <video id="inviteVideo" src="invite.mp4" loop muted playsinline preload="auto"
+        <video id="inviteVideo" src="invite.mp4" poster="/assets/poster.jpg" loop muted playsinline preload="auto"
                aria-label="Animated Paw Patrol birthday invitation for Krishiv"></video>
         <button class="sound-btn" id="soundBtn" type="button" aria-label="Turn sound on" title="Toggle sound">&#128263;</button>
         <button class="sound-hint" id="soundHint" type="button">&#128266; Tap for sound</button>
@@ -419,6 +442,8 @@ data:
       </div>
     
       <span class="h1-sub">🎉 You're Invited!</span>
+    
+      <p class="countdown" id="countdown" hidden>🐾 <strong id="cdNum">0</strong> days to go!</p>
     
       <p class="tagline">“No job is too big, no pup is too small!”<br>
       Come help us celebrate Krishiv's <strong>4th birthday</strong> — pups, cake and big rescue missions await.</p>
@@ -704,6 +729,29 @@ data:
             setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
           });
         }
+      })();
+    </script>
+    
+    <script>
+      (function () {
+        var el  = document.getElementById('countdown');
+        var num = document.getElementById('cdNum');
+        if (!el || !num) return;
+    
+        // Party starts Saturday 28 November 2026, 6:00 PM HKT (UTC+8).
+        var start = new Date('2026-11-28T18:00:00+08:00').getTime();
+        var days  = Math.ceil((start - Date.now()) / 86400000);
+    
+        if (days > 1) {
+          num.textContent = days;
+        } else if (days === 1) {
+          el.innerHTML = '\uD83D\uDC3E <strong>Tomorrow</strong> is the big day!';
+        } else if (days === 0) {
+          el.innerHTML = '\uD83C\uDF89 <strong>It\u2019s party day!</strong>';
+        } else {
+          return;                       // party is over - stay hidden
+        }
+        el.hidden = false;
       })();
     </script>
     

@@ -29,8 +29,9 @@ spec:
         - name: html
           mountPath: /usr/share/nginx/html
           readOnly: true
-        # Open Graph share image, served at /assets/og.jpg. Kept in its own
-        # ConfigMap because invite-html is already ~800 KB (1 MiB object limit).
+        # Static images served at /assets/ (og.jpg share card + poster.jpg video
+        # poster). Kept in its own ConfigMap because invite-html is already
+        # ~800 KB (1 MiB object limit).
         # Mounted as a directory, NOT subPath — bind-mounting a single file into
         # the read-only configMap directory fails with "not a directory".
         - name: og
