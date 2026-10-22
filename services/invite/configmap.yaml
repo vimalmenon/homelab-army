@@ -529,17 +529,17 @@ data:
             : 'Total: ' + total + ' ' + plural(total, 'guest', 'guests');
     
           var body =
-            "Hi! RSVP for Krishiv's 4th birthday Paw Patrol party \uD83D\uDC3E\n" +
-            'Coming: ' + n.adults + ' ' + plural(n.adults, 'adult', 'adults') + ', ' +
-            n.children + ' ' + plural(n.children, 'child', 'children') +
-            ' (' + total + ' ' + plural(total, 'guest', 'guests') + ' in total).\n' +
-            'See you Saturday 28 Nov at 6:00 PM!';
+            "\uD83D\uDC3E RUFF! RSVP for Krishiv's 4th birthday Paw Patrol party!\n" +
+            'Our pack reporting for duty: ' + n.adults + ' ' + plural(n.adults, 'adult', 'adults') +
+            ' + ' + n.children + ' ' + plural(n.children, 'pup', 'pups') +
+            ' (' + total + ' in total).\n' +
+            'See you Saturday 28 Nov at 6:00 PM \u2014 Paw Patrol is on a roll!';
     
           yes.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(body);
           yes.style.opacity = total === 0 ? '.55' : '1';
     
           no.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(
-            'Hi! So sorry, we can\u2019t make it to Krishiv\u2019s Paw Patrol party on 28 Nov \uD83D\uDC3E Wishing him a happy birthday!'
+            '\uD83D\uDC3E Aww \u2014 our pack can\u2019t make it to Krishiv\u2019s 4th birthday Paw Patrol party on 28 Nov. Have a pawsome day! \uD83D\uDC36'
           );
     
           document.getElementById('adultsMinus').disabled = n.adults <= MIN;
