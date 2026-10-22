@@ -336,12 +336,20 @@ data:
       }
       .rsvp-box .cta{display:flex;width:100%;justify-content:center;margin-top:16px;}
       .cta-no{
-        display:block;margin:13px auto 0;
+        display:block;
+        /* 15px of text + padding = a ~44px thumb target; the negative margins
+           cancel the extra box so surrounding layout doesn't move. */
+        padding:14px 10px;
+        margin:-1px auto -14px;
         width:max-content;
         font-size:12.5px;font-weight:700;color:#8aa2bf;
-        text-decoration:none;border-bottom:2px dashed #cbdcec;
+        text-decoration:underline;
+        text-decoration-style:dashed;
+        text-decoration-color:#cbdcec;
+        text-decoration-thickness:2px;
+        text-underline-offset:4px;
       }
-      .cta-no:hover{color:var(--red);border-bottom-color:var(--red);}
+      .cta-no:hover{color:var(--red);text-decoration-color:var(--red);}
     
       .footnote{
         margin-top:22px;
@@ -740,7 +748,8 @@ data:
     
         // Party starts Saturday 28 November 2026, 6:00 PM HKT (UTC+8).
         var start = new Date('2026-11-28T18:00:00+08:00').getTime();
-        var days  = Math.ceil((start - Date.now()) / 86400000);
+        // floor so the day before reads "1" (Tomorrow), not "2"
+        var days  = Math.floor((start - Date.now()) / 86400000);
     
         if (days > 1) {
           num.textContent = days;
