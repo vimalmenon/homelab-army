@@ -343,7 +343,7 @@ data:
     
     <main class="card">
       <div class="video-hero">
-        <video id="inviteVideo" src="invite.mp4" autoplay loop muted playsinline preload="auto"
+        <video id="inviteVideo" src="invite.mp4" loop muted playsinline preload="auto"
                aria-label="Animated Paw Patrol birthday invitation for Krishiv"></video>
         <button class="sound-btn" id="soundBtn" type="button" aria-label="Turn sound on" title="Toggle sound">&#128263;</button>
         <button class="sound-hint" id="soundHint" type="button">&#128266; Tap for sound</button>
@@ -454,11 +454,22 @@ data:
         var hint = document.getElementById('soundHint');
         if (!v || !b) return;
     
-        // Respect the visitor's reduced-motion preference.
-        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          v.autoplay = false;
-          v.pause();
+        var reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    
+        function start() {
+          if (reduceMotion) { return; }
+          var p = v.play();
+          if (p && p.catch) { p.catch(function () {}); }
         }
+    
+        // Playback only begins once the page has finished loading.
+        if (document.readyState === 'complete') {
+          start();
+        } else {
+          window.addEventListener('load', start, { once: true });
+        }
+        // Restoring from the back/forward cache fires no load event.
+        window.addEventListener('pageshow', function (ev) { if (ev.persisted) { start(); } });
     
         function sync() {
           b.textContent = v.muted ? '🔇' : '🔊';
