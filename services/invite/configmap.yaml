@@ -642,7 +642,7 @@ data:
             'Our pack reporting for duty: ' + n.adults + ' ' + plural(n.adults, 'adult', 'adults') +
             ' + ' + n.children + ' ' + plural(n.children, 'pup', 'pups') +
             ' (' + total + ' in total).\n' +
-            'See you Saturday 28 Nov at 6:00 PM \u2014 Paw Patrol is on a roll!';
+            'See you Saturday 28 Nov at 6:00 PM \u2014 Paw Patrol is on a roll! \uD83D\uDC36';
     
           yes.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(body);
           yes.style.opacity = total === 0 ? '.55' : '1';
