@@ -19,7 +19,7 @@ data:
     <meta property="og:site_name" content="Krishiv's 4th Birthday">
     <meta property="og:title" content="Krishiv is turning FOUR! 🐾 Paw Patrol Party">
     <meta property="og:description" content="Saturday 28 November 2026, 6:00 PM · Room No. 2, Caribbean Coast Club House. Set your headcount and RSVP in 5 seconds — no job is too big, no pup is too small!">
-    <meta property="og:image" content="https://invite.completeautomate.com/og.jpg">
+    <meta property="og:image" content="https://invite.completeautomate.com/assets/og.jpg">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="1200">
@@ -27,7 +27,7 @@ data:
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Krishiv is turning FOUR! 🐾 Paw Patrol Party">
     <meta name="twitter:description" content="Saturday 28 November 2026, 6:00 PM · Room No. 2, Caribbean Coast Club House. Tap to RSVP.">
-    <meta name="twitter:image" content="https://invite.completeautomate.com/og.jpg">
+    <meta name="twitter:image" content="https://invite.completeautomate.com/assets/og.jpg">
     <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E">
     <style>
       :root{
@@ -213,6 +213,28 @@ data:
         color:#7b93b5;
         line-height:1.35;
       }
+    
+      /* ── add to calendar ─────────────────────────── */
+      .calendar-row{
+        display:flex;gap:10px;justify-content:center;flex-wrap:wrap;
+        margin:22px auto 0;
+        max-width:440px;
+      }
+      .cal-btn{
+        display:inline-flex;align-items:center;gap:7px;
+        padding:11px 18px;
+        border-radius:999px;
+        background:#ffffff;
+        border:2px solid var(--sky-light);
+        color:var(--blue);
+        font-family:inherit;
+        font-size:13.5px;font-weight:700;
+        text-decoration:none;cursor:pointer;
+        box-shadow:0 3px 10px rgba(11,78,162,.10);
+        transition:transform .1s ease,box-shadow .15s ease,background .15s ease;
+      }
+      .cal-btn:hover{background:#f2fbff;transform:translateY(-1px);box-shadow:0 5px 14px rgba(11,78,162,.16);}
+      .cal-btn:active{transform:translateY(0);}
     
       /* ── call to action ──────────────────────────── */
       .cta{
@@ -444,6 +466,15 @@ data:
         </div>
       </div>
     
+      <div class="calendar-row">
+        <a class="cal-btn" id="calGoogle" href="https://calendar.google.com/calendar/render?action=TEMPLATE" target="_blank" rel="noopener">
+          <span aria-hidden="true">📅</span> Google Calendar
+        </a>
+        <button class="cal-btn" id="calIcs" type="button">
+          <span aria-hidden="true">📥</span> Apple / Outlook
+        </button>
+      </div>
+    
       <section class="rsvp-box">
         <h2 class="rsvp-title">Who's coming? 🐾</h2>
         <p class="rsvp-sub">Set your headcount, then send it to us on WhatsApp — takes 5 seconds.</p>
@@ -613,6 +644,66 @@ data:
         });
     
         render();
+      })();
+    </script>
+    
+    <script>
+      (function () {
+        var TITLE = "Krishiv's 4th Birthday \u2014 Paw Patrol Party";
+        var DESC  = "Paw Patrol party! RSVP at https://invite.completeautomate.com";
+        var LOC   = "Room No. 2, Caribbean Coast Club House, Caribbean Coast Phase 1 Monterey Cove";
+        // Saturday 28 Nov 2026, 6:00 PM - 9:00 PM HKT (UTC+8) == 10:00-13:00 UTC
+        var START = '20261128T100000Z';
+        var END   = '20261128T130000Z';
+    
+        var g = document.getElementById('calGoogle');
+        if (g) {
+          g.href = 'https://calendar.google.com/calendar/render?action=TEMPLATE' +
+            '&text=' + encodeURIComponent(TITLE) +
+            '&dates=' + START + '/' + END +
+            '&details=' + encodeURIComponent(DESC) +
+            '&location=' + encodeURIComponent(LOC) +
+            '&ctz=Asia/Hong_Kong';
+        }
+    
+        var b = document.getElementById('calIcs');
+        if (b) {
+          b.addEventListener('click', function () {
+            var stamp = new Date().toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+            var ics = [
+              'BEGIN:VCALENDAR',
+              'VERSION:2.0',
+              'PRODID:-//completeautomate//invite//EN',
+              'CALSCALE:GREGORIAN',
+              'METHOD:PUBLISH',
+              'BEGIN:VEVENT',
+              'UID:krishiv-4th-birthday-20261128@completeautomate.com',
+              'DTSTAMP:' + stamp,
+              'DTSTART:' + START,
+              'DTEND:' + END,
+              'SUMMARY:' + TITLE,
+              'DESCRIPTION:' + DESC,
+              'LOCATION:' + LOC.replace(/,/g, '\\,'),
+              'BEGIN:VALARM',
+              'TRIGGER:-P1D',
+              'ACTION:DISPLAY',
+              'DESCRIPTION:Tomorrow - Krishiv Paw Patrol party!',
+              'END:VALARM',
+              'END:VEVENT',
+              'END:VCALENDAR'
+            ].join('\r\n') + '\r\n';
+    
+            var blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = 'krishiv-paw-patrol-party.ics';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            setTimeout(function () { URL.revokeObjectURL(url); }, 3000);
+          });
+        }
       })();
     </script>
     

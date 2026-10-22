@@ -29,12 +29,12 @@ spec:
         - name: html
           mountPath: /usr/share/nginx/html
           readOnly: true
-        # Open Graph share image, served at /og.jpg. Kept in its own ConfigMap
-        # because invite-html is already ~800 KB (the 1 MiB object limit).
-        # Note: subPath mounts do not refresh — restart the pod to update it.
+        # Open Graph share image, served at /assets/og.jpg. Kept in its own
+        # ConfigMap because invite-html is already ~800 KB (1 MiB object limit).
+        # Mounted as a directory, NOT subPath — bind-mounting a single file into
+        # the read-only configMap directory fails with "not a directory".
         - name: og
-          mountPath: /usr/share/nginx/html/og.jpg
-          subPath: og.jpg
+          mountPath: /usr/share/nginx/html/assets
           readOnly: true
       volumes:
       - name: html
