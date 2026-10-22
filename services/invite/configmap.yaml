@@ -205,6 +205,61 @@ data:
       .cta:hover{transform:translateY(2px);box-shadow:0 5px 0 #d99b00,0 8px 16px rgba(217,155,0,.3);}
       .cta:active{transform:translateY(5px);box-shadow:0 2px 0 #d99b00;}
     
+      /* ── RSVP headcount box ──────────────────────── */
+      .rsvp-box{
+        margin:26px auto 0;
+        max-width:440px;
+        background:#ffffff;
+        border:3px solid var(--sky-light);
+        border-radius:22px;
+        padding:20px 18px 20px;
+        box-shadow:0 4px 0 rgba(79,195,247,.28);
+        text-align:left;
+      }
+      .rsvp-title{
+        margin:0 0 3px;
+        font-size:16.5px;font-weight:800;color:var(--blue);
+      }
+      .rsvp-sub{
+        margin:0 0 14px;
+        font-size:12.5px;color:#7b93b5;line-height:1.45;
+      }
+      .stepper{
+        display:flex;align-items:center;justify-content:space-between;
+        padding:10px 0;
+        border-top:2px dashed #e5f2fb;
+      }
+      .stepper:first-of-type{border-top:0;padding-top:2px;}
+      .stepper-label{font-size:15px;font-weight:700;color:var(--ink);}
+      .stepper-ctrl{display:flex;align-items:center;gap:13px;}
+      .stepper-ctrl button{
+        width:34px;height:34px;border-radius:50%;
+        border:0;background:var(--blue);color:#fff;
+        font-size:19px;font-weight:700;line-height:1;cursor:pointer;
+        box-shadow:0 3px 0 var(--blue-dark);
+        transition:transform .1s ease,background .15s ease;
+      }
+      .stepper-ctrl button:hover{background:var(--red);}
+      .stepper-ctrl button:active{transform:translateY(3px);box-shadow:none;}
+      .stepper-ctrl button:disabled{background:#c3d6e8;box-shadow:0 3px 0 #a7bdd1;cursor:not-allowed;}
+      .stepper-ctrl .count{
+        min-width:26px;text-align:center;
+        font-size:19px;font-weight:800;color:var(--blue);
+        font-variant-numeric:tabular-nums;
+      }
+      .rsvp-total{
+        margin:12px 0 0;
+        font-size:13px;font-weight:700;color:#3a5b8c;
+      }
+      .rsvp-box .cta{display:flex;width:100%;justify-content:center;margin-top:16px;}
+      .cta-no{
+        display:block;margin:13px auto 0;
+        width:max-content;
+        font-size:12.5px;font-weight:700;color:#8aa2bf;
+        text-decoration:none;border-bottom:2px dashed #cbdcec;
+      }
+      .cta-no:hover{color:var(--red);border-bottom-color:var(--red);}
+    
       .footnote{
         margin-top:22px;
         font-size:12.5px;
@@ -347,9 +402,35 @@ data:
         </div>
       </div>
     
-      <a class="cta" href="https://wa.me/85263523532?text=Hi!%20We're%20coming%20to%20Krishiv's%20Paw%20Patrol%20birthday%20party%20%F0%9F%90%BE">
-        <span aria-hidden="true">🐾</span> RSVP on WhatsApp
-      </a>
+      <section class="rsvp-box">
+        <h2 class="rsvp-title">Who's coming? 🐾</h2>
+        <p class="rsvp-sub">Set your headcount, then send it to us on WhatsApp — takes 5 seconds.</p>
+    
+        <div class="stepper">
+          <span class="stepper-label">Adults</span>
+          <div class="stepper-ctrl">
+            <button type="button" id="adultsMinus" aria-label="One fewer adult">−</button>
+            <span class="count" id="adultsCount">2</span>
+            <button type="button" id="adultsPlus" aria-label="One more adult">+</button>
+          </div>
+        </div>
+    
+        <div class="stepper">
+          <span class="stepper-label">Children</span>
+          <div class="stepper-ctrl">
+            <button type="button" id="childrenMinus" aria-label="One fewer child">−</button>
+            <span class="count" id="childrenCount">1</span>
+            <button type="button" id="childrenPlus" aria-label="One more child">+</button>
+          </div>
+        </div>
+    
+        <p class="rsvp-total" id="rsvpTotal">Total: 3 guests</p>
+    
+        <a class="cta" id="rsvpYes" href="https://wa.me/85263523532" target="_blank" rel="noopener">
+          <span aria-hidden="true">🐾</span> Send RSVP on WhatsApp
+        </a>
+        <a class="cta-no" id="rsvpNo" href="https://wa.me/85263523532" target="_blank" rel="noopener">Sorry, we can't make it</a>
+      </section>
     
       <p class="footnote">
         Kindly RSVP by <strong>21 November</strong> so we can get the pup packs ready.<br>
@@ -411,6 +492,73 @@ data:
     
         v.addEventListener('volumechange', sync);
         sync();
+      })();
+    </script>
+    
+    <script>
+      (function () {
+        var PHONE = '85263523532';
+        var MIN = 0, MAX = 12;
+        var n = { adults: 2, children: 1 };
+    
+        var elA = document.getElementById('adultsCount');
+        var elC = document.getElementById('childrenCount');
+        var elTotal = document.getElementById('rsvpTotal');
+        var yes = document.getElementById('rsvpYes');
+        var no = document.getElementById('rsvpNo');
+        if (!elA || !yes) return;
+    
+        function plural(num, one, many) { return num === 1 ? one : many; }
+    
+        function render() {
+          elA.textContent = n.adults;
+          elC.textContent = n.children;
+    
+          var total = n.adults + n.children;
+          elTotal.textContent = total === 0
+            ? 'Add at least one guest to RSVP'
+            : 'Total: ' + total + ' ' + plural(total, 'guest', 'guests');
+    
+          var body =
+            "Hi! RSVP for Krishiv's 4th birthday Paw Patrol party \uD83D\uDC3E\n" +
+            'Coming: ' + n.adults + ' ' + plural(n.adults, 'adult', 'adults') + ', ' +
+            n.children + ' ' + plural(n.children, 'child', 'children') +
+            ' (' + total + ' ' + plural(total, 'guest', 'guests') + ' in total).\n' +
+            'See you Saturday 28 Nov at 6:00 PM!';
+    
+          yes.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(body);
+          yes.style.opacity = total === 0 ? '.55' : '1';
+    
+          no.href = 'https://wa.me/' + PHONE + '?text=' + encodeURIComponent(
+            'Hi! So sorry, we can\u2019t make it to Krishiv\u2019s Paw Patrol party on 28 Nov \uD83D\uDC3E Wishing him a happy birthday!'
+          );
+    
+          document.getElementById('adultsMinus').disabled = n.adults <= MIN;
+          document.getElementById('adultsPlus').disabled = n.adults >= MAX;
+          document.getElementById('childrenMinus').disabled = n.children <= MIN;
+          document.getElementById('childrenPlus').disabled = n.children >= MAX;
+        }
+    
+        function wire(plus, minus, key) {
+          document.getElementById(plus).addEventListener('click', function () {
+            if (n[key] < MAX) { n[key]++; render(); }
+          });
+          document.getElementById(minus).addEventListener('click', function () {
+            if (n[key] > MIN) { n[key]--; render(); }
+          });
+        }
+    
+        wire('adultsPlus', 'adultsMinus', 'adults');
+        wire('childrenPlus', 'childrenMinus', 'children');
+    
+        yes.addEventListener('click', function (e) {
+          if (n.adults + n.children === 0) {
+            e.preventDefault();
+            elTotal.textContent = 'Please add at least one guest first';
+          }
+        });
+    
+        render();
       })();
     </script>
     
