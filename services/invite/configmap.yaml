@@ -198,12 +198,12 @@ data:
         text-transform:uppercase;
         text-decoration:none;
         border-radius:999px;
-        border:3px solid #ffffff;
-        box-shadow:0 7px 0 #d99b00, 0 12px 24px rgba(217,155,0,.35);
+        border:0;
+        box-shadow:0 5px 16px rgba(217,155,0,.4), inset 0 -2px 0 rgba(190,130,0,.22);
         transition:transform .12s ease, box-shadow .12s ease;
       }
-      .cta:hover{transform:translateY(2px);box-shadow:0 5px 0 #d99b00,0 8px 16px rgba(217,155,0,.3);}
-      .cta:active{transform:translateY(5px);box-shadow:0 2px 0 #d99b00;}
+      .cta:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(217,155,0,.48), inset 0 -2px 0 rgba(190,130,0,.22);}
+      .cta:active{transform:translateY(1px);box-shadow:0 3px 10px rgba(217,155,0,.42), inset 0 -2px 0 rgba(190,130,0,.22);}
     
       /* WhatsApp glyph sits inline with the button label */
       .wa-ico{
@@ -244,12 +244,12 @@ data:
         width:34px;height:34px;border-radius:50%;
         border:0;background:var(--blue);color:#fff;
         font-size:19px;font-weight:700;line-height:1;cursor:pointer;
-        box-shadow:0 3px 0 var(--blue-dark);
-        transition:transform .1s ease,background .15s ease;
+        box-shadow:0 3px 8px rgba(11,78,162,.32), inset 0 -2px 0 rgba(0,0,0,.16);
+        transition:transform .1s ease,background .15s ease,box-shadow .15s ease;
       }
-      .stepper-ctrl button:hover{background:var(--red);}
-      .stepper-ctrl button:active{transform:translateY(3px);box-shadow:none;}
-      .stepper-ctrl button:disabled{background:#c3d6e8;box-shadow:0 3px 0 #a7bdd1;cursor:not-allowed;}
+      .stepper-ctrl button:hover{background:var(--red);box-shadow:0 4px 10px rgba(230,51,41,.36), inset 0 -2px 0 rgba(0,0,0,.16);}
+      .stepper-ctrl button:active{transform:translateY(1px);box-shadow:0 2px 5px rgba(11,78,162,.3), inset 0 -2px 0 rgba(0,0,0,.2);}
+      .stepper-ctrl button:disabled{background:#c3d6e8;box-shadow:none;cursor:not-allowed;}
       .stepper-ctrl .count{
         min-width:26px;text-align:center;
         font-size:19px;font-weight:800;color:var(--blue);
