@@ -66,10 +66,16 @@
       register: hestia_deploy
       changed_when: false
 
+    - name: Stage the price script on the target
+      ansible.builtin.copy:
+        src: ../files/portfolio-prices.py
+        dest: /tmp/portfolio-prices.py
+        mode: "0644"
+
     - name: Fetch prices from Hestia
       ansible.builtin.shell: >-
         kubectl -n {{ portfolio_namespace }} exec -i deploy/{{ portfolio_deployment }}
-        -- python - < {{ playbook_dir }}/../files/portfolio-prices.py
+        -- python - < /tmp/portfolio-prices.py
       register: prices
       changed_when: false
 
