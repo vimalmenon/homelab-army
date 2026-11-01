@@ -1,26 +1,37 @@
 ---
-# Daily portfolio price snapshot.
+# Daily portfolio price snapshot, delivered to Telegram.
 #
 # Targets the Hermes host (Semaphore inventory 7) rather than `hosts: localhost`:
 # under Semaphore `localhost` resolves to the Semaphore pod, which has no kubectl
 # and no cluster credentials.
 #
-# The price fetch is piped into the Hestia pod so it reuses the real HOLDINGS list
+# RUN IDENTITY — the reason for the `ansible_become: false` play var below.
+# Inventory 7 puts .105 in BOTH `[k3s_cluster]` and `[hermes]`, and defines
+# `[k3s_cluster:vars] ansible_become=true / ansible_become_user=root`. Group vars
+# outrank the `become:` play keyword, so a play that merely says `become: false`
+# (or `become_user: hermes`) still executes as root with $HOME=/root — and root
+# has no kubectl, because kubectl lives in /home/hermes/.local/bin. Setting the
+# *variable* `ansible_become: false` at play level does win, leaving the SSH user
+# (`hermes`, credential 5) in place.
+#
+# The price fetch is piped into the Hestia pod so it reuses the real HOLDINGS map
 # and yfinance client. Duplicating the tickers here would silently drift the day
 # someone adds a second position.
-#
-# `become_user: hermes` is explicit because the Semaphore inventories set
-# `ansible_become=true` in their group vars, which would otherwise run every task
-# as root with $HOME=/root and no access to /home/hermes/.kube/config.
 - name: Portfolio prices
   hosts: hermes
-  become: true
-  become_user: hermes
   gather_facts: false
-
   vars:
+    # Beats [k3s_cluster:vars] ansible_become=true — see header comment.
+    ansible_become: false
+
     portfolio_namespace: microservices
     portfolio_deployment: hestia
+
+    # Semaphore does not load repo group_vars, so resolve these from the
+    # environment injected by the template's "Telegram" environment (id 3).
+    telegram_bot_token: "{{ lookup('env', 'TELEGRAM_BOT_TOKEN') | default('', true) }}"
+    telegram_chat_id: "{{ lookup('env', 'TELEGRAM_CHAT_ID') | default('8145517732', true) }}"
+    telegram_parse_mode: HTML
 
   tasks:
     - name: Confirm run identity and kubectl availability
@@ -30,13 +41,16 @@
       register: identity
       changed_when: false
 
-    - name: Fail early if kubectl is missing
+    - name: Fail early unless we are the hermes user with kubectl
       ansible.builtin.assert:
         that:
+          - "'user=hermes' in identity.stdout"
           - "'kubectl: NOT in PATH' not in identity.stdout"
         fail_msg: >-
-          kubectl is not available to this run ({{ identity.stdout_lines | join(' | ') }}).
-          The play must execute as the 'hermes' user, which owns /home/hermes/.kube.
+          Wrong run identity ({{ identity.stdout_lines | join(' | ') }}).
+          This play must execute as 'hermes' because kubectl and /home/hermes/.kube
+          belong to that user. Check for ansible_become/ansible_become_user leaking
+          in from the inventory's [k3s_cluster:vars].
 
     - name: Check the hestia deployment exists
       ansible.builtin.command: >-
@@ -59,3 +73,10 @@
       ansible.builtin.fail:
         msg: "Hestia returned no holdings - check the HOLDINGS map in hestia/src/portfolio.py"
       when: "prices.stdout is search('Positions: 0')"
+
+    # <pre> keeps the table monospaced so the columns line up in Telegram, and
+    # '&' must be escaped for parse_mode=HTML (the header contains "P&L").
+    - name: Send prices to Telegram
+      include_tasks: ../tasks/notify-telegram.yml
+      vars:
+        telegram_message: "<pre>{{ prices.stdout | replace('&', '&amp;') }}</pre>"
