@@ -83,14 +83,10 @@
       ansible.builtin.debug:
         msg: "{{ prices.stdout_lines }}"
 
-    - name: Warn when the price feed returned nothing
-      ansible.builtin.fail:
-        msg: "Hestia returned no holdings - check the HOLDINGS map in hestia/src/portfolio.py"
-      when: "prices.stdout is search('Positions: 0')"
-
-    # <pre> keeps the table monospaced so the columns line up in Telegram, and
-    # '&' must be escaped for parse_mode=HTML (the header contains "P&L").
+    # The script renders Telegram HTML itself (bold headings, one short block per
+    # holding) and exits non-zero when it finds no positions, so stdout is passed
+    # through unmodified rather than wrapped in <pre>.
     - name: Send prices to Telegram
       include_tasks: ../tasks/notify-telegram.yml
       vars:
-        telegram_message: "<pre>{{ prices.stdout | replace('&', '&amp;') }}</pre>"
+        telegram_message: "{{ prices.stdout }}"
