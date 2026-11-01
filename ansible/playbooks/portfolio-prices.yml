@@ -24,6 +24,11 @@
     # Beats [k3s_cluster:vars] ansible_become=true — see header comment.
     ansible_become: false
 
+    # kubectl lives in the hermes user's ~/.local/bin, which a non-interactive
+    # SSH session does not add to PATH (no profile is sourced). Resolve it
+    # explicitly rather than hoping the login shell's PATH is inherited.
+    kubectl_dir: /home/hermes/.local/bin
+
     portfolio_namespace: microservices
     portfolio_deployment: hestia
 
@@ -32,6 +37,9 @@
     telegram_bot_token: "{{ lookup('env', 'TELEGRAM_BOT_TOKEN') | default('', true) }}"
     telegram_chat_id: "{{ lookup('env', 'TELEGRAM_CHAT_ID') | default('8145517732', true) }}"
     telegram_parse_mode: HTML
+
+  environment:
+    PATH: "{{ kubectl_dir }}:/usr/local/bin:/usr/bin:/bin"
 
   tasks:
     - name: Confirm run identity and kubectl availability
