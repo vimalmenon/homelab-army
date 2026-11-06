@@ -93,12 +93,22 @@ def main() -> None:
     ]
 
     for h in holdings:
+        qty = f"{h['shares']:,.0f}"
+        if h.get("unit") and h["unit"] != "shares":
+            qty += f" {h['unit']}"
         lines += [
             "",
             f"<b>{esc(h['ticker'])}</b> · {esc(tidy_name(h['name']))}",
-            f"{money(h['price'])}   {arrow(h['change_pct'])} {pct(h['change_pct'])}",
+            f"{qty} · {money(h['price'])}{'/' + h['unit'] if h.get('unit') and h['unit'] != 'shares' else ''}"
+            f"   {arrow(h['change_pct'])} {pct(h['change_pct'])}",
             f"Value <b>{money(h['total_value'])}</b> · Day <b>{money(h['total_pnl'], signed=True)}</b>",
         ]
+        # Present only where a purchase price is known (the gold position).
+        if h.get("total_return_pct") is not None:
+            lines.append(
+                f"Since Apr-2025 <b>{pct(h['total_return_pct'])}</b> "
+                f"({money(h['total_return'], signed=True)})"
+            )
 
     lines += [
         "",

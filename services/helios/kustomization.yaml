@@ -8,4 +8,4 @@ resources:
 
 images:
   - name: ghcr.io/vimalmenon/micro-army/helios
-    newTag: 4b9deb4
+    newTag: 828224e
