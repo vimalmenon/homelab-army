@@ -105,9 +105,12 @@ def main() -> None:
         ]
         # Present only where a purchase price is known (the gold position).
         if h.get("total_return_pct") is not None:
+            invested = (
+                f" · invested {money(h['cost_value'])}" if h.get("cost_value") else ""
+            )
             lines.append(
                 f"Since Apr-2025 <b>{pct(h['total_return_pct'])}</b> "
-                f"({money(h['total_return'], signed=True)})"
+                f"({money(h['total_return'], signed=True)}){invested}"
             )
 
     lines += [
