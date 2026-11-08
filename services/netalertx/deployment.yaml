@@ -57,7 +57,9 @@ spec:
         resources:
           limits:
             cpu: 500m
-            memory: 768Mi
+            # Was 768Mi — netalertx ran at ~500Mi baseline and spiked past the
+            # cap, earning ~1,900 OOMKills. Headroom above the observed peak.
+            memory: 1536Mi
           requests:
             cpu: 100m
             memory: 256Mi
