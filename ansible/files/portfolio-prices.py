@@ -105,13 +105,23 @@ def main() -> None:
         ]
         # Present only where a purchase price is known (the gold position).
         if h.get("total_return_pct") is not None:
-            invested = (
-                f" · invested {money(h['cost_value'])}" if h.get("cost_value") else ""
-            )
             lines.append(
                 f"Since Apr-2025 <b>{pct(h['total_return_pct'])}</b> "
-                f"({money(h['total_return'], signed=True)}){invested}"
+                f"({money(h['total_return'], signed=True)})"
             )
+            # Cost per unit plus total outlay, mirroring the Cost and Invested
+            # columns on the portfolio page. Without this the digest is a
+            # thinner view of the same data than the page it summarises.
+            if h.get("cost_value") and h.get("cost_basis"):
+                suffix = (
+                    "/" + h["unit"]
+                    if h.get("unit") and h["unit"] != "shares"
+                    else ""
+                )
+                lines.append(
+                    f"Cost {money(h['cost_basis'])}{suffix} · "
+                    f"invested <b>{money(h['cost_value'])}</b>"
+                )
 
     lines += [
         "",
