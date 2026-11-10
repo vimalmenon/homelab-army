@@ -30,15 +30,18 @@ spec:
         image: ghcr.io/netalertx/netalertx:26.6.3
         imagePullPolicy: IfNotPresent
         livenessProbe:
-          failureThreshold: 3
+          # This page is a PHP app that hits the device database; measured at
+          # 2.7-4.8s on a quiet node. A 5s timeout sat right on the edge, so any
+          # spike tripped it and the kubelet killed a healthy container — that was
+          # 360 restarts in two days, all of them probe kills (exit 143), not OOMs.
+          failureThreshold: 5
           httpGet:
             path: /
             port: 20211
             scheme: HTTP
-          initialDelaySeconds: 30
           periodSeconds: 30
           successThreshold: 1
-          timeoutSeconds: 5
+          timeoutSeconds: 10
         name: netalertx
         ports:
         - containerPort: 20211
@@ -53,16 +56,29 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 15
           successThreshold: 1
-          timeoutSeconds: 5
+          timeoutSeconds: 10
         resources:
           limits:
-            cpu: 500m
+            # Was 500m, which throttled 191 of 478 scheduling periods — the app
+            # spent more time blocked by its CPU quota than executing it, and that
+            # is what made the web UI slow enough to fail its own probe.
+            cpu: 2000m
             # Was 768Mi — netalertx ran at ~500Mi baseline and spiked past the
             # cap, earning ~1,900 OOMKills. Headroom above the observed peak.
             memory: 1536Mi
           requests:
-            cpu: 100m
+            cpu: 300m
             memory: 256Mi
+        startupProbe:
+          # Generous boot allowance: scans and the OUI DB import run at start-up,
+          # and the app should not be killed for being slow to come up.
+          failureThreshold: 30
+          httpGet:
+            path: /
+            port: 20211
+            scheme: HTTP
+          periodSeconds: 10
+          timeoutSeconds: 10
         securityContext:
           capabilities:
             add:
