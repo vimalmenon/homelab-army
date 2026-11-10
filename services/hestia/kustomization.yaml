@@ -10,4 +10,4 @@ resources:
 
 images:
   - name: ghcr.io/vimalmenon/micro-army/hestia
-    newTag: 6ae77a2
+    newTag: 3bc750d
