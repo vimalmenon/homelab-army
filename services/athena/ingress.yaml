@@ -5,7 +5,11 @@ metadata:
   namespace: microservices
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
-    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd
+    # Both middlewares: add-https forces the TLS redirect, forwardauth puts the
+    # wiki behind Authelia. Without the second one, athena's full CRUD API — read,
+    # create, update AND delete articles — is open to the internet. It was
+    # reachable unauthenticated until 2026-11-12.
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
 spec:
   ingressClassName: traefik
   rules:
