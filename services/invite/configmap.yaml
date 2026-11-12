@@ -749,8 +749,12 @@ data:
     
         // Party starts Sunday 29 November 2026, 5:30 PM HKT (UTC+8).
         var start = new Date('2026-11-29T17:30:00+08:00').getTime();
-        // floor so the day before reads "1" (Tomorrow), not "2"
-        var days  = Math.floor((start - Date.now()) / 86400000);
+        // Count HKT calendar days, not 24-hour periods. Dividing the raw
+        // difference by a day makes days hit 0 at 5:30pm on the 28th, which
+        // fires the "party day" branch a full day early.
+        var HKT  = 8 * 60 * 60 * 1000;
+        var days = Math.floor((start     + HKT) / 86400000)
+                 - Math.floor((Date.now() + HKT) / 86400000);
     
         if (days > 1) {
           num.textContent = days;
