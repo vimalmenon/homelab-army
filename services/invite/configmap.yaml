@@ -686,8 +686,8 @@ data:
         var DESC  = "Paw Patrol party! RSVP at https://invite.completeautomate.com";
         var LOC   = "Room No. 2, Caribbean Coast Club House, Caribbean Coast Phase 1 Monterey Cove";
         // Sunday 29 Nov 2026, 5:30 PM - 8:30 PM HKT (UTC+8) == 09:30-12:30 UTC
-        var START = '20261128T100000Z';
-        var END   = '20261128T130000Z';
+        var START = '20261129T093000Z';
+        var END   = '20261129T123000Z';
     
         var g = document.getElementById('calGoogle');
         if (g) {
@@ -711,6 +711,7 @@ data:
               'METHOD:PUBLISH',
               'BEGIN:VEVENT',
               'UID:krishiv-4th-birthday-20261128@completeautomate.com',
+              'SEQUENCE:1',
               'DTSTAMP:' + stamp,
               'DTSTART:' + START,
               'DTEND:' + END,
