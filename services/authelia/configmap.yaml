@@ -62,6 +62,14 @@ data:
           policy: one_factor
         - domain: documents.completeautomate.com
           policy: one_factor
+        - domain: wiki.completeautomate.com
+          policy: one_factor
+        # ⚠️ This wildcard bypasses everything not listed above. It silently
+        # defeats forward-auth: an ingress can point at the authelia-forwardauth
+        # middleware and still be wide open, because Authelia answers the auth
+        # subrequest with 200. The wiki's full CRUD API was public until
+        # 2026-11-12 for exactly this reason. Prefer one_factor here and bypass
+        # the genuinely public hosts (invite, auth) individually.
         - domain: "*.completeautomate.com"
           policy: bypass
     session:
