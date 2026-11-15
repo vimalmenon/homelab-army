@@ -22,6 +22,9 @@ spec:
                 port:
                   number: 8080
   tls:
+    # No secretName: Traefik serves kube-system/completeautomate-tls, the
+    # cert-manager wildcard. Naming a per-host secret here means Traefik has
+    # nothing to hand back until cert-manager issues one, and the handshake
+    # fails in the meantime. Same shape as every other ingress in the repo.
     - hosts:
         - plan.completeautomate.com
-      secretName: plan-completeautomate-tls
