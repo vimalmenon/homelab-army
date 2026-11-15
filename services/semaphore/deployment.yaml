@@ -5,6 +5,12 @@ metadata:
   namespace: semaphore
 spec:
   replicas: 1
+  # BoltDB at /var/lib/semaphore holds an exclusive file lock, so two pods can
+  # never run at once. A RollingUpdate starts the replacement before the old pod
+  # exits, and the new one panics with exit code 2 because it cannot open the
+  # database. Recreate terminates the old pod first, which is what BoltDB needs.
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: semaphore
