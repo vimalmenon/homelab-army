@@ -65,12 +65,17 @@ spec:
           initialDelaySeconds: 5
           periodSeconds: 10
         resources:
+          # 256Mi was too small: an apt run forks 8 ansible-playbook workers
+          # (~45Mi each) on top of the ~93Mi server, so the cgroup tipped over
+          # and the kernel OOM-killed the whole pod ~52s into the play. Same
+          # failure every Saturday. CPU was equally starved at 200m for 8
+          # forks, so the run also throttled hard.
           requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 200m
+            cpu: 100m
             memory: 256Mi
+          limits:
+            cpu: 1000m
+            memory: 1Gi
       volumes:
       - name: config
         configMap:
