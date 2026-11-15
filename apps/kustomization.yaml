@@ -20,6 +20,7 @@ resources:
   - homelab-backup.yaml
   - iris.yaml
   - k3s-server-backup.yaml
+  - leantime.yaml
   - linkwarden.yaml
   - metallb.yaml
   - n8n.yaml

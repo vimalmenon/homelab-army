@@ -64,6 +64,15 @@ data:
           policy: one_factor
         - domain: wiki.completeautomate.com
           policy: one_factor
+        # Leantime: UI behind SSO, but the JSON-RPC API stays reachable by
+        # key alone. Without this path exemption the forwardauth middleware
+        # demands a browser session and headless automation breaks.
+        - domain: plan.completeautomate.com
+          resources:
+            - '^https://plan\.completeautomate\.com/api/.*$'
+          policy: bypass
+        - domain: plan.completeautomate.com
+          policy: one_factor
         # ⚠️ This wildcard bypasses everything not listed above. It silently
         # defeats forward-auth: an ingress can point at the authelia-forwardauth
         # middleware and still be wide open, because Authelia answers the auth

@@ -1,0 +1,27 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: leantime
+  namespace: leantime
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    # add-https forces the TLS redirect, forwardauth puts the Authelia gate in
+    # front of the UI. The /api/ path is exempted in Authelia's access_control
+    # so the JSON-RPC endpoint stays reachable by key for headless automation.
+    traefik.ingress.kubernetes.io/router.middlewares: authelia-add-https@kubernetescrd,authelia-authelia-forwardauth@kubernetescrd
+spec:
+  rules:
+    - host: plan.completeautomate.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: leantime
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - plan.completeautomate.com
+      secretName: plan-completeautomate-tls

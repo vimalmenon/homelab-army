@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: leantime
+spec:
+  serviceName: mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: leantime-mariadb
+  template:
+    metadata:
+      labels:
+        app: leantime-mariadb
+    spec:
+      securityContext:
+        fsGroup: 999
+      containers:
+        - name: mariadb
+          image: mariadb:11.4.4
+          # NFS-safe InnoDB settings. O_DIRECT is the default and is the
+          # classic way a data directory corrupts on a network filesystem.
+          args:
+            - --innodb-flush-method=fsync
+            - --innodb-file-per-table=1
+            - --innodb-use-native-aio=0
+            - --skip-name-resolve
+          env:
+            - name: MYSQL_DATABASE
+              value: leantime
+            - name: MYSQL_USER
+              value: leantime
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: leantime-secrets
+                  key: MYSQL_ROOT_PASSWORD
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: leantime-secrets
+                  key: MYSQL_PASSWORD
+          ports:
+            - name: mysql
+              containerPort: 3306
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            exec:
+              command: ["healthcheck.sh", "--connect", "--innodb_initialized"]
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 12
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        storageClassName: nfs-client
+        resources:
+          requests:
+            storage: 8Gi

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leantime
+  namespace: leantime
+spec:
+  replicas: 1
+  # Recreate, not RollingUpdate: two pods would share one MariaDB and one
+  # userfiles volume, and the installer state is not safe to duplicate.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: leantime
+  template:
+    metadata:
+      labels:
+        app: leantime
+    spec:
+      securityContext:
+        fsGroup: 33   # www-data, the uid the image runs as
+      containers:
+        - name: leantime
+          image: leantime/leantime:3.15.0
+          env:
+            - name: LEAN_APP_URL
+              value: https://plan.completeautomate.com
+            - name: LEAN_DB_HOST
+              value: mariadb.leantime.svc.cluster.local
+            - name: LEAN_DB_PORT
+              value: "3306"
+            - name: LEAN_DB_DATABASE
+              value: leantime
+            - name: LEAN_DB_USER
+              value: leantime
+            - name: LEAN_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: leantime-secrets
+                  key: MYSQL_PASSWORD
+            # The chart default for this is literally "changeme".
+            - name: LEAN_SESSION_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: leantime-secrets
+                  key: LEAN_SESSION_PASSWORD
+            - name: LEAN_DEFAULT_TIMEZONE
+              value: Asia/Hong_Kong
+            # Traefik terminates TLS in front of us and Cloudflare before that.
+            - name: LEAN_TRUSTED_PROXIES
+              value: "*"
+          ports:
+            - name: http
+              containerPort: 8080
+          volumeMounts:
+            - name: userfiles
+              mountPath: /var/www/html/userfiles
+          resources:
+            requests:
+              cpu: 100m
+              memory: 384Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 90
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 5
+      volumes:
+        - name: userfiles
+          persistentVolumeClaim:
+            claimName: leantime-userfiles

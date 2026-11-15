@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: leantime-userfiles
+  namespace: leantime
+spec:
+  # NFS so uploads survive pod reschedule, not just a restart.
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-client
+  resources:
+    requests:
+      storage: 5Gi
