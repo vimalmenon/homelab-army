@@ -67,9 +67,12 @@ data:
         # Leantime: UI behind SSO, but the JSON-RPC API stays reachable by
         # key alone. Without this path exemption the forwardauth middleware
         # demands a browser session and headless automation breaks.
+        # resources MUST be a path regex here: when domain is set, Authelia
+        # matches resources against the path only. A full-URL regex silently
+        # never matches and the rule is skipped.
         - domain: plan.completeautomate.com
           resources:
-            - '^https://plan\.completeautomate\.com/api/.*$'
+            - '^/api/.*$'
           policy: bypass
         - domain: plan.completeautomate.com
           policy: one_factor
