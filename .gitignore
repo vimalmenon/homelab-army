@@ -16,3 +16,9 @@ Thumbs.db
 # K8s
 *.secret.yaml
 ansible/files/*.pem
+
+# Ansible run artifacts
+ansible/cache/
+ansible/files/__pycache__/
+__pycache__/
+*.pyc
