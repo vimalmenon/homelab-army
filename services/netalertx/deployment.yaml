@@ -30,33 +30,43 @@ spec:
         image: ghcr.io/netalertx/netalertx:26.10.28
         imagePullPolicy: IfNotPresent
         livenessProbe:
-          # This page is a PHP app that hits the device database; measured at
-          # 2.7-4.8s on a quiet node. A 5s timeout sat right on the edge, so any
-          # spike tripped it and the kubelet killed a healthy container — that was
-          # 360 restarts in two days, all of them probe kills (exit 143), not OOMs.
-          failureThreshold: 5
+          # Probes a static asset, NOT /. Root cause of the old probe kills: GET /
+          # returns 302 -> /devices.php, and the kubelet's HTTP client FOLLOWS
+          # redirects, so every probe rendered a full PHP+SQLite page (3-7s) and
+          # burned ~half a PHP worker (measured: 16 renders/150s at 4.6s each,
+          # with 226 probe failures logged against /devices.php). nginx serves
+          # this file in 0.5ms with no PHP and no DB involvement, so liveness now
+          # means "process and web server alive" and a slow page can no longer
+          # kill a healthy container.
+          failureThreshold: 3
           httpGet:
-            path: /
+            path: /lib/bootstrap/bootstrap.min.js
             port: 20211
             scheme: HTTP
           periodSeconds: 30
           successThreshold: 1
-          timeoutSeconds: 10
+          timeoutSeconds: 5
         name: netalertx
         ports:
         - containerPort: 20211
           name: web
           protocol: TCP
         readinessProbe:
+          # Readiness must mean "the app can serve", not "nginx is up": the
+          # backend initialises for ~13 min after start (54 plugin checks over
+          # NFS) while nginx serves static files immediately. Reading the
+          # backend's own state file is accurate, costs ~1ms, and only routes
+          # traffic once the GraphQL server is actually listening.
+          exec:
+            command:
+            - sh
+            - -c
+            - grep -qE '"graphQLServerStarted":[[:space:]]*1' /tmp/api/app_state.json
           failureThreshold: 3
-          httpGet:
-            path: /
-            port: 20211
-            scheme: HTTP
           initialDelaySeconds: 15
           periodSeconds: 15
           successThreshold: 1
-          timeoutSeconds: 10
+          timeoutSeconds: 5
         resources:
           limits:
             # Was 500m, which throttled 191 of 478 scheduling periods — the app
@@ -70,15 +80,18 @@ spec:
             cpu: 300m
             memory: 256Mi
         startupProbe:
-          # Generous boot allowance: scans and the OUI DB import run at start-up,
-          # and the app should not be killed for being slow to come up.
-          failureThreshold: 30
-          httpGet:
-            path: /
-            port: 20211
-            scheme: HTTP
+          # Boot takes ~13 min here (54 plugin checks over NFS) and the old
+          # 30 x 10s allowance (5 min) expired long before the app was usable,
+          # so every restart spent its last minutes flapping NotReady. Wait on
+          # the backend itself with a 20 min ceiling, then hand over to readiness.
+          exec:
+            command:
+            - sh
+            - -c
+            - grep -qE '"graphQLServerStarted":[[:space:]]*1' /tmp/api/app_state.json
+          failureThreshold: 120
           periodSeconds: 10
-          timeoutSeconds: 10
+          timeoutSeconds: 5
         securityContext:
           capabilities:
             add:
