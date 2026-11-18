@@ -18,7 +18,7 @@ spec:
       serviceAccountName: hestia
       containers:
       - name: hestia
-        image: ghcr.io/vimalmenon/micro-army/hestia:1f63bf2
+        image: ghcr.io/vimalmenon/micro-army/hestia:599cc2e
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
