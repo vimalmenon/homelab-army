@@ -3,7 +3,6 @@ kind: Kustomization
 namespace: microservices
 
 resources:
-- cronjob.yaml
 - deployment.yaml
 - service.yaml
 
