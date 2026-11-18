@@ -27,7 +27,7 @@ spec:
           value: Asia/Hong_Kong
         - name: APP_CONF_OVERRIDE
           value: '{"GRAPHQL_PORT":"20214"}'
-        image: ghcr.io/netalertx/netalertx:26.10.28
+        image: ghcr.io/netalertx/netalertx:26.6.3
         imagePullPolicy: IfNotPresent
         livenessProbe:
           # This page is a PHP app that hits the device database; measured at
