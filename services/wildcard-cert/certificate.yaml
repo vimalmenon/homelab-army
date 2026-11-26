@@ -1,0 +1,31 @@
+# Traefik's default certificate.
+#
+# Every ingress in this cluster declares `tls: - hosts: [...]` with no secretName,
+# so Traefik falls back to the TLSStore in kube-system, which points at the
+# completeautomate-tls secret. That secret expired on 2026-09-23 and nothing
+# renewed it: the only cert-manager Certificate in this repo lived in the
+# `authelia` namespace and wrote its own secret, leaving this copy orphaned.
+#
+# The result was invisible from outside (the Cloudflare tunnel speaks http to the
+# Traefik VIP and browsers see Cloudflare's edge certificate) while every LAN
+# request over https failed validation.
+#
+# A wildcard cannot be issued over HTTP-01, so this uses letsencrypt-prod, whose
+# only solver is Cloudflare DNS-01. The API token lives in the cert-manager
+# namespace as cloudflare-token/CLOUDFLARE_API_TOKEN.
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: completeautomate-wildcard
+  namespace: kube-system
+spec:
+  secretName: completeautomate-tls
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+  dnsNames:
+    - completeautomate.com
+    - "*.completeautomate.com"
+  # Renew well before expiry so there is room to notice a failure.
+  duration: 2160h
+  renewBefore: 720h

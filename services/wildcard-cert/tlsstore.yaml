@@ -1,0 +1,13 @@
+# The TLSStore Traefik consults when an Ingress gives it no secretName.
+#
+# This existed in the cluster but was not in git, so the link between "ingress
+# declares hosts only" and "Traefik serves completeautomate-tls" lived only in
+# live state. Committing it keeps that path reproducible.
+apiVersion: traefik.io/v1alpha1
+kind: TLSStore
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  defaultCertificate:
+    secretName: completeautomate-tls

@@ -36,3 +36,4 @@ resources:
   - slides.yaml
   - uptime-kuma.yaml
   - vaultwarden.yaml
+  - wildcard-cert.yaml
